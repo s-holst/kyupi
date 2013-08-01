@@ -1,0 +1,310 @@
+/*
+ * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * at the top-level directory of this distribution.
+ * This file is part of the KyuPI project. It is subject to the license terms
+ * in the LICENSE.md file found in the top-level directory of this distribution.
+ * No part of the KyuPI project, including this file, may be copied, modified,
+ * propagated, or distributed except according to the terms contained in the
+ * LICENSE.md file.
+ */
+
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN(Stil)
+
+package org.kyupi.data.parser;
+
+import java.util.*;
+import java.io.*;
+
+import org.apache.log4j.Logger;
+
+@SuppressWarnings("all")
+public class Stil {
+
+	protected static Logger log = Logger.getLogger(Stil.class);
+		
+	private static String getLocation(String sf_, Token token_) {
+	    if (token_ != null)
+		  return sf_ + ":" + token_.beginLine + ":" + token_.beginColumn;
+		return sf_;
+	}
+    
+	public static Stil load (InputStream is, File f) throws IOException {
+	    String sf_ = f.getPath();
+		Reader reader = new InputStreamReader(is);
+		Stil parser = new Stil(reader);
+        try {
+			parser.stil_file ();
+		} catch (ParseException e3) {
+		    e3.printStackTrace();
+			throw new IOException("Parse error at " + getLocation(sf_,e3.currentToken) + ": " + e3.getMessage());
+		} catch (TokenMgrError e4) {
+			throw new IOException("Token error in " + sf_.toString() + ": " + e4.getMessage());
+		}
+		return parser;
+	}
+
+	private String unquote(String s)	{
+	  return s.substring(1,s.length()-1);	}
+
+	public ArrayList<String> primary_inputs;
+	public ArrayList<String> primary_outputs;
+	public ArrayList<String> chain_names;
+	public ArrayList<ArrayList<String>> chain_cells;
+	
+	public ArrayList<Operation> ops;
+
+	public String clock;
+	
+	public class Operation {
+	  public String pi,po,scanin,scanout;
+	}
+	
+}
+
+PARSER_END(Stil)
+
+SKIP :
+{
+    " "
+  | "\n"
+  | "\r"
+  | "\t"
+}
+
+SPECIAL_TOKEN :
+{
+  <COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+TOKEN [IGNORE_CASE] :
+{
+    <STIL:         "STIL">
+  | <HEADER:       "Header">
+  | <SIGNALS:      "Signals">
+  | <SIGNALGROUPS: "SignalGroups">
+  | <TIMING:    "Timing">
+  | <SCANSTRUCTURES: "ScanStructures" >
+  | <PATTERNBURST: "PatternBurst" >
+  | <PATTERNEXEC: "PatternExec" >
+  | <PROCEDURES: "Procedures" >
+  | <MACRODEFS: "MacroDefs" >
+  | <PATTERN: "Pattern" >
+  | <SCANCHAIN: "ScanChain" >
+  | <SCANLENGTH: "ScanLength" >
+  | <SCANIN: "ScanIn" >
+  | <SCANOUT: "ScanOut" >
+  | <SCANINVERSION: "ScanInversion" >
+  | <SCANCELLS: "ScanCells" >
+  | <SCANMASTERCLOCK: "ScanMasterClock" >
+  | <CALL:       "Call">
+}
+
+TOKEN :
+{
+    <#digit: ["0"-"9"] >
+  | <#letter: ["A"-"Z","a"-"z"] >
+  | <number_float: (<digit>)+ "." (<digit>)+ >
+  | <number_integer: (<digit>)+ >
+  | <#id_head:  <letter> >
+  | <#id_tail: (<id_head>|<digit>) >
+  | <identifier: <id_head> ( <id_tail> )* >
+  | <equals: "=" >
+  | <quote: "'" >
+  | <plus: "+" >
+  | <semicolon: ";" >
+  | <bopen: "{" >
+  | <bclose: "}" >
+  | <nonbrace_character: ( <letter> | <digit> | <equals> | <quote> | <plus> | <semicolon> 
+  						   | ["#","&","(",")","*",",","-",".","/",":","<",">","[","]",
+                            "_","|","!","$","%","@","?","^","`","~","\\"])>
+  | <string: "\"" (<nonbrace_character> | <bopen> | <bclose> | " ")* "\"">
+}
+
+void stil_file() :
+{
+}
+{
+  <STIL> <number_float> ignored_block()
+    ( <HEADER> ignored_block()
+    | <SIGNALS> ignored_block()
+    | <SIGNALGROUPS> signal_groups()
+    | <TIMING> ignored_block()
+    | <SCANSTRUCTURES> scan_structures()
+    | <PATTERNBURST> <string> ignored_block()
+    | <PATTERNEXEC> ignored_block()
+    | <PROCEDURES> ignored_block()
+    | <MACRODEFS> ignored_block()
+    | <PATTERN> <string> pattern()  )+ <EOF>
+}
+
+void signal_groups() :
+{
+  Token t;
+  ArrayList<String> arr;}{
+  < bopen >
+  (    t=<string> <equals> <quote> arr=string_plus_array() <quote> (<semicolon> | ignored_block())
+    {
+      String s = unquote(t.image);
+      if (s.equals("_pi"))
+        primary_inputs = arr;
+      if (s.equals("_po"))
+        primary_outputs = arr;      }
+  )*
+  < bclose >}
+
+void scan_structures() :
+{
+  Token t;
+  ArrayList<String> cells;}{
+  < bopen >
+  {
+    chain_names = new ArrayList<String>();
+    chain_cells = new ArrayList<ArrayList<String>>();
+  }
+  (    <SCANCHAIN> t=<string>  {
+    chain_names.add(unquote(t.image));  }
+  cells = scan_chain()
+  {    chain_cells.add(cells);
+  }
+  )*
+  < bclose >}
+
+ArrayList<String> scan_chain() :
+{
+  ArrayList<String> cells = null;
+  Token t;}{
+  < bopen >
+  (    <SCANLENGTH> <number_integer> <semicolon>
+  | <SCANIN> <string> <semicolon>
+  | <SCANOUT> <string> <semicolon>
+  | <SCANINVERSION> <number_integer> <semicolon>
+  | <SCANCELLS> cells=string_array() <semicolon>  | <SCANMASTERCLOCK> t=<string> <semicolon>
+    {	  clock = unquote(t.image);	}
+  )*
+  < bclose >
+  {    return cells;
+  }
+}
+
+void pattern() :
+{
+  Operation op;
+}
+{
+  {
+    ops = new ArrayList<Operation>();
+  }
+  <bopen>
+  (
+      <identifier>
+    | <string>
+    | <semicolon>
+    | <nonbrace_character>
+    | ignored_block()
+    | <CALL> <string> op = pattern_record()
+      {
+        ops.add(op);
+      }
+  )*
+  <bclose>
+}
+
+Operation pattern_record() :
+{
+  Operation op = new Operation();
+  String pat;
+  String id;
+  Token t;
+}
+{
+  <bopen>
+  (
+    t=<string> <equals> pat=read_pattern() <semicolon>
+    {
+      id=unquote(t.image);
+      if (id.equals("_pi"))
+        op.pi = pat;
+      if (id.equals("_po"))
+        op.po = pat;
+      if (id.equals("Scan_In"))
+        op.scanin = pat;
+      if (id.equals("Scan_Out"))
+        op.scanout = pat;
+    }
+  )*
+  <bclose>
+  {
+    return op;
+  }
+}
+
+ArrayList<String> string_plus_array() :
+{
+  Token t;
+  ArrayList<String> arr = new ArrayList<String>();}{
+  ( t=<string>  {
+    arr.add(unquote(t.image));  }
+  ( <plus> t=<string>  {    arr.add(unquote(t.image));
+  }
+  )*)*
+  {    return arr;
+  }}
+
+ArrayList<String> string_array() :
+{
+  Token t;
+  ArrayList<String> arr = new ArrayList<String>();
+}
+{
+  ( t=<string>
+  {
+    arr.add(unquote(t.image));
+  }
+  )*
+  {
+    return arr;
+  }
+}
+
+
+void ignored_block() :
+{
+}
+{
+  < bopen >
+  skip_to_matching_brace()
+  < bclose >
+}
+
+JAVACODE
+void skip_to_matching_brace() {
+	Token tok;
+	int nesting = 1;
+	while (true) {
+		tok = getToken(1);
+		if (tok.kind == bopen) nesting++;
+		if (tok.kind == bclose) {
+			nesting--;
+			if (nesting == 0) break;
+		}
+		tok = getNextToken();
+	}
+}
+
+JAVACODE
+String read_pattern() {
+	StringBuffer buf = new StringBuffer();
+	Token tok;
+	while (true) {
+		tok = getToken(1);
+		if (tok.kind == semicolon) break;
+		buf.append(tok.image);
+		tok = getNextToken();
+	}
+	return buf.toString();
+}
+

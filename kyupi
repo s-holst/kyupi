@@ -1,0 +1,80 @@
+#!/bin/bash
+
+test -z "$KYUPI_HOME"       && KYUPI_HOME=`dirname $0`
+test -z "$KYUPI_MEMORY"     && KYUPI_MEMORY=2048
+
+export KYUPI_HOME
+export KYUPI_MEMORY
+
+export KYUPI_VMARGS="-server -Dfile.encoding=UTF8 $KYUPI_VMARGS"
+
+#export KYUPI_VMARGS="-verbose:gc $KYUPI_VMARGS"
+
+
+#
+# set CLASSPATH
+#
+
+if [ -f "$KYUPI_HOME/lib/commons-cli-1.0.jar" ]; then
+  cli=$KYUPI_HOME/lib/commons-cli-1.0.jar
+  log4j=$KYUPI_HOME/lib/log4j-1.2.17.jar
+  junit=$KYUPI_HOME/lib/junit-4.10.jar
+  compress=$KYUPI_HOME/lib/commons-compress-1.4.1.jar
+  bin=$KYUPI_HOME/bin
+  export CLASSPATH=$bin:$log4j:$cli:$junit:$compress
+else
+  echo "KyuPI distribution not found in directory '$KYUPI_HOME'."
+  echo "Set the variable KYUPI_HOME to the directory which contains the distribution."
+  exit 1
+fi
+
+
+#
+# First command line argument determines start class
+#
+
+app_package="org.kyupi.apps"
+app_path="org/kyupi/apps"
+app_name=$1
+shift
+shopt -s nocasematch
+
+case $app_name in
+stat*|designst*)
+  app_class=DesignStatistics
+  ;;
+jvm*)
+  app_class=JvmStats
+  ;;
+c*)
+  app_class=Circuits
+  ;;
+*)
+  app_class=DefaultApp
+esac
+
+
+#
+# Compile, if only sources are found
+#
+
+if [ ! -f "$KYUPI_HOME/bin/$app_path/DefaultApp.class" ]; then
+  if [ -f "$KYUPI_HOME/src/$app_path/DefaultApp.java" ]; then
+    echo "Compiling sources from $KYUPI_HOME/src to $KYUPI_HOME/bin ..."
+    mkdir -p $KYUPI_HOME/bin
+    find $KYUPI_HOME/src -name *.java |xargs javac -d $KYUPI_HOME/bin
+    cp $KYUPI_HOME/src/log4j.properties $KYUPI_HOME/bin/
+  else
+    echo "Neither sources nor class files found in directory '$KYUPI_HOME'."
+    echo "Set the variable KYUPI_HOME to the directory which contains bin/$app_path/DefaultApp.class or src/$app_path/DefaultApp.java."
+    exit 1
+  fi
+fi
+
+
+#
+# Start Java process
+#
+
+cmd="java $KYUPI_VMARGS -DKyuPI.home=$KYUPI_HOME -Xmx${KYUPI_MEMORY}m -Xms${KYUPI_MEMORY}m $app_package.$app_class"
+exec $cmd "$@"

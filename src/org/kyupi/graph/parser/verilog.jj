@@ -1,0 +1,144 @@
+/*
+ * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * at the top-level directory of this distribution.
+ * This file is part of the KyuPI project. It is subject to the license terms
+ * in the LICENSE.md file found in the top-level directory of this distribution.
+ * No part of the KyuPI project, including this file, may be copied, modified,
+ * propagated, or distributed except according to the terms contained in the
+ * LICENSE.md file.
+ */
+
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN(Verilog)
+
+package org.kyupi.graph.parser;
+
+import java.util.*;
+import java.io.*;
+import org.apache.log4j.Logger;
+import org.kyupi.graph.parser.VerilogParseTree.*;
+
+@SuppressWarnings("all")
+public class Verilog {
+
+	private static Logger log = Logger.getLogger(Verilog.class);
+
+	public static VerilogParseTree parse (InputStream is) throws IOException {
+		Verilog parse = new Verilog(is);
+		VerilogParseTree tree = new VerilogParseTree();
+		try {
+			parse.file(tree);
+			return tree;
+		} catch (ParseException e) {
+			throw new IOException(e);
+		} catch (TokenMgrError e) {
+			throw new IOException(e);
+		}
+	}
+}
+
+PARSER_END(Verilog)
+
+SKIP : { " " | "\n" | "\r" | "\t" }
+
+SPECIAL_TOKEN : { <COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")> }
+
+TOKEN :
+{   <MODULE:       "module">
+  | <INPUT:        "input">
+  | <OUTPUT:       "output">
+  | <WIRE:         "wire">
+  | <ENDMODULE:    "endmodule">
+  | <ASSIGN:       "assign">
+}
+
+TOKEN :
+{   <#digit:   ["0"-"9"]>
+  | <#id_head: ["a"-"z","A"-"Z","_"]>
+  | <#id_tail: ["a"-"z","A"-"Z","0"-"9","_","$"]>
+  | <integer: <digit> (<digit>)*>
+  | <basic_identifier: <id_head> ( <id_tail> )*>
+  | <extended_identifier: "\\" ( ~[" ", "\t", "\r", "\n"] )* [" ", "\t", "\r", "\n"]>
+}
+
+void file(VerilogParseTree tree) : 
+{}
+{
+    ( module(tree.newModule()) )+ <EOF>}
+
+void module(Module module) :
+{}
+{
+    <MODULE> module.moduleName=identifier() "(" identifier_list(module.portNames) ")" ";"
+    ( module_item(module) )*    <ENDMODULE>
+}
+
+void module_item(Module module):
+{}
+{
+  (
+    <INPUT> ranged_variable_list(module.newInputDeclaration())  | <OUTPUT> ranged_variable_list(module.newOutputDeclaration())
+  | <WIRE> ranged_variable_list(module.newWireDeclaration())
+  | <ASSIGN> {Assignment a = module.newAssignment();} a.targetName=identifier() "=" a.sourceName=identifier()  | module_instantiation(module.newModuleInstantiation())
+  ) ";"}
+
+void ranged_variable_list(RangedVariableList rvl) :
+{}{
+  [ range(rvl.range) ] identifier_list(rvl.variableNames)}
+
+void module_instantiation(ModuleInstantiation mi):
+{}
+{
+  mi.moduleName=identifier() mi.instanceName=identifier() "(" list_of_module_connections(mi) ")"}
+
+void list_of_module_connections(ModuleInstantiation mi):
+{}{
+  named_port_connection(mi.newPortConnection()) ( "," named_port_connection(mi.newPortConnection()) )*}
+
+void named_port_connection(PortConnection pc):
+{}
+{
+  "." pc.portName=identifier() "(" pc.variableName=identifier() ")"}
+
+void range(Range range) :
+{}{
+  "[" range.start=integer() ":" range.end=integer() "]"
+}
+
+void identifier_list(Collection<String> list):
+{
+  String id;
+}
+{
+  id=identifier() {list.add(id);} ( "," id=identifier() {list.add(id);} )*
+}
+
+int integer() :
+{
+  Token t;
+}
+{
+  t=<integer> { return Integer.parseInt(t.image); }
+}
+
+String identifier() :
+{
+  Token t,t2;
+  String s;
+  String suffix = "";
+}
+{  
+	(  t=<basic_identifier>
+	|  t=<extended_identifier> 
+	)
+	[ "[" t2=<integer> "]" { suffix = "[" + t2.image + "]"; } ]
+	{
+	  s = t.image;
+	  if (s.startsWith("\\"))
+	      s = s.substring(1);
+	  return s + suffix;
+	}
+}

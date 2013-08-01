@@ -1,0 +1,1922 @@
+/*
+ * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * at the top-level directory of this distribution.
+ * This file is part of the KyuPI project. It is subject to the license terms
+ * in the LICENSE.md file found in the top-level directory of this distribution.
+ * No part of the KyuPI project, including this file, may be copied, modified,
+ * propagated, or distributed except according to the terms contained in the
+ * LICENSE.md file.
+ */
+
+options {
+  STATIC = false;
+  //LOOKAHEAD = 5;
+  
+  // DEBUG_PARSER = true;
+  // CHOICE_AMBIGUITY_CHECK=3;
+  IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(VHDL93)
+
+package org.kyupi.graph.parser;
+
+import java.util.*;
+import java.io.*;
+
+import org.apache.log4j.Logger;
+
+import org.kyupi.graph.Graph;
+import org.kyupi.graph.Graph.Node;
+import org.kyupi.graph.Library;
+
+
+@SuppressWarnings("all")
+public class VHDL93 {
+
+	private static Logger log = Logger.getLogger(VHDL93.class);
+
+	private static final int DIR_IN = 0;
+	private static final int DIR_OUT = 1;
+	private static final int DIR_INOUT = 2;
+	private static final int DIR_BUFFER = 3;
+	private static final int DIR_LINKAGE = 4;
+
+	private static final int OP_EQUAL = 0;
+	private static final int OP_NEQUAL = 1;
+	private static final int OP_LESS = 2;
+	private static final int OP_LESSEQ = 3;
+	private static final int OP_GREATER = 4;
+	private static final int OP_GREATEREQ = 5;
+
+	private Library library;
+	
+	public VHDL93() {
+		this ((Reader) null);
+	}
+	
+	private static String getLocation(String sf_, Token token_) {
+	    if (token_ != null)
+		  return sf_ + ":" + token_.beginLine + ":" + token_.beginColumn;
+		return sf_;
+	}
+    
+	public static ArrayList<Graph> parse (InputStream is, Library library) throws IOException {
+	    String sf_ = "foo";
+		Reader reader = new InputStreamReader(is);
+		VHDL93 parser = new VHDL93(reader);
+        parser.library = library;
+		Context c = new Context();
+		try {
+			parser.design_file (c);
+		} catch (ParseException e3) {
+			throw new IOException("Parse error at " + getLocation(sf_,e3.currentToken) + ": " + e3.getMessage());
+		} catch (TokenMgrError e4) {
+			throw new IOException("Token error in " + sf_.toString() + ": " + e4.getMessage());
+		}
+		return c.getUnits();
+	}
+}
+
+PARSER_END(VHDL93)
+
+SKIP :
+{
+    " "
+  | "\n"
+  | "\r"
+  | "\t"
+}
+
+SPECIAL_TOKEN :
+{
+  <COMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+TOKEN [IGNORE_CASE] :
+{
+    <ABS:          "abs">
+  | <ACCESS:       "access">
+  | <ACROSS:       "across">
+  | <AFTER:        "after">
+  | <ALIAS:        "alias">
+  | <ALL:          "all">
+  | <AND:          "and">
+  | <ARCHITECTURE: "architecture">
+  | <ARRAY:        "array">
+  | <ASSERT:       "assert">
+  | <ATTRIBUTE:    "attribute">
+  | <BEGIN:        "begin">
+  | <BLOCK:        "block">
+  | <BODY:         "body">
+  | <BUFFER:       "buffer">
+  | <BUS:          "bus">
+  | <CASE:         "case">
+  | <COMPONENT:    "component">
+  | <CONFIGURATION: "configuration">
+  | <CONSTANT:      "constant">
+  | <DISCONNECT:    "disconnect">
+  | <DOWNTO:        "downto">
+  | <ELSE:          "else">
+  | <ELSIF:         "elsif">
+  | <END:           "end">
+  | <ENTITY:        "entity">
+  | <EXIT:          "exit">
+  | <FILE:          "file">
+  | <FOR:           "for">
+  | <FUNCTION:      "function">
+  | <GENERATE:      "generate">
+  | <GENERIC:       "generic">
+  | <GROUP:         "group">
+  | <GUARDED:       "guarded">
+  | <IF:            "if">
+  | <IMPURE:        "impure">
+  | <IN:            "in">
+  | <INERTIAL:      "inertial">
+  | <INOUT:         "inout">
+  | <IS:            "is">
+  | <LABEL:         "label">
+  | <LIBRARY:       "library">
+  | <LINKAGE:       "linkage">
+  | <LITERAL:       "literal">
+  | <LOOP:          "loop">
+  | <MAP:           "map">
+  | <MOD:           "mod">
+  | <NAND:          "nand">
+  | <NEW:           "new">
+  | <NEXT:          "next">
+  | <NOISE:         "noise">
+  | <NOR:           "nor">
+  | <NOT:           "not">
+  | <NULL:          "null">
+  | <OF:            "of">
+  | <ON:            "on">
+  | <OPEN:          "open">
+  | <OR:            "or">
+  | <OTHERS:        "others">
+  | <OUT:           "out">
+  | <PACKAGE:       "package">
+  | <PORT:          "port">
+  | <POSTPONED:     "postponed">
+  | <PROCEDURAL:    "procedural">
+  | <PROCEDURE:     "procedure">
+  | <PROCESS:       "process">
+  | <PROTECTED:     "protected">
+  | <PURE:          "pure">
+  | <QUANTITY:      "quantity">
+  | <RANGE:         "range">
+  | <RECORD:        "record">
+  | <REFERENCE:     "reference">
+  | <REGISTER:      "register">
+  | <REJECT:        "reject">
+  | <REM:           "rem">
+  | <REPORT:        "report">
+  | <RETURN:        "return">
+  | <ROL:           "rol">
+  | <ROR:           "ror">
+  | <SELECT:        "select">
+  | <SEVERITY:      "severity">
+  | <SIGNAL:        "signal">
+  | <SHARED:        "shared">
+  | <SLA:           "sla">
+  | <SLL:           "sll">
+  | <SRA:           "sra">
+  | <SRL:           "srl">
+  | <SUBTYPE:       "subtype">
+  | <THEN:          "then">
+  | <TO:            "to">
+  | <TRANSPORT:     "transport">
+  | <TYPE:          "type">
+  | <UNAFFECTED:    "unaffected">
+  | <UNITS:         "units">
+  | <UNTIL:         "until">
+  | <USE:           "use">
+  | <VARIABLE:      "variable">
+  | <WAIT:          "wait">
+  | <WHEN:          "when">
+  | <WHILE:         "while">
+  | <WITH:          "with">
+  | <XNOR:          "xnor">
+  | <XOR:           "xor">
+}
+
+TOKEN :
+{
+    <#upper_case_letter:               ["A"-"Z"]>
+  | <#lower_case_letter:               ["a"-"z"]>
+  | <#digit:                           ["0"-"9"]>
+  | <#extended_digit:                  ["0"-"9","A"-"F"]>
+  | <#special_character:               ["#","&","'","(",")","*","+",",","-",
+                                        ".","/",":",";","<","=",">","[","]",
+                                        "_","|"]>
+  | <#other_special_character:         ["!","$","%","@","?","^","`","{","}","~",
+                                        "\\"]>
+  | <#eother_special_character:        ["!","$","%","@","?","^","`","{","}","~"]>
+  | <#format_effector:                 ["\n","\t"]>
+  | <#base_specifier:                  ["B","O","X"]>
+  | <#underline:                       "_">
+  | <#letter:                          ["a"-"z","A"-"Z"]>
+  | <#letter_or_digit:                 ["a"-"z","A"-"Z","0"-"9"]>
+  | <#integer: <digit> (("_")? <digit>)*>
+  | <#base: <integer> >
+  | <#based_integer: (("_")? <extended_digit>)*>
+  | <based_literal: <base> "#" <based_integer> ("." <based_integer>)? "#" (<exponent>)?>
+  | <#basic_character: (<basic_graphic_character>|<format_effector>)>
+  | <#basic_graphic_character: (["A"-"Z"]|<digit>|<special_character>|" ")>
+  | <basic_identifier: <letter> ( ("_")? <letter_or_digit> )*>
+  | <bit_string_literal: <base_specifier> "\"" <bit_value> "\"">
+  | <#bit_value: <extended_digit> ( ("_")? <extended_digit>)*>
+  | <character_literal:  "'" <graphic_character> "'">
+  | <decimal_literal: <integer> ( "." <integer>)? ( <exponent> )?>
+  | <#exponent: ("E" ("+")? <integer>) | ("E" "-" <integer>)>
+  | <extended_identifier: "\\" <egraphic_character> ( <egraphic_character> )* "\\">
+  | <#egraphic_character: (<basic_graphic_character>
+                          | <lower_case_letter>
+                          | <eother_special_character>)>
+  | <#graphic_character: (<basic_graphic_character>
+                          | <lower_case_letter>
+                          | <other_special_character>)>
+  | <string_literal: "\"" (<graphic_character>|"\"\"")* "\"">
+
+  | <EXP: "**">
+  | <MUL: "*">
+  | <DIV: "/">
+  | <ADD: "+">
+  | <SUB: "-">
+  | <CONCAT: "&">
+  | <EQ:  "=">
+  | <NEQ: "/=">
+  | <GE:  ">=">
+  | <LE:  "<=">
+  | <GT:  ">">
+  | <LO:  "<">
+  | <SEMICOLON: ";">
+}
+
+void design_file(Context c) :
+{
+}
+{
+    ( design_unit(c) )+ <EOF>
+}
+
+void design_unit(Context c) :
+{
+}
+{
+	{
+	  log.trace(">> design_unit");
+	}
+	context_clause() 
+	library_unit(c)
+	{ 
+	  log.trace("<< design_unit"); 
+	}
+}
+
+void context_clause() :
+{
+}
+{
+	( context_item() )*
+}
+
+void context_item() :
+{
+}
+{
+	( library_clause() | use_clause() )
+}
+
+void library_clause() :
+{
+}
+{
+	<LIBRARY>  identifier() ( "," identifier() )* ";"
+}
+
+void use_clause() :
+{
+}
+{
+	<USE> name() ( "," name() )* ";"
+}
+
+void library_unit(Context c) :
+{
+}
+{
+    ( LOOKAHEAD(<ENTITY> | <CONFIGURATION> | <PACKAGE> identifier() ) primary_unit(c)
+	| secondary_unit(c)
+	)
+}
+
+void primary_unit(Context c) :
+{
+	Graph entity = null;
+}
+{
+	{
+	  log.trace(">>>> primary_unit");
+	}
+	( entity_declaration(c)
+	| configuration_declaration(c)
+	| LOOKAHEAD(<PACKAGE> identifier())
+		package_declaration(c)
+ 	)
+	{
+	  log.trace("<<<< primary_unit");
+	}
+}
+
+void entity_declaration(Context c) :
+{
+	String id;
+	Graph entity = new Graph(library);
+}
+{
+	<ENTITY> id = identifier() <IS>  
+	{
+	    c.addAsEntity(id, entity);
+	}
+	entity_header(entity)
+	<END> [ <ENTITY> ] [ identifier() ] ";"  
+}
+
+void entity_header(Graph entity_) :
+{}
+{
+  [ generic_clause() ]
+  [ port_clause(entity_) ]
+}
+
+void configuration_declaration(Context context_):
+{}
+{
+	<CONFIGURATION> identifier() <OF> name() <IS>
+		( configuration_declarative_item() )*
+		block_configuration()
+	<END> [ <CONFIGURATION> ] [ identifier() ] ";"
+}
+
+void configuration_declarative_item():
+{}
+{
+		use_clause()
+		| attribute_specification()
+		| group_declaration()		
+}
+
+void attribute_specification() :
+{}
+{
+	<ATTRIBUTE> identifier() <OF>
+	entity_specification() <IS> expression() ";"
+}
+
+void entity_specification() :
+{}
+{
+	entity_name_list() ":" entity_class()
+}
+
+void entity_name_list() :
+{}
+{
+	( entity_designator() ( "," entity_designator() )*
+	| <OTHERS>
+	| <ALL>
+	)
+}
+
+void entity_designator() :
+{}
+{
+	entity_tag() signature()
+}
+
+void entity_tag() :
+{}
+{
+	( identifier ()
+	| <character_literal>
+	| <string_literal>
+	)
+}
+
+void entity_class() :
+{}
+{
+	( <ENTITY> 
+	| <ARCHITECTURE> 
+	| <CONFIGURATION> 
+	| <PROCEDURE> 
+	| <FUNCTION> 
+	| <PACKAGE> 
+	| <TYPE> 
+	| <SUBTYPE> 
+	| <CONSTANT> 
+	| <SIGNAL> 
+	| <VARIABLE> 
+	| <COMPONENT> 
+	| <LABEL> 
+	| <LITERAL> 
+	| <UNITS> 
+	| <GROUP> 
+	| <FILE> 
+	)
+}
+
+void group_declaration() :
+{}
+{
+	<GROUP> identifier() ":" name()
+	"(" group_constituent_list() ")" ";"
+}
+
+void group_constituent_list() :
+{}
+{
+	group_constituent() ( "," group_constituent() )*
+}
+
+void group_constituent() :
+{}
+{
+	( name()
+	| <character_literal>
+	)
+}
+
+void block_configuration() :
+{}
+{
+	<FOR> name()
+		( use_clause() )*
+		( configuration_item() )*
+	<END> <FOR> ";"
+}
+
+void configuration_item():
+{}
+{
+	LOOKAHEAD(block_configuration())
+		block_configuration()
+	| component_configuration()
+}
+
+void component_configuration():
+{}
+{
+	<FOR> component_specification()
+		[ binding_indication() ";" ]
+		[ block_configuration() ]
+	<END> <FOR> ";"
+}
+
+void component_specification():
+{}
+{
+	instantiation_list() ":" name()
+}
+
+void instantiation_list():
+{}
+{
+	identifier() ( "," identifier() )*
+	| <OTHERS>
+	| <ALL>
+}
+
+
+void binding_indication():
+{}
+{
+	[ <USE> entity_aspect() ]
+	[ generic_map_aspect() ]
+	[ port_map_aspect() ]
+}
+
+void entity_aspect():
+{}
+{
+	( <ENTITY> name()
+		 [ LOOKAHEAD("(" identifier() ")")
+			"(" identifier() ")" ]
+	| <CONFIGURATION> name()
+	| <OPEN>
+	)
+}
+
+void package_declaration(Context c):
+{
+}
+{
+	<PACKAGE> identifier() <IS>
+		( package_declarative_item(c) )*
+	<END> [ <PACKAGE> ] [ identifier() ] ";"
+}
+
+void package_declarative_item(Context c):
+{
+}
+{
+	( 
+	subprogram_declaration() 
+	| type_declaration() 
+	| subtype_declaration() 
+	| constant_declaration() 
+	| signal_declaration(null) 
+	| file_declaration()
+	| alias_declaration()
+	| component_declaration(c)
+	| LOOKAHEAD( attribute_declaration() )
+		attribute_declaration()
+	| attribute_specification()
+	| use_clause()
+	)
+}
+
+
+void port_clause(Graph entity_)  :
+{}
+{
+	<PORT> "(" interface_list(entity_) ")" ";"
+}
+
+void interface_list(Graph entity_):
+{
+}
+{
+  interface_declaration(entity_)   
+  ( ";" interface_declaration(entity_) )*
+}
+
+void interface_declaration(Graph entity_):
+{
+}
+{
+	interface_signal_declaration(entity_) 
+}
+
+void interface_signal_declaration(Graph entity_):
+{
+	ArrayList<String> ids;
+	int dir = DIR_LINKAGE;
+	boolean isSignal = false;
+	int posIdx = entity_.countInputs() + entity_.countOutputs();
+}
+{
+	[<SIGNAL> {isSignal = true;}] ids = identifier_list() ":"
+	[ dir = mode() ] subtype_indication() [ <BUS> ] [ ":=" expression() ]
+	{
+		for (String id: ids) {
+  			if (dir == DIR_IN)  			{
+  			  log.trace("input port: " + id);
+  			  Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_INPUT);
+  			  n.setPosition(posIdx++);
+  			} else  			{
+  			  log.trace("output port: " + id);
+  			  Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_OUTPUT);
+  			  n.setPosition(posIdx++);
+  			}
+		}
+	}
+}
+
+int mode() :
+{ 
+	int m = DIR_LINKAGE;
+}
+{
+	(  <IN> { m = DIR_IN; }
+	| <OUT> { m = DIR_OUT; }
+	| <INOUT> { m = DIR_INOUT; }
+	| <BUFFER> { m = DIR_BUFFER; }
+	| <LINKAGE> { m = DIR_LINKAGE; }
+	)
+	{ return m ; }
+}
+
+void secondary_unit(Context c):
+{
+}
+{
+	{
+	  log.trace(">>>> secondary_unit");
+	}
+	
+	( architecture_body(c) 
+	| package_body(c)
+	)
+	{
+	  log.trace("<<<< secondary_unit");
+	}
+}
+
+void package_body(Context c):
+{
+}
+{
+	<PACKAGE> <BODY> identifier() <IS>
+		package_body_declarative_part()
+	<END> [ <PACKAGE> <BODY> ] [ identifier() ] ";"
+}
+
+void package_body_declarative_item():
+{
+}
+{
+		LOOKAHEAD(subprogram_declaration())
+		subprogram_declaration()
+	| subprogram_body() 
+	| type_declaration()
+	| subtype_declaration()
+	| constant_declaration() 
+    | alias_declaration()
+	| use_clause()
+	| group_declaration()
+}
+
+void package_body_declarative_part() :
+{}
+{
+	( package_body_declarative_item() )*
+}
+
+
+
+void architecture_body(Context c) :
+{
+	String id;
+	String entityName;
+	Graph g;
+}
+{
+	<ARCHITECTURE> id = identifier() <OF> entityName = name() <IS> 
+		{
+		  g = c.getEntity(entityName);
+		  c.markImplemented(g);
+		}
+		architecture_declarative_part(c, g)
+	<BEGIN>
+		architecture_statement_part(g)
+	<END> [ <ARCHITECTURE> ] [ identifier() ] ";"
+}
+
+void architecture_declarative_part(Context c, Graph g):
+{
+}
+{
+	( block_declarative_item(c, g) )*
+}
+
+void block_declarative_item(Context c, Graph g) :
+{
+}
+{
+	(
+		LOOKAHEAD(subprogram_declaration())
+    	subprogram_declaration()
+	| subprogram_body()
+	| type_declaration()
+	| subtype_declaration()
+	| constant_declaration()
+	| signal_declaration(g)
+	| alias_declaration()
+	| component_declaration(c)
+	| LOOKAHEAD(attribute_declaration())
+		attribute_declaration()
+	| attribute_specification()
+	| configuration_specification()
+	| use_clause()
+	)
+}
+
+void architecture_statement_part(Graph arch_) :
+{
+}
+{
+	( architecture_statement(arch_) )*
+}
+
+void architecture_statement(Graph g):
+{
+}
+{
+		(
+		LOOKAHEAD([identifier() ":"] <BLOCK>)
+			block_statement()
+		| LOOKAHEAD([identifier() ":"] [<POSTPONED>] <PROCESS>)
+			process_statement() 
+		| LOOKAHEAD([identifier() ":"] [<POSTPONED>] conditional_signal_assignment()|
+			[identifier() ":"] [<POSTPONED>] selected_signal_assignment())
+			concurrent_signal_assignment_statement()
+		| LOOKAHEAD(identifier() ":" instantiated_unit() )
+			component_instantiation_statement(g)
+		| LOOKAHEAD(generate_statement())
+			generate_statement()
+
+		)
+}
+
+void block_statement() :
+{
+}
+{
+	identifier() ":"
+	<BLOCK> [ "(" expression() ")" ] [ <IS> ]
+		block_header()
+		( block_declarative_item(null,null) 
+			 )*
+	<BEGIN>
+		block_statement_part()
+	<END> <BLOCK> [ identifier() ] ";"
+}
+
+void block_header() :
+{
+}
+{
+	[ generic_clause()
+		[ generic_map_aspect() ";" ] ]
+	[ port_clause(null)
+		[ port_map_aspect() ";" ] ]
+}
+
+void block_statement_part():
+{
+}
+{
+	( architecture_statement(null) )*
+}
+
+
+String instantiated_unit():
+{
+  String id;
+}
+{
+	(
+	[ <COMPONENT> ] id=name()
+	| <ENTITY> id=name() [ "(" identifier() ")" ]
+	| <CONFIGURATION> id=name()
+	)
+	{	  return id;	}
+}
+
+void component_instantiation_statement(Graph g):
+{
+  String id, compId;
+  Node comp;
+  HashMap<String,String> map;
+}
+{
+	id=identifier() ":" compId=instantiated_unit()	{	  comp=g.new Node(id,library.resolve(compId));	}
+		[ generic_map_aspect() ]
+		[ map=port_map_aspect()		{
+		  for (String key: map.keySet())		  {
+		    String value = map.get(key);		    Node sig = g.searchNode(value);
+		    if (sig==null)
+		     throw new ParseException("signal name unknown: " + value);
+		    int pidx = library.pinIndex(comp.type(), key);
+		    int pdir = library.pinDirection(comp.type(), key);
+		    log.trace("pin " + key + " of " + comp.typeName() + " : " + pidx + " dir " + pdir);
+		    if (pidx==-1)
+		      throw new ParseException("pin name unknown: " + key);
+		    if (sig != null && pidx >= 0)		    {		      if (pdir == Library.DIR_IN)
+		        g.connect(sig, -1, comp, pidx); //comp.setPredecessor(pidx,sig);
+		      if (pdir == Library.DIR_OUT)
+		        g.connect(comp, -1, sig, 0);
+		    }		  }		} ] ";"
+}
+
+HashMap<String,String> port_map_aspect()  :
+{
+  HashMap<String,String> map;
+}
+{
+	<PORT> <MAP> "(" map=association_list() ")"	{	  return map;	}
+}
+
+void generic_map_aspect() :
+{
+}
+{
+	<GENERIC> <MAP> "(" association_list() ")"
+}
+
+HashMap<String,String> association_list()  :
+{
+  HashMap<String,String> map = new HashMap<String,String>();
+  int idx = 0;
+}
+{
+	association_element(map,idx++) 
+	( "," association_element(map,idx++) )*	{	  return map;	}
+}
+
+void association_element(HashMap<String,String> map, int idx)  :
+{
+  String key = null;
+  String value;
+}
+{
+	[ LOOKAHEAD( formal_part() "=>" ) key=formal_part() "=>" ]
+	value=actual_part()	{
+	  if (key==null)
+	    key=""+idx;	  map.put(key,value);	}
+}
+
+String formal_part() :
+{
+  String s;
+}
+{
+	( LOOKAHEAD( name() "(" name() ")")
+		s=name() "(" name() ")"
+	| s=name()
+	)	{	  return s;	}
+}
+
+String actual_part()  :
+{
+  String s;
+}
+{
+	//actual_designator()
+	s=name()
+	{	  return s;	}
+}
+
+void actual_designator() :
+{
+}
+{
+	( LOOKAHEAD(expression())
+		expression()
+	| <OPEN>
+	)
+}
+
+
+
+void conditional_signal_assignment():
+{
+}
+{
+	target() "<=" options_() conditional_waveforms() ";"
+}
+
+int options_():
+{
+}
+{
+	[ <GUARDED> ] 
+	[ delay_mechanism() ]
+	{ return 0; }
+}
+
+int delay_mechanism() :
+{
+}
+{
+	( <TRANSPORT> 
+	| [ <REJECT> expression() ] <INERTIAL>
+	)
+	{ return 0; }
+}
+
+void target() :
+{
+}
+{
+	( name()
+	| aggregate()
+	)
+}
+
+void conditional_waveforms() :
+{
+}
+{
+	waveform()
+	( LOOKAHEAD( <WHEN> expression() <ELSE>)
+		<WHEN> expression() <ELSE> waveform() 
+	)*
+    [ <WHEN> expression() ]
+}
+
+void waveform() :
+{
+}
+{
+	( waveform_element() 
+	( "," waveform_element() )*
+	| <UNAFFECTED>
+	)
+}
+
+void waveform_element() :
+{
+}
+{
+	( LOOKAHEAD(<NULL>)
+		<NULL> [<AFTER> expression() ]
+	| expression() [ <AFTER> expression() ] 
+	)
+}
+
+void concurrent_signal_assignment_statement() :
+{
+}
+{
+	[ LOOKAHEAD( identifier() ":") identifier() ":" ]
+	[ <POSTPONED> ]
+	( LOOKAHEAD(  target() "<=" options_() conditional_waveforms() ";")
+	conditional_signal_assignment()
+	| selected_signal_assignment() )
+}
+
+void selected_signal_assignment() :
+{
+}
+{
+	<WITH> expression() <SELECT>
+	 target()  "<=" options_() selected_waveforms() ";"
+}
+
+void selected_waveforms() :
+{
+}
+{
+	waveform() <WHEN> choices()
+	("," waveform() <WHEN> choices() 
+	)*
+	
+}
+
+
+void generate_statement() :
+{
+}
+{
+	identifier() ":"
+	generation_scheme() <GENERATE>
+		[ LOOKAHEAD(2) ( block_declarative_item(null,null) )* <BEGIN> ]
+		( architecture_statement(null) )*
+	<END> <GENERATE> [ identifier() ] ";"
+}
+
+void generation_scheme() :
+{
+}
+{
+	( <FOR> identifier() <IN> range()
+	| <IF> expression()
+	)
+}
+
+
+
+void constant_declaration() :
+{
+}
+{
+	<CONSTANT> identifier_list() ":" subtype_indication()
+	[ ":=" expression() ] ";"
+}
+
+void signal_declaration(Graph g) :
+{
+  ArrayList<String> ids;
+}
+{
+	<SIGNAL> ids=identifier_list() ":"
+	subtype_indication() [ signal_kind() ] [ ":=" expression() ] ";"	{	  for (String id: ids)	  {
+	    log.trace("new signal node: " + id);
+	    g.new Node(id,Library.FLAG_PSEUDO|Library.TYPE_BUF);	  }	}
+}
+
+int signal_kind() :
+{}
+{
+	( <REGISTER> { return 1; }
+	| <BUS> { return 2; }
+	)	
+}
+
+void component_declaration(Context c) :
+{
+  Graph g = new Graph(library);
+  String id;
+}
+{
+	<COMPONENT> id=identifier() [ <IS> ]
+	{
+	  c.addAsEntity(id,g);
+	}
+	[ generic_clause() 
+	]
+	[ port_clause(g) 
+	]
+	<END> <COMPONENT> [ identifier() ] ";"
+}
+
+void generic_clause() :
+{}
+{
+	<GENERIC> "(" interface_list(null) ")" ";"
+}
+
+
+void type_declaration() :
+{}
+{
+	full_type_declaration()
+}
+
+void full_type_declaration() :
+{}
+{
+	<TYPE> identifier() <IS> type_definition() ";"
+}
+
+void subtype_declaration() :
+{}
+{
+	<SUBTYPE> identifier() <IS> subtype_indication() ";"
+}
+
+void attribute_declaration() :
+{
+}
+{
+	<ATTRIBUTE> identifier() ":" name() ";"
+}
+
+void subtype_indication() :
+{
+}
+{
+	[ LOOKAHEAD (name() name()) name() ] name() [ constraint() ]
+}
+
+void type_definition() :
+{
+}
+{
+	( scalar_type_definition()
+	| composite_type_definition()
+	| access_type_definition()
+	| file_type_definition()
+	)
+}
+
+void scalar_type_definition() :
+{
+}
+{
+	( LOOKAHEAD(range_constraint() <UNITS> )
+	physical_type_definition()
+	| LOOKAHEAD(enumeration_type_definition())
+    enumeration_type_definition()
+	| range_constraint()
+	)
+}
+
+void access_type_definition() :
+{
+}
+{
+	<ACCESS> subtype_indication()
+}
+
+void file_type_definition():
+{
+}
+{
+	<FILE> <OF> name()
+}
+
+void physical_type_definition() :
+{
+}
+{
+	range_constraint()
+	<UNITS>
+	base_unit_declaration()
+	( secondary_unit_declaration() )*
+  	<END> <UNITS> [ identifier() ]
+}
+
+String base_unit_declaration() :
+{
+	String unit;
+}
+{
+	unit = identifier() ";"
+	{ return unit; }
+}
+
+void secondary_unit_declaration() :
+{
+}
+{
+	identifier() "=" physical_literal() ";"
+}
+
+
+void enumeration_type_definition() :
+{
+}
+{
+	"(" enumeration_literal() 
+	( "," enumeration_literal()  )* ")"
+}
+
+
+
+void composite_type_definition() :
+{
+}
+{
+	( array_type_definition()
+	| record_type_definition()
+	)
+}
+
+void array_type_definition() :
+{
+}
+{
+	( LOOKAHEAD(<ARRAY> "(" index_subtype_definition())
+	unconstrained_array_definition()
+	| constrained_array_definition()
+	)
+}
+
+void unconstrained_array_definition() :
+{
+}
+{
+	<ARRAY> "(" index_subtype_definition()
+	( "," index_subtype_definition() )* 
+	")"
+	<OF> subtype_indication()
+}
+
+String index_subtype_definition() :
+{
+	String n;
+}
+{
+	n = name() <RANGE> "<>"
+	{ return n; }
+}
+
+void constrained_array_definition() :
+{
+}
+{
+	<ARRAY> index_constraint() <OF> subtype_indication()
+}
+
+void record_type_definition() :
+{
+}
+{
+	<RECORD>
+		( element_declaration() )+
+	<END> <RECORD> [ identifier() ]
+}
+
+void element_declaration() :
+{
+}
+{
+	identifier_list() ":" subtype_indication() ";"
+}
+
+void constraint() :
+{
+}
+{
+	(
+    	range_constraint() 
+	| index_constraint()
+	)
+}
+
+void index_constraint() :
+{
+}
+{
+	"(" discreteRange()
+	( "," discreteRange()  )* ")"
+}
+
+void discreteRange() :
+{
+}
+{
+	( LOOKAHEAD(simple_expression() direction() )
+		range()
+	| LOOKAHEAD (name() name() constraint()) 		
+		subtype_indication()
+	| LOOKAHEAD (name() constraint()) 		
+		subtype_indication()
+	| LOOKAHEAD (name() name()) 		
+		subtype_indication()
+	| LOOKAHEAD (name()) 		
+		subtype_indication()
+	| range()
+	)
+}
+
+
+
+void range_constraint() :
+{
+}
+{
+	<RANGE> range()
+}
+
+void range() :
+{
+}
+{
+	(
+		LOOKAHEAD (simple_expression() direction() simple_expression())
+		simple_expression() direction() simple_expression()
+	|   name()
+	)
+}
+
+int direction() :
+{}
+{
+	( <TO>  { return 1; } | <DOWNTO> { return 2; } )
+}
+
+void simple_expression() :
+{ 
+}
+{
+	[ ( <ADD> | <SUB> ) ] term()
+	(
+		( <ADD>
+		| <SUB>
+		| <CONCAT>
+		)
+		term() 
+    )*
+}
+
+
+void term() :
+{ 
+}
+{
+	factor() 
+	( 
+		multiplying_operator() 
+		factor()
+	)*
+}
+
+int multiplying_operator() :
+{}
+{
+	( "*"     { return 1; }
+	| "/"     { return 2; }
+	| <MOD>   { return 3; }
+	| <REM>   { return 4; }
+	)
+}
+
+void factor() :
+{
+}
+{
+	(
+		<ABS> primary()
+		| <NOT> primary()
+		| primary() [ <EXP> primary() ]
+	)
+}
+
+String name():
+{
+	String name;
+}
+{
+
+	name = identifier()
+
+	[ LOOKAHEAD(name_extension()) name_extension() ]
+	
+	{ return name; }
+}
+
+void name_extension():
+{
+}
+{
+	(
+		LOOKAHEAD(signature() "'" identifier() )
+		signature() "'" identifier()
+		[ LOOKAHEAD( "(" expression() ")") "(" expression() ")"]
+	| LOOKAHEAD(signature() "'" <RANGE> )
+		signature() "'" <RANGE>
+		[ LOOKAHEAD( "(" expression() ")") "(" expression() ")"]
+	| "." suffix()
+	| LOOKAHEAD( "(" range() ")" )
+		"(" range() ")"
+	| LOOKAHEAD( "(" expression() ("," expression() )* ")" )
+	
+        "(" expression()
+        ("," expression() )* ")"
+	)
+  [  LOOKAHEAD(name_extension() ) name_extension() ]
+}
+
+void signature() :
+{
+}
+{
+	[ name() 
+	( LOOKAHEAD ("," name() ) "," name() )* ]
+	[ <RETURN> name() ]
+}
+
+void expression() :
+{ 
+}
+{
+	relation()
+	( LOOKAHEAD(1) 
+		( <AND>
+		| <OR>     
+		| <NAND>   
+		| <NOR>    
+		| <XOR>     
+		| <XNOR>
+		)
+		relation() 
+	)*
+}
+
+void logical_operator():
+{}
+{
+	<AND>     
+	| <OR>     
+	| <NAND>   
+	| <NOR>     
+	| <XOR>     
+	| <XNOR>    
+}
+
+void relation() :
+{ 
+}
+{
+	shift_expression() 
+	[ 
+	  relational_operator() shift_expression() 
+	]
+}
+
+int relational_operator():
+{}
+{
+    <EQ>                { return OP_EQUAL; }
+  | <NEQ>               { return OP_NEQUAL; }
+  | <LO>                { return OP_LESS; }
+  | <LE>                { return OP_LESSEQ; }
+  | <GT>                { return OP_GREATER; }
+  | <GE>                { return OP_GREATEREQ; }
+}
+
+void shift_expression() :
+{ 
+}
+{
+	simple_expression() 
+	[ 
+	  shift_operator() simple_expression() 
+	]
+}
+
+int shift_operator() :
+{}
+{
+    <SLL>               { return 1; }
+  | <SRL>               { return 2; }
+  | <SLA>               { return 3; }
+  | <SRA>               { return 4; }
+  | <ROL>               { return 5; }
+  | <ROR>               { return 6; }
+}
+
+void primary() :
+{
+}
+{
+	( LOOKAHEAD( qualified_expression() )
+		qualified_expression()
+	| LOOKAHEAD(name())
+		name()
+	| LOOKAHEAD(literal())
+		literal()
+	| LOOKAHEAD( aggregate() )
+		aggregate()
+	| LOOKAHEAD( "(" expression() ")")
+		"(" expression() ")"
+	)
+}
+
+void literal() :
+{
+}
+{
+	(
+	LOOKAHEAD( numeric_literal() )
+	numeric_literal()
+	| enumeration_literal()
+	| <bit_string_literal> 
+	| <string_literal> 
+	| <NULL> 
+	)
+}
+
+void numeric_literal() :
+{
+}
+{
+	( LOOKAHEAD (physical_literal())
+	physical_literal()
+	| abstract_literal() )
+}
+
+void physical_literal() :
+{
+}
+{
+	abstract_literal() 
+	name()
+}
+
+void abstract_literal() :
+{
+}
+{
+	( <decimal_literal>
+	| <based_literal>
+	)
+}
+
+void enumeration_literal() :
+{
+}
+{
+	( <character_literal>
+	| identifier()
+	)
+}
+
+void qualified_expression() :
+{
+}
+{
+	name() "'" 
+	( LOOKAHEAD (aggregate()) 
+		aggregate() 
+	| "(" expression() ")" 
+	)
+}
+
+void aggregate() :
+{
+}
+{
+	"(" element_association() 
+	( "," element_association() )* ")"
+}
+
+void element_association() :
+{
+}
+{
+	[ LOOKAHEAD (choices() "=>") choices() "=>" ]
+	expression()
+}
+
+void choices() :
+{
+}
+{
+	choice()
+	( "|" choice() )*
+	
+}
+
+
+void choice() :
+{
+}
+{
+	(LOOKAHEAD(simple_expression())
+	simple_expression()
+	| LOOKAHEAD(range())
+	range()
+	| <OTHERS>
+	)
+}
+
+void suffix() :
+{
+}
+{
+	(
+		identifier() 
+	| <character_literal>
+	| <string_literal>
+	| <ALL>
+	)
+}
+
+
+String identifier() :
+{
+  Token t;
+}
+{  
+	(  t=<basic_identifier>
+	|  t=<extended_identifier> 
+	)
+{return t.image;}
+}
+
+ArrayList<String> identifier_list() :
+{
+  String id;
+  ArrayList<String> arr = new ArrayList<String>();
+}
+{
+	id = identifier()
+	{	  arr.add(id);	}	
+	( "," id=identifier()	{	  arr.add(id);	}	)*
+
+	{	  return arr;
+	}
+}
+
+/**
+ * processes
+ */
+ 
+void process_statement() :
+{
+}
+{
+	[ identifier() ":" ]
+	[ <POSTPONED> ] <PROCESS> 
+	[ "(" sensitivity_list() ")" 
+	] [ <IS> ]
+		( process_declarative_item() )*
+	<BEGIN>
+		sequence_of_statements()
+	<END> [ <POSTPONED> ] <PROCESS> [ identifier() ] ";"
+}
+
+void sensitivity_list() :
+{
+}
+{
+	name()
+	( "," name() )*
+}
+
+void process_declarative_item() :
+{
+}
+{
+	( LOOKAHEAD(subprogram_declaration())
+	  subprogram_declaration()
+	| subprogram_body()
+	| type_declaration()
+	| subtype_declaration()
+	| constant_declaration()
+	| variable_declaration()
+	| file_declaration()
+	| alias_declaration()
+	| LOOKAHEAD( attribute_declaration() )
+		attribute_declaration()
+	| attribute_specification()
+	| use_clause() 
+	)
+}
+
+void file_declaration() :
+{}
+{
+	<FILE> identifier_list() ":" subtype_indication()
+     [ file_open_information() ] ";"
+}
+
+
+void file_open_information() :
+{}
+{
+	[ <OPEN> expression() ] <IS> [mode()] expression()
+}
+
+
+
+void variable_declaration() :
+{
+}
+{
+	[ <SHARED> ] <VARIABLE> identifier_list() ":"
+	subtype_indication() [ ":=" expression() ] ";"
+}
+
+void sequence_of_statements() :
+{
+}
+{
+	( sequential_statement() )*
+}
+
+void sequential_statement() :
+{
+}
+{
+		(
+			LOOKAHEAD(3)
+			wait_statement()
+		| LOOKAHEAD(3)
+			assertion_statement()
+		| LOOKAHEAD(  [ identifier() ":" ] target() "<=" )
+			signal_assignment_statement()
+		| LOOKAHEAD(  [ identifier() ":" ] target() ":=" )
+			variable_assignment_statement()
+		| LOOKAHEAD(3)
+		    procedure_call_statement()
+		| LOOKAHEAD(3)
+			if_statement()
+		| LOOKAHEAD(3)
+			case_statement()
+		| LOOKAHEAD(3)
+			loop_statement()
+		| LOOKAHEAD(3)
+		    exit_statement()
+		| LOOKAHEAD(3)
+			return_statement()
+		| LOOKAHEAD(3)
+			null_statement()
+		)
+}
+
+void procedure_call():
+{
+}
+{
+	name() [ "(" association_list() ")" ]
+}
+
+void procedure_call_statement():
+{
+}
+{
+   [ LOOKAHEAD( identifier() ";") identifier() ":" ]
+   procedure_call() ";"
+}
+
+
+void exit_statement():
+{
+}
+{
+	[ identifier() ":" ] <EXIT> [ identifier() ]
+	[ <WHEN> expression() ] ";"
+}
+
+
+void wait_statement() :
+{
+}
+{
+	[ LOOKAHEAD( identifier() ) ":" identifier() ":"]
+	<WAIT> 
+	[ sensitivity_clause() ]
+	[ condition_clause() ] 
+	[ timeout_clause() ] ";"
+}
+
+void sensitivity_clause() :
+{
+}
+{
+	<ON> sensitivity_list()
+}
+
+void condition_clause() :
+{
+}
+{
+	<UNTIL> expression()
+}
+
+void timeout_clause() :
+{
+}
+{
+	<FOR> expression()
+}
+
+
+void assertion_statement() :
+{
+}
+{
+	[ identifier() ":" ] assertion() ";"
+}
+
+void assertion() :
+{
+}
+{
+	<ASSERT> expression()
+	[ <REPORT> expression() ]
+	[ <SEVERITY> expression() ]
+}
+
+void signal_assignment_statement() :
+{
+}
+{
+	[ LOOKAHEAD( identifier() ":") identifier() ":" ]
+	target() "<=" [ delay_mechanism() ] waveform() ";"
+	
+}
+
+void variable_assignment_statement() :
+{
+}
+{
+	[ LOOKAHEAD( identifier() ":") identifier() ":" ]
+	target() ":=" expression() ";"
+}
+
+void if_statement() :
+{
+}
+{
+	[ identifier() ":" ]
+	<IF> expression() <THEN>
+		sequence_of_statements()
+	( <ELSIF> expression() <THEN>
+		sequence_of_statements() 
+	)*
+	[ <ELSE>
+		sequence_of_statements() 
+	]
+	<END> <IF> [ identifier() ] ";"
+}
+
+void case_statement() :
+{
+}
+{
+	[ identifier() ":" ]
+	<CASE> expression() <IS>
+		case_statement_alternative()
+		( case_statement_alternative() )*
+	<END> <CASE> [ identifier() ] ";"
+}
+
+
+void case_statement_alternative() :
+{
+}
+{
+	<WHEN> choices() "=>" sequence_of_statements()
+}
+
+void loop_statement() :
+{
+}
+{
+	[ identifier() ":" ]
+	[ iteration_scheme() ] <LOOP>
+		sequence_of_statements()
+	<END> <LOOP> [ identifier() ] ";"
+}
+
+void iteration_scheme() :
+{
+}
+{
+	( <WHILE> expression() 
+	| <FOR> identifier() <IN> range()
+	)
+}
+
+void null_statement() :
+{}
+{
+	[ identifier() ":" ] <NULL> ";"
+}
+
+void return_statement() :
+{
+}
+{
+	[ identifier() ":" ] <RETURN> [ expression() ] ";"
+}
+
+/*
+ * subprograms
+ */
+
+void subprogram_body() :
+{
+}
+{
+	subprogram_specification() <IS>
+		subprogram_declarative_part()
+	<BEGIN>
+		subprogram_statement_part()
+	<END> [ ( <PROCEDURE> | <FUNCTION>) ] [ identifier() ] ";"
+}
+
+
+void subprogram_declaration() :
+{
+}
+{
+	subprogram_specification() ";"
+}
+
+void subprogram_declarative_item() :
+{
+}
+{
+	(LOOKAHEAD(subprogram_declaration())
+		subprogram_declaration()
+	| subprogram_body()
+	| type_declaration()
+	| subtype_declaration()
+	| constant_declaration()
+	| variable_declaration()	
+	| file_declaration()
+	| alias_declaration()
+	| LOOKAHEAD(attribute_declaration())
+		attribute_declaration()
+	| attribute_specification()
+	| use_clause()
+	| group_declaration()
+	)
+}
+
+void subprogram_declarative_part() :
+{}
+{
+  ( subprogram_declarative_item() )*
+}
+
+
+void subprogram_specification() :
+{
+}
+{
+	( <PROCEDURE> identifier() [ "(" interface_list(null) ")" ]
+	| [ <PURE> | <IMPURE> ] <FUNCTION> identifier()
+		[ "(" interface_list(null) ")" ]
+                <RETURN> name()
+    )
+}
+
+void subprogram_statement_part() :
+{
+}
+{
+	( sequential_statement() )*	
+}
+
+void alias_declaration() :
+{}
+{
+	<ALIAS> identifier()
+	[ ":" subtype_indication() ] <IS> name() signature() ";"
+}
+
+void configuration_specification() :
+{}
+{
+  <FOR> component_specification() binding_indication() ";"
+}
