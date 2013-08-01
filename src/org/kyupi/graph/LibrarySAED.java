@@ -17,7 +17,32 @@ public class LibrarySAED extends Library {
 
 	// re-use Library.TYPE_ where possible.
 	// new type ids: 0x10, 0x20 ... 0xff0
+	public static final int TYPE_AO21 = 0x10;
+	public static final int TYPE_AO221 = 0x20;
+	public static final int TYPE_AO222 = 0x30;
+	public static final int TYPE_AO22 = 0x40;
+	public static final int TYPE_AOBUF = 0x50 | TYPE_BUF;
+	public static final int TYPE_AOI21 = 0x60;
+	public static final int TYPE_AOI221 = 0x70;
+	public static final int TYPE_AOI222 = 0x80;
+	public static final int TYPE_AOI22 = 0x90;
+	public static final int TYPE_AOINV = 0xa0 | TYPE_NOT;
 
+	public static final int TYPE_OA21 = 0xb0;
+	public static final int TYPE_OA221 = 0xc0;
+	public static final int TYPE_OA222 = 0xd0;
+	public static final int TYPE_OA22 = 0xe0;
+	public static final int TYPE_OAI21 = 0xf0;
+	public static final int TYPE_OAI221 = 0x100;
+	public static final int TYPE_OAI222 = 0x110;
+	public static final int TYPE_OAI22 = 0x120;
+
+	public static final int TYPE_DELLN = 0x140 | TYPE_BUF;
+	public static final int TYPE_IBUFF = 0x150 | TYPE_NOT;
+	public static final int TYPE_INV = 0x160 | TYPE_NOT;
+	public static final int TYPE_MUX21 = 0x170;
+	public static final int TYPE_MUX41 = 0x180;
+	public static final int TYPE_NBUFF = 0x190 | TYPE_BUF;
 
 	public static final int TYPE_DEC24 = 0xc00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_HADD = 0xd00 | FLAG_MULTIOUTPUT;
@@ -32,7 +57,10 @@ public class LibrarySAED extends Library {
 
 	private String[] pinNamesIN = { "IN" };
 	private String[] pinNamesINx = { "IN1", "IN2", "IN3", "IN4", "IN5", "IN6" };
+	private String[] pinNamesIN2S = { "IN1", "IN2", "S" };
+	private String[] pinNamesIN4S1 = { "IN1", "IN2", "IN3", "IN4", "S0", "S1" };
 	private String[] pinNamesQ = { "Q" };
+	private String[] pinNamesQN = { "QN" };
 	private String[] pinNamesQQN = { "Q", "QN" };
 	private String[] pinNamesQx = { "Q0", "Q1", "Q2", "Q3" };
 	private String[] pinNamesZ = { "Z" };
@@ -51,6 +79,45 @@ public class LibrarySAED extends Library {
 			put(TYPE_AND | INPUTS_2, new InterfaceSpec("AND2", pinNamesINx, 2, pinNamesQ, 1));
 			put(TYPE_AND | INPUTS_3, new InterfaceSpec("AND3", pinNamesINx, 3, pinNamesQ, 1));
 			put(TYPE_AND | INPUTS_4, new InterfaceSpec("AND4", pinNamesINx, 4, pinNamesQ, 1));
+			put(TYPE_AO21, new InterfaceSpec("AO21", pinNamesINx, 3, pinNamesQ, 1));
+			put(TYPE_AO221, new InterfaceSpec("AO221", pinNamesINx, 5, pinNamesQ, 1));
+			put(TYPE_AO222, new InterfaceSpec("AO222", pinNamesINx, 6, pinNamesQ, 1));
+			put(TYPE_AO22, new InterfaceSpec("AO22", pinNamesINx, 4, pinNamesQ, 1));
+			put(TYPE_AOBUF, new InterfaceSpec("AOBUF", pinNamesIN, 1, pinNamesQ, 1));
+			put(TYPE_AOI21, new InterfaceSpec("AOI21", pinNamesINx, 3, pinNamesQN, 1));
+			put(TYPE_AOI221, new InterfaceSpec("AOI221", pinNamesINx, 5, pinNamesQN, 1));
+			put(TYPE_AOI222, new InterfaceSpec("AOI222", pinNamesINx, 6, pinNamesQN, 1));
+			put(TYPE_AOI22, new InterfaceSpec("AOI22", pinNamesINx, 4, pinNamesQN, 1));
+			put(TYPE_AOINV, new InterfaceSpec("AOINV", pinNamesIN, 1, pinNamesQN, 1));
+			put(TYPE_DELLN, new InterfaceSpec("DELLN1", pinNamesIN, 1, pinNamesQ, 1));
+			put(TYPE_DELLN, new InterfaceSpec("DELLN2", pinNamesIN, 1, pinNamesQ, 1));
+			put(TYPE_DELLN, new InterfaceSpec("DELLN3", pinNamesIN, 1, pinNamesQ, 1));
+			put(TYPE_IBUFF, new InterfaceSpec("IBUFF", pinNamesIN, 1, pinNamesQN, 1));
+			put(TYPE_INV, new InterfaceSpec("INV", pinNamesIN, 1, pinNamesQN, 1));
+			put(TYPE_MUX21, new InterfaceSpec("MUX21", pinNamesIN2S, 3, pinNamesQ, 1));
+			put(TYPE_MUX41, new InterfaceSpec("MUX41", pinNamesIN4S1, 6, pinNamesQ, 1));
+			put(TYPE_NAND | INPUTS_2, new InterfaceSpec("NAND2", pinNamesINx, 2, pinNamesQN, 1));
+			put(TYPE_NAND | INPUTS_3, new InterfaceSpec("NAND3", pinNamesINx, 3, pinNamesQN, 1));
+			put(TYPE_NAND | INPUTS_4, new InterfaceSpec("NAND4", pinNamesINx, 4, pinNamesQN, 1));
+			put(TYPE_NBUFF, new InterfaceSpec("NBUFF", pinNamesIN, 1, pinNamesQ, 1));
+			put(TYPE_NOR | INPUTS_2, new InterfaceSpec("NOR2", pinNamesINx, 2, pinNamesQN, 1));
+			put(TYPE_NOR | INPUTS_3, new InterfaceSpec("NOR3", pinNamesINx, 3, pinNamesQN, 1));
+			put(TYPE_NOR | INPUTS_4, new InterfaceSpec("NOR4", pinNamesINx, 4, pinNamesQN, 1));
+			put(TYPE_OA21, new InterfaceSpec("OA21", pinNamesINx, 3, pinNamesQ, 1));
+			put(TYPE_OA221, new InterfaceSpec("OA221", pinNamesINx, 5, pinNamesQ, 1));
+			put(TYPE_OA222, new InterfaceSpec("OA222", pinNamesINx, 6, pinNamesQ, 1));
+			put(TYPE_OA22, new InterfaceSpec("OA22", pinNamesINx, 4, pinNamesQ, 1));
+			put(TYPE_OAI21, new InterfaceSpec("OAI21", pinNamesINx, 3, pinNamesQN, 1));
+			put(TYPE_OAI221, new InterfaceSpec("OAI221", pinNamesINx, 5, pinNamesQN, 1));
+			put(TYPE_OAI222, new InterfaceSpec("OAI222", pinNamesINx, 6, pinNamesQN, 1));
+			put(TYPE_OAI22, new InterfaceSpec("OAI22", pinNamesINx, 4, pinNamesQN, 1));
+			put(TYPE_OR | INPUTS_2, new InterfaceSpec("OR2", pinNamesINx, 2, pinNamesQ, 1));
+			put(TYPE_OR | INPUTS_3, new InterfaceSpec("OR3", pinNamesINx, 3, pinNamesQ, 1));
+			put(TYPE_OR | INPUTS_4, new InterfaceSpec("OR4", pinNamesINx, 4, pinNamesQ, 1));
+			put(TYPE_XNOR | INPUTS_2, new InterfaceSpec("XNOR2", pinNamesINx, 2, pinNamesQ, 1));
+			put(TYPE_XNOR | INPUTS_3, new InterfaceSpec("XNOR3", pinNamesINx, 3, pinNamesQ, 1));
+			put(TYPE_XOR | INPUTS_2, new InterfaceSpec("XOR2", pinNamesINx, 2, pinNamesQ, 1));
+			put(TYPE_XOR | INPUTS_3, new InterfaceSpec("XOR3", pinNamesINx, 3, pinNamesQ, 1));
 			put(TYPE_SDFFAR | INPUTS_5, new InterfaceSpec("SDFFAR", pinNamesDSSCR, 5, pinNamesQQN, 2));
 			put(TYPE_FADD, new InterfaceSpec("FADD", pinNamesABCI, 3, pinNamesSCO, 2));
 			put(TYPE_HADD, new InterfaceSpec("HADD", pinNamesA0B0, 2, pinNamesSOC1, 2));
@@ -67,6 +134,110 @@ public class LibrarySAED extends Library {
 			put("AND2X2", TYPE_AND | INPUTS_2 | STRENGTH_2);
 			put("AND2X4", TYPE_AND | INPUTS_2 | STRENGTH_4);
 			put("AND3X1", TYPE_AND | INPUTS_3 | STRENGTH_1);
+			put("AND3X2", TYPE_AND | INPUTS_3 | STRENGTH_2);
+			put("AND3X4", TYPE_AND | INPUTS_3 | STRENGTH_4);
+			put("AND4X1", TYPE_AND | INPUTS_4 | STRENGTH_1);
+			put("AND4X2", TYPE_AND | INPUTS_4 | STRENGTH_2);
+			put("AND4X4", TYPE_AND | INPUTS_4 | STRENGTH_4);
+			put("AO21X1", TYPE_AO21 | STRENGTH_1);
+			put("AO21X2", TYPE_AO21 | STRENGTH_2);
+			put("AO221X1", TYPE_AO221 | STRENGTH_1);
+			put("AO221X2", TYPE_AO221 | STRENGTH_2);
+			put("AO222X1", TYPE_AO222 | STRENGTH_1);
+			put("AO222X2", TYPE_AO222 | STRENGTH_2);
+			put("AO22X1", TYPE_AO22 | STRENGTH_1);
+			put("AO22X2", TYPE_AO22 | STRENGTH_2);
+			put("AOBUFX1", TYPE_AOBUF | STRENGTH_1);
+			put("AOBUFX2", TYPE_AOBUF | STRENGTH_2);
+			put("AOBUFX4", TYPE_AOBUF | STRENGTH_4);
+			put("AOI21X1", TYPE_AOI21 | STRENGTH_1);
+			put("AOI21X2", TYPE_AOI21 | STRENGTH_2);
+			put("AOI221X1", TYPE_AOI221 | STRENGTH_1);
+			put("AOI221X2", TYPE_AOI221 | STRENGTH_2);
+			put("AOI222X1", TYPE_AOI222 | STRENGTH_1);
+			put("AOI222X2", TYPE_AOI222 | STRENGTH_2);
+			put("AOI22X1", TYPE_AOI22 | STRENGTH_1);
+			put("AOI22X2", TYPE_AOI22 | STRENGTH_2);
+			put("AOINVX1", TYPE_AOINV | STRENGTH_1);
+			put("AOINVX2", TYPE_AOINV | STRENGTH_2);
+			put("AOINVX4", TYPE_AOINV | STRENGTH_4);
+			put("DELLN1X2", TYPE_DELLN | STRENGTH_2);
+			put("DELLN2X2", TYPE_DELLN | STRENGTH_2);
+			put("DELLN3X2", TYPE_DELLN | STRENGTH_2);
+			put("IBUFFX16", TYPE_IBUFF | STRENGTH_16);
+			put("IBUFFX2", TYPE_IBUFF | STRENGTH_2);
+			put("IBUFFX32", TYPE_IBUFF | STRENGTH_32);
+			put("IBUFFX4", TYPE_IBUFF | STRENGTH_4);
+			put("IBUFFX8", TYPE_IBUFF | STRENGTH_8);
+			put("INVX0", TYPE_INV | STRENGTH_0);
+			put("INVX16", TYPE_INV | STRENGTH_16);
+			put("INVX1", TYPE_INV | STRENGTH_1);
+			put("INVX2", TYPE_INV | STRENGTH_2);
+			put("INVX32", TYPE_INV | STRENGTH_32);
+			put("INVX4", TYPE_INV | STRENGTH_4);
+			put("INVX8", TYPE_INV | STRENGTH_8);
+			put("MUX21X1", TYPE_MUX21 | STRENGTH_1);
+			put("MUX21X2", TYPE_MUX21 | STRENGTH_2);
+			put("MUX41X1", TYPE_MUX41 | STRENGTH_1);
+			put("MUX41X2", TYPE_MUX41 | STRENGTH_2);
+			put("NAND2X0", TYPE_NAND | INPUTS_2 | STRENGTH_0);
+			put("NAND2X1", TYPE_NAND | INPUTS_2 | STRENGTH_1);
+			put("NAND2X2", TYPE_NAND | INPUTS_2 | STRENGTH_2);
+			put("NAND2X4", TYPE_NAND | INPUTS_2 | STRENGTH_4);
+			put("NAND3X0", TYPE_NAND | INPUTS_3 | STRENGTH_0);
+			put("NAND3X1", TYPE_NAND | INPUTS_3 | STRENGTH_1);
+			put("NAND3X2", TYPE_NAND | INPUTS_3 | STRENGTH_2);
+			put("NAND3X4", TYPE_NAND | INPUTS_3 | STRENGTH_4);
+			put("NAND4X0", TYPE_NAND | INPUTS_3 | STRENGTH_0);
+			put("NAND4X1", TYPE_NAND | INPUTS_3 | STRENGTH_1);
+			put("NBUFFX16", TYPE_NBUFF | STRENGTH_16);
+			put("NBUFFX2", TYPE_NBUFF | STRENGTH_2);
+			put("NBUFFX32", TYPE_NBUFF | STRENGTH_32);
+			put("NBUFFX4", TYPE_NBUFF | STRENGTH_4);
+			put("NBUFFX8", TYPE_NBUFF | STRENGTH_8);
+			put("NOR2X0", TYPE_NOR | INPUTS_2 | STRENGTH_0);
+			put("NOR2X1", TYPE_NOR | INPUTS_2 | STRENGTH_1);
+			put("NOR2X2", TYPE_NOR | INPUTS_2 | STRENGTH_2);
+			put("NOR2X4", TYPE_NOR | INPUTS_2 | STRENGTH_4);
+			put("NOR3X0", TYPE_NOR | INPUTS_3 | STRENGTH_0);
+			put("NOR3X1", TYPE_NOR | INPUTS_3 | STRENGTH_1);
+			put("NOR3X2", TYPE_NOR | INPUTS_3 | STRENGTH_2);
+			put("NOR3X4", TYPE_NOR | INPUTS_3 | STRENGTH_4);
+			put("NOR4X0", TYPE_NOR | INPUTS_4 | STRENGTH_0);
+			put("NOR4X1", TYPE_NOR | INPUTS_4 | STRENGTH_1);
+			put("OA21X1", TYPE_OA21 | STRENGTH_1);
+			put("OA21X2", TYPE_OA21 | STRENGTH_2);
+			put("OA221X1", TYPE_OA221 | STRENGTH_1);
+			put("OA221X2", TYPE_OA221 | STRENGTH_2);
+			put("OA222X1", TYPE_OA222 | STRENGTH_1);
+			put("OA222X2", TYPE_OA222 | STRENGTH_2);
+			put("OA22X1", TYPE_OA22 | STRENGTH_1);
+			put("OA22X2", TYPE_OA22 | STRENGTH_2);
+			put("OAI21X1", TYPE_OAI21 | STRENGTH_1);
+			put("OAI21X2", TYPE_OAI21 | STRENGTH_2);
+			put("OAI221X1", TYPE_OAI221 | STRENGTH_1);
+			put("OAI221X2", TYPE_OAI221 | STRENGTH_2);
+			put("OAI222X1", TYPE_OAI222 | STRENGTH_1);
+			put("OAI222X2", TYPE_OAI222 | STRENGTH_2);
+			put("OAI22X1", TYPE_OAI22 | STRENGTH_1);
+			put("OAI22X2", TYPE_OAI22 | STRENGTH_2);
+			put("OR2X1", TYPE_OR | INPUTS_2 | STRENGTH_1);
+			put("OR2X2", TYPE_OR | INPUTS_2 | STRENGTH_2);
+			put("OR2X4", TYPE_OR | INPUTS_2 | STRENGTH_4);
+			put("OR3X1", TYPE_OR | INPUTS_3 | STRENGTH_1);
+			put("OR3X2", TYPE_OR | INPUTS_3 | STRENGTH_2);
+			put("OR3X4", TYPE_OR | INPUTS_3 | STRENGTH_4);
+			put("OR4X1", TYPE_OR | INPUTS_4 | STRENGTH_1);
+			put("OR4X2", TYPE_OR | INPUTS_4 | STRENGTH_2);
+			put("OR4X4", TYPE_OR | INPUTS_4 | STRENGTH_4);
+			put("XNOR2X1", TYPE_XNOR  | INPUTS_2 | STRENGTH_1);
+			put("XNOR2X2", TYPE_XNOR  | INPUTS_2 | STRENGTH_2);
+			put("XNOR3X1", TYPE_XNOR  | INPUTS_3 | STRENGTH_1);
+			put("XNOR3X2", TYPE_XNOR  | INPUTS_3 | STRENGTH_2);
+			put("XOR2X1", TYPE_XOR  | INPUTS_2 | STRENGTH_1);
+			put("XOR2X2", TYPE_XOR  | INPUTS_2 | STRENGTH_2);
+			put("XOR3X1", TYPE_XOR  | INPUTS_3 | STRENGTH_1);
+			put("XOR3X2", TYPE_XOR  | INPUTS_3 | STRENGTH_2);
 			put("SDFFARX1", TYPE_SDFFAR | INPUTS_5 | STRENGTH_1);
 			put("SDFFARX2", TYPE_SDFFAR | INPUTS_5 | STRENGTH_2);
 			put("TIEH", TYPE_CONST1);
@@ -135,6 +306,43 @@ public class LibrarySAED extends Library {
 
 	public long evaluate(int type, long[] inputs, int numInputs) {
 		switch (type & INTERFACE_SPEC_MASK) {
+		case TYPE_AO21:
+			return ((inputs[0] & inputs[1]) | inputs[2]);
+		case TYPE_AO221:
+			return ((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]) | inputs[4]);
+		case TYPE_AO222:
+			return ((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]) | (inputs[4] & inputs[5]));
+		case TYPE_AO22:
+			return ((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]));
+		case TYPE_AOI21:
+			return ~((inputs[0] & inputs[1]) | inputs[2]);
+		case TYPE_AOI221:
+			return ~((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]) | inputs[4]);
+		case TYPE_AOI222:
+			return ~((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]) | (inputs[4] & inputs[5]));
+		case TYPE_AOI22:
+			return ~((inputs[0] & inputs[1]) | (inputs[2] & inputs[3]));
+		case TYPE_OA21:
+			return ((inputs[0] | inputs[1]) & inputs[2]);
+		case TYPE_OA221:
+			return ((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]) & inputs[4]);
+		case TYPE_OA222:
+			return ((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]) & (inputs[4] | inputs[5]));
+		case TYPE_OA22:
+			return ((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]));
+		case TYPE_OAI21:
+			return ~((inputs[0] | inputs[1]) & inputs[2]);
+		case TYPE_OAI221:
+			return ~((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]) & inputs[4]);
+		case TYPE_OAI222:
+			return ~((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]) & (inputs[4] | inputs[5]));
+		case TYPE_OAI22:
+			return ~((inputs[0] | inputs[1]) & (inputs[2] | inputs[3]));
+		case TYPE_MUX21:
+			return ((inputs[0] & ~inputs[2]) | (inputs[1] & inputs[2]));
+		case TYPE_MUX41:
+			return ((inputs[0] & ~inputs[4] & ~inputs[5]) | (inputs[1] & ~inputs[4] & inputs[5]) | (inputs[2] & inputs[4] & ~inputs[5]) | (inputs[3]
+					& inputs[4] & inputs[5]));
 		case TYPE_FADD_CO:
 			return ((inputs[0] & inputs[1]) | (inputs[1] & inputs[2]) | (inputs[0] & inputs[2]));
 		}
