@@ -376,6 +376,146 @@ public class Library {
 		throw new RuntimeException("impossible. should not reach here.");
 	}
 
+	public long[] evaluate(int type, long[] inputsV, long[] inputsC, int numInputs){
+		long cv[] = new long[2];
+		long j = 0L;
+		long k = 0L;
+		long l = 0L;
+		
+		switch (type & 0xf) {
+		case TYPE_CONST0:
+			cv[0] = -1L;
+			cv[1] = 0L;
+			return cv;
+		case TYPE_NOR:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] |= k;  cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;		
+			return cv;
+		case TYPE_AGTB:
+			for (int i = 0; i < numInputs; i++){
+				k |= ~inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = inputsV[0] & ~inputsV[1];
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] &= ~k; cv[1] |= k;
+			return cv;			
+		case TYPE_BNOT:
+			cv[0] = inputsC[1];
+			cv[1] = inputsC[1] ^ inputsV[1]; 
+			return cv;		
+		case TYPE_BGTA:
+			for (int i = 0; i < numInputs; i++){
+				k |= ~inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = ~inputsV[0] & inputsV[1];
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] &= ~k; cv[1] |= k;
+			return cv;					
+		case TYPE_NOT:
+			cv[0] = inputsC[0];
+			cv[1] = inputsC[0] ^ inputsV[0]; 
+			return cv;
+		case TYPE_XOR:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= ~inputsC[i] & ~inputsV[i];
+				j ^= inputsV[i];
+			}
+			cv[0] = -1L;  cv[1] = j;
+			cv[0] &= ~k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;	
+		case TYPE_NAND:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] |= k;	 cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;
+		case TYPE_AND:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] |= k;	 cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;		
+			return cv;
+		case TYPE_XNOR:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= ~inputsC[i] & ~inputsV[i];
+				j ^= inputsV[i];
+			}
+			cv[0] = -1L;  cv[1] = j;
+			cv[0] &= ~k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;	
+		case TYPE_BUF:
+			cv[0] = inputsC[0];
+			cv[1] = inputsV[0];
+			return cv;
+		case TYPE_AGEB:
+			for(int i = 0; i < numInputs; i++)
+				l |= ~inputsC[i] & inputsV[i];
+			k = ~inputsC[0] & ~inputsV[0] & ~inputsC[1] & ~inputsV[1];
+			j = inputsV[0] | ~inputsV[1];
+			cv[0] = -1L; cv[1] = 0L;
+			cv[0] = -1L; cv[1] = j;
+			cv[0] &= ~k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_BBUF:
+			cv[0] = inputsC[1];
+			cv[1] = inputsV[1];
+			return cv;	
+		case TYPE_BGEA:
+			for(int i = 0; i < numInputs; i++)
+				l |= ~inputsC[i] & inputsV[i];
+			k = ~inputsC[0] & ~inputsV[0] & ~inputsC[1] & ~inputsV[1];
+			j = ~inputsV[0] | inputsV[1];
+			cv[0] = -1L; cv[1] = 0L;
+			cv[0] = -1L; cv[1] = j;
+			cv[0] &= ~k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;	
+		case TYPE_OR:
+			for (int i = 0; i < numInputs; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = 0L;
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] |= k;	 cv[1] |= k;
+			cv[0] &= ~l; cv[1] |= l;		
+			return cv;		
+		case TYPE_CONST1:
+			cv[0] = -1L;
+			cv[1] = 0L;
+			return cv;	
+		}
+		
+		throw new RuntimeException("impossible. should not reach here.");
+	}
+	
 	public boolean isInterface(int type) {
 		return (type & (FLAG_INPUT|FLAG_OUTPUT|FLAG_SEQUENTIAL)) != 0;
 	}

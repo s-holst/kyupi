@@ -348,6 +348,596 @@ public class LibrarySAED extends Library {
 		}
 		return super.evaluate(type, inputs, numInputs);
 	}
+	
+	public long[] evaluate(int type, long[] inputsV, long[] inputsC, int numInputs) {
+		long cv[] = new long[2];
+		long TinputsC[] = new long[3];
+		long TinputsV[] = new long[3];
+		long j = 0L;
+		long k = 0L;
+		long l = 0L;
+		
+		switch (type & INTERFACE_SPEC_MASK) {
+		case TYPE_AO21:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[1] = inputsC[2];
+			TinputsV[1] = inputsV[2];
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;			
+			return cv;			
+		case TYPE_AO221:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			TinputsC[2] = inputsC[4];
+			TinputsV[2] = inputsV[4];
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_AO222:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 4; i < 6; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[2] = -1L; TinputsV[2] = -1L;
+			TinputsC[2] &= ~j; TinputsV[2] &= ~j;			
+			TinputsC[2] |= k;  TinputsV[2] &= ~k;			
+			TinputsC[2] &= ~l; TinputsV[2] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_AO22:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_AOI21:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[1] = inputsC[2];
+			TinputsV[1] = inputsV[2];
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;	
+		case TYPE_AOI221:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			TinputsC[2] = inputsC[4];
+			TinputsV[2] = inputsV[4];
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;
+		case TYPE_AOI222:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 4; i < 6; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[2] = -1L; TinputsV[2] = -1L;
+			TinputsC[2] &= ~j; TinputsV[2] &= ~j;			
+			TinputsC[2] |= k;  TinputsV[2] &= ~k;			
+			TinputsC[2] &= ~l; TinputsV[2] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;
+		case TYPE_AOI22:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = -1L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = -1L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;	
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] =  0L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] |= k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0]; 
+			return cv;
+		case TYPE_OA21:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[1] = inputsC[2];
+			TinputsV[1] = inputsV[2];
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_OA221:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[2] = inputsC[4];
+			TinputsV[2] = inputsV[4];
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_OA222:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 4; i < 6; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[2] = -1L; TinputsV[2] = 0L;
+			TinputsC[2] &= ~j; TinputsV[2] &= ~j;			
+			TinputsC[2] |= k;  TinputsV[2] |= k;			
+			TinputsC[2] &= ~l; TinputsV[2] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_OA22:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_OAI21:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[1] = inputsC[2];
+			TinputsV[1] = inputsV[2];
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0]; 
+			return cv;
+		case TYPE_OAI221:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			TinputsC[2] = inputsC[4];
+			TinputsV[2] = inputsV[4];
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0];
+			return cv;
+		case TYPE_OAI222:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 4; i < 6; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[2] = -1L; TinputsV[2] = 0L;
+			TinputsC[2] &= ~j; TinputsV[2] &= ~j;			
+			TinputsC[2] |= k;  TinputsV[2] |= k;			
+			TinputsC[2] &= ~l; TinputsV[2] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 0; i < 3; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0]; 
+			return cv;
+		case TYPE_OAI22:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L; TinputsV[0] = 0L;
+			TinputsC[0] &= ~j; TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;  TinputsV[0] |= k;			
+			TinputsC[0] &= ~l; TinputsV[0] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L; TinputsV[1] = 0L;
+			TinputsC[1] &= ~j; TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;  TinputsV[1] |= k;			
+			TinputsC[1] &= ~l; TinputsV[1] |= l;
+			l = 0L; k = 0L; j = 0L;
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L; cv[1] = -1L;
+			cv[0] &= ~j; cv[1] &= ~j;			
+			cv[0] |= k;  cv[1] &= ~k;			
+			cv[0] &= ~l; cv[1] |= l;
+			cv[1] ^= cv[0]; 
+			return cv;
+		case TYPE_MUX21:
+			for(int i = 0; i < numInputs; i++)
+				l |= ~inputsC[i] & inputsV[i];
+/*			l |= ~inputsC[2] & inputsV[2];
+			l |= inputsC[2] & ~inputsV[2] & ~inputsC[0] & inputsV[0];
+			l |= inputsC[2] & inputsV[2] & ~inputsC[1] & inputsV[1];
+*/			k |= (inputsC[2] & ~inputsV[2] & inputsC[0] & ~inputsV[0]) |
+					(inputsC[2] & inputsV[2] & inputsC[1] & ~inputsV[1]) | 
+					(inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1]);
+			j |= (inputsC[2] & ~inputsV[2] & inputsC[0] & inputsV[0]) | 
+					(inputsC[2] & inputsV[2] & inputsC[1] & inputsV[1]) |
+					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]);
+			cv[0] = 0L; cv[1] = 0L;
+			cv[0] |= j; cv[1] |= j;
+			cv[0] |= k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_MUX41:
+			for(int i = 0; i < numInputs; i++)
+				l |= ~inputsC[i] & inputsV[i];
+			k |= (inputsC[4] & ~inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[0] & ~inputsV[0]) |
+					(inputsC[4] & ~inputsV[4] & inputsC[5] & inputsV[5] & inputsC[1] & ~inputsV[1]) |
+					(inputsC[4] & inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[2] & ~inputsV[2]) |
+					(inputsC[4] & inputsV[4] & inputsC[5] & inputsV[5] & inputsC[3] & ~inputsV[3]) |
+					(inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1] & inputsC[2] & ~inputsV[2] & inputsC[3] & ~inputsV[3]);
+			j |= (inputsC[4] & ~inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[0] & inputsV[0]) |
+					(inputsC[4] & ~inputsV[4] & inputsC[5] & inputsV[5] & inputsC[1] & inputsV[1]) |
+					(inputsC[4] & inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[2] & inputsV[2]) |
+					(inputsC[4] & inputsV[4] & inputsC[5] & inputsV[5] & inputsC[3] & inputsV[3]) |
+					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1] & inputsC[2] & inputsV[2] & inputsC[3] & inputsV[3]);
+			cv[0] = 0L; cv[1] = 0L;
+			cv[0] |= j; cv[1] |= j;
+			cv[0] |= k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_FADD:	//FADD_CO
+			for(int i = 0; i < numInputs; i++)
+				l |= ~inputsC[i] & inputsV[i];
+			k |= (inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1]) | 
+					(inputsC[1] & ~inputsV[1] & inputsC[2] & ~inputsV[2]) | 
+					(inputsC[0] & ~inputsV[0] & inputsC[2] & ~inputsV[2]);
+			j |= (inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]) | 
+					(inputsC[1] & inputsV[1] & inputsC[2] & inputsV[2]) | 
+					(inputsC[0] & inputsV[0] & inputsC[2] & inputsV[2]);	
+			cv[0] = 0L; cv[1] = 0L;
+			cv[0] |= j; cv[1] |= j;
+			cv[0] |= k; cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
+			return cv;
+		case TYPE_DEC24: //DEC24_Q0
+			for(int i = 0; i < numInputs; i++){
+				k |= ~inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			cv[0] = -1L; cv[1] = ~inputsV[0] & ~inputsV[1];
+			cv[0] &= ~j; cv[1] &= ~j;
+			cv[0] &= ~k; cv[1] |= k;
+		}
+		return super.evaluate(type, inputsV, inputsC, numInputs);
+	}
 
 	public boolean isScanCell(int type) {
 		if (isType(type, TYPE_SDFFAR))

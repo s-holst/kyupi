@@ -90,4 +90,105 @@ public class LibraryNangate extends Library {
 		}
 		return super.evaluate(type, inputs, numInputs);
 	}
+	
+	public long[] evaluate(int type, long[] inputsV, long[] inputsC, int numInputs) {
+		long cv[] = new long[2];
+		long TinputsC[] = new long[2];
+		long TinputsV[] = new long[2];
+		long j = 0L;
+		long k = 0L;	
+		long l = 0L;
+		
+		switch (type & INTERFACE_SPEC_MASK) {
+		case TYPE_AOI22:
+			for (int i = 0; i < 2; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[0] = -1L;
+			TinputsV[0] = -1L;
+			TinputsC[0] &= ~j;
+			TinputsV[0] &= ~j;			
+			TinputsC[0] |= k;
+			TinputsV[0] &= ~k;			
+			TinputsC[0] &= ~l;
+			TinputsV[0] |= l;
+			
+			l = 0L;
+			k = 0L;
+			j = 0L;
+			for (int i = 2; i < 4; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & ~inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L;
+			TinputsV[1] = -1L;
+			TinputsC[1] &= ~j;
+			TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;
+			TinputsV[1] &= ~k;			
+			TinputsC[1] &= ~l;
+			TinputsV[1] |= l;
+			
+			l = 0L;
+			k = 0L;
+			j = 0L;	
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L;
+			cv[1] =  0L;
+			cv[0] &= ~j;
+			cv[1] &= ~j;			
+			cv[0] |= k;
+			cv[1] |= k;			
+			cv[0] &= ~l;
+			cv[1] |= l;
+			
+			cv[1] ^= cv[0]; 
+			return cv;
+		case TYPE_OAI21:
+			TinputsC[0] = inputsC[0];
+			TinputsV[0] = inputsV[0];
+			
+			for (int i = 1; i < 3; i++){
+				l |= ~inputsC[i] & inputsV[i];
+				k |= inputsC[i] & inputsV[i];
+				j |= ~inputsC[i] & ~inputsV[i];
+			}
+			TinputsC[1] = -1L;
+			TinputsV[1] = 0L;
+			TinputsC[1] &= ~j;
+			TinputsV[1] &= ~j;			
+			TinputsC[1] |= k;
+			TinputsV[1] |= k;			
+			TinputsC[1] &= ~l;
+			TinputsV[1] |= l;
+
+			l = 0L;
+			k = 0L;
+			j = 0L;
+			for (int i = 0; i < 2; i++){
+				l |= ~TinputsC[i] & TinputsV[i];
+				k |= TinputsC[i] & ~TinputsV[i];
+				j |= ~TinputsC[i] & ~TinputsV[i];
+			}
+			cv[0] = -1L;
+			cv[1] = -1L;
+			cv[0] &= ~j;
+			cv[1] &= ~j;			
+			cv[0] |= k;
+			cv[1] &= ~k;			
+			cv[0] &= ~l;
+			cv[1] |= l;
+			
+			cv[1] ^= cv[0]; 
+			return cv;
+		}
+		return super.evaluate(type, inputsV, inputsC, numInputs);
+	}
 }
