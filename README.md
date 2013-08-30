@@ -99,7 +99,10 @@ for succeeding on the mission.
 Contributing
 ------------
 
-Learning to work with a new piece of software is always an investment. We are working hard to achieve the highest benefit/cost ratio as possible. But this requires your help. No matter if you try KyuPI for the first time or using it in large projects, please send us any:
+Learning to work with a new piece of software is always an investment. We are
+working hard to achieve the highest benefit/cost ratio as possible. But this
+requires your help. No matter if you try KyuPI for the first time or using it
+in large projects, please send us any:
 
 * Comments on usability, documentation, API design, ...
 * Reports on bugs, inconsistencies, performance issues

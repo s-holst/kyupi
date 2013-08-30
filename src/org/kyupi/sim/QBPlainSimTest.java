@@ -91,6 +91,7 @@ public class QBPlainSimTest extends TestCase {
 	public void testAllSaed90() throws Exception {
 		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED());
 		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
+		GraphTools.splitMultiOutputCells(g_test);
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
