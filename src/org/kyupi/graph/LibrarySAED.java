@@ -881,15 +881,17 @@ public class LibrarySAED extends Library {
 		case TYPE_MUX21:
 			for(int i = 0; i < numInputs; i++)
 				l |= ~inputsC[i] & inputsV[i];
-/*			l |= ~inputsC[2] & inputsV[2];
-			l |= inputsC[2] & ~inputsV[2] & ~inputsC[0] & inputsV[0];
-			l |= inputsC[2] & inputsV[2] & ~inputsC[1] & inputsV[1];
-*/			k |= (inputsC[2] & ~inputsV[2] & inputsC[0] & ~inputsV[0]) |
+			k |= (inputsC[2] & ~inputsV[2] & inputsC[0] & ~inputsV[0]) |
 					(inputsC[2] & inputsV[2] & inputsC[1] & ~inputsV[1]) | 
 					(inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1]);
+			
 			j |= (inputsC[2] & ~inputsV[2] & inputsC[0] & inputsV[0]) | 
+					(inputsC[2] & inputsV[2] & inputsC[1] & inputsV[1]);
+/*			j |= (inputsC[2] & ~inputsV[2] & inputsC[0] & inputsV[0]) | 
 					(inputsC[2] & inputsV[2] & inputsC[1] & inputsV[1]) |
-					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]);
+					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]);*/
+			//appropriate implement
+			
 			cv[0] = 0L; cv[1] = 0L;
 			cv[0] |= j; cv[1] |= j;
 			cv[0] |= k; cv[1] &= ~k;
@@ -897,44 +899,50 @@ public class LibrarySAED extends Library {
 			return cv;
 		case TYPE_MUX41:
 			for(int i = 0; i < numInputs; i++)
-				l |= ~inputsC[i] & inputsV[i];
+				l |= ~inputsC[i] & inputsV[i];			
 			k |= (inputsC[4] & ~inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[0] & ~inputsV[0]) |
 					(inputsC[4] & ~inputsV[4] & inputsC[5] & inputsV[5] & inputsC[1] & ~inputsV[1]) |
 					(inputsC[4] & inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[2] & ~inputsV[2]) |
 					(inputsC[4] & inputsV[4] & inputsC[5] & inputsV[5] & inputsC[3] & ~inputsV[3]) |
+					(inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1] & inputsC[4] & ~inputsV[4]) |
+					(inputsC[2] & ~inputsV[2] & inputsC[3] & ~inputsV[3] & inputsC[4] & inputsV[4]) |
+					(inputsC[0] & ~inputsV[0] & inputsC[2] & ~inputsV[2] & inputsC[5] & ~inputsV[5]) |
+					(inputsC[1] & ~inputsV[1] & inputsC[3] & ~inputsV[3] & inputsC[5] & inputsV[5]) |
 					(inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1] & inputsC[2] & ~inputsV[2] & inputsC[3] & ~inputsV[3]);
 			j |= (inputsC[4] & ~inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[0] & inputsV[0]) |
 					(inputsC[4] & ~inputsV[4] & inputsC[5] & inputsV[5] & inputsC[1] & inputsV[1]) |
 					(inputsC[4] & inputsV[4] & inputsC[5] & ~inputsV[5] & inputsC[2] & inputsV[2]) |
 					(inputsC[4] & inputsV[4] & inputsC[5] & inputsV[5] & inputsC[3] & inputsV[3]) |
+					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1] & inputsC[4] & ~inputsV[4]) |
+					(inputsC[2] & inputsV[2] & inputsC[3] & inputsV[3] & inputsC[4] & inputsV[4]) |
+					(inputsC[0] & inputsV[0] & inputsC[2] & inputsV[2] & inputsC[5] & ~inputsV[5]) |
+					(inputsC[1] & inputsV[1] & inputsC[3] & inputsV[3] & inputsC[5] & inputsV[5]) |
 					(inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1] & inputsC[2] & inputsV[2] & inputsC[3] & inputsV[3]);
 			cv[0] = 0L; cv[1] = 0L;
 			cv[0] |= j; cv[1] |= j;
 			cv[0] |= k; cv[1] &= ~k;
 			cv[0] &= ~l; cv[1] |= l;
 			return cv;
-		case TYPE_FADD:	//FADD_CO
+		case TYPE_FADD_CO:
 			for(int i = 0; i < numInputs; i++)
 				l |= ~inputsC[i] & inputsV[i];
 			k |= (inputsC[0] & ~inputsV[0] & inputsC[1] & ~inputsV[1]) | 
 					(inputsC[1] & ~inputsV[1] & inputsC[2] & ~inputsV[2]) | 
 					(inputsC[0] & ~inputsV[0] & inputsC[2] & ~inputsV[2]);
+
 			j |= (inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]) | 
+					(inputsC[1] & inputsV[1] & inputsC[2] & inputsV[2] & inputsC[0] & ~inputsV[0]) | 
+					(inputsC[0] & inputsV[0] & inputsC[2] & inputsV[2] & inputsC[1] & ~inputsV[1]);
+/*			j |= (inputsC[0] & inputsV[0] & inputsC[1] & inputsV[1]) | 
 					(inputsC[1] & inputsV[1] & inputsC[2] & inputsV[2]) | 
-					(inputsC[0] & inputsV[0] & inputsC[2] & inputsV[2]);	
+					(inputsC[0] & inputsV[0] & inputsC[2] & inputsV[2]);*/
+			//appropriate implement
+
 			cv[0] = 0L; cv[1] = 0L;
 			cv[0] |= j; cv[1] |= j;
 			cv[0] |= k; cv[1] &= ~k;
 			cv[0] &= ~l; cv[1] |= l;
 			return cv;
-		case TYPE_DEC24: //DEC24_Q0
-			for(int i = 0; i < numInputs; i++){
-				k |= ~inputsC[i] & inputsV[i];
-				j |= ~inputsC[i] & ~inputsV[i];
-			}
-			cv[0] = -1L; cv[1] = ~inputsV[0] & ~inputsV[1];
-			cv[0] &= ~j; cv[1] &= ~j;
-			cv[0] &= ~k; cv[1] |= k;
 		}
 		return super.evaluate(type, inputsV, inputsC, numInputs);
 	}

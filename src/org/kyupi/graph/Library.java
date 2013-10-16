@@ -400,12 +400,14 @@ public class Library {
 			return cv;
 		case TYPE_AGTB:
 			for (int i = 0; i < numInputs; i++){
-				k |= ~inputsC[i] & inputsV[i];
+				l |= ~inputsC[i] & inputsV[i];
 				j |= ~inputsC[i] & ~inputsV[i];
 			}
-			cv[0] = -1L; cv[1] = inputsV[0] & ~inputsV[1];
+			k = (inputsC[0] & ~inputsV[0]) | (inputsC[1] & inputsV[1]);
+			cv[0] = -1L; cv[1] = -1L;
 			cv[0] &= ~j; cv[1] &= ~j;
-			cv[0] &= ~k; cv[1] |= k;
+			cv[0] |= k;  cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
 			return cv;			
 		case TYPE_BNOT:
 			cv[0] = inputsC[1];
@@ -413,12 +415,14 @@ public class Library {
 			return cv;		
 		case TYPE_BGTA:
 			for (int i = 0; i < numInputs; i++){
-				k |= ~inputsC[i] & inputsV[i];
+				l |= ~inputsC[i] & inputsV[i];
 				j |= ~inputsC[i] & ~inputsV[i];
 			}
-			cv[0] = -1L; cv[1] = ~inputsV[0] & inputsV[1];
+			k = (inputsC[0] & inputsV[0]) | (inputsC[1] & ~inputsV[1]);
+			cv[0] = -1L; cv[1] = -1L;
 			cv[0] &= ~j; cv[1] &= ~j;
-			cv[0] &= ~k; cv[1] |= k;
+			cv[0] |= k;  cv[1] &= ~k;
+			cv[0] &= ~l; cv[1] |= l;
 			return cv;					
 		case TYPE_NOT:
 			cv[0] = inputsC[0];
