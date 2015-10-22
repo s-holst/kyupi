@@ -1,4 +1,4 @@
-Copyright 2013 Stefan Holst (mail at s-holst.de), Kyushu Institute of Technology
+Copyright 2013-2015 Stefan Holst (mail at s-holst.de), Kyushu Institute of Technology
 
 - all contributions not attributed otherwise
 

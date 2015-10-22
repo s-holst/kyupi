@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * Copyright 2013-2015 The KyuPI project contributors. See the COPYRIGHT.md file
  * at the top-level directory of this distribution.
  * This file is part of the KyuPI project. It is subject to the license terms
  * in the LICENSE.md file found in the top-level directory of this distribution.
@@ -131,4 +131,31 @@ public class ArrayTools {
 				break;
 		}
 	}
+	
+	public static float min(float[] arr) {
+		float retval = Float.POSITIVE_INFINITY;
+		for (float v: arr) {
+			if (v < retval)
+				retval = v;
+		}
+		return retval;
+	}
+
+	public static int search(float[] arr, float key) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == key)
+				return i;
+		}
+		return -1;
+	}
+
+	public static String toString(float[] w1) {
+		StringBuffer buf = new StringBuffer();
+		for (float f : w1) {
+			buf.append(""+ f + " ");
+		}
+		return buf.toString();
+	}
+
+
 }
