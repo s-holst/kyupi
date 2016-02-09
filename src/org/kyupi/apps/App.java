@@ -114,7 +114,7 @@ public abstract class App extends TestCase implements Callable<Void> {
 			ensureLib();
 			return GraphTools.loadGraph(f, lib);
 		} else
-			throw new IllegalArgumentException("Please specify a circuit with -c ...");
+			throw new IllegalArgumentException("Please specify a circuit with -"+OPT_DESIGN+" ...");
 	}
 
 	protected ArrayList<File> outputFilesFromArgs() {
@@ -144,6 +144,10 @@ public abstract class App extends TestCase implements Callable<Void> {
 			log.info("  -" + op.getOpt() + "\t" + op.getDescription());
 		}
 	}
+	
+	protected void setLib(Library l) {
+		lib = l;
+	}
 
 	private void ensureLib() {
 		ensureArgsParsed();
@@ -155,8 +159,10 @@ public abstract class App extends TestCase implements Callable<Void> {
 				lib = new LibrarySAED();
 			else
 				lib = new Library();
-		} else
-			lib = new Library();
+		} else {
+			if (lib == null)
+				lib = new Library();
+		}
 	}
 
 	private void ensureArgsParsed() {
