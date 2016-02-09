@@ -218,7 +218,7 @@ public class Graph {
 		public int searchInIdx(Node pred) {
 			int i = ArrayTools.linearSearchReference(inputs, pred);
 			if (i < 0)
-				throw new IllegalArgumentException("given node is not a predecessor");
+				throw new IllegalArgumentException("given node " +pred.queryName() + " is not a predecessor of " + queryName());
 			return i;
 		}
 
