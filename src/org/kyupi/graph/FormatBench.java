@@ -312,7 +312,7 @@ class FormatBench {
 				}
 				if (s.length() > 0)
 					s = s.substring(1);
-				op.println(node.queryName() + " = " + names[node.type() & Library.MASK_FUNCTION] + "(" + s + ")");
+				op.println(node.queryName() + " = " + names[node.type() & 0xf] + "(" + s + ")");
 			}
 		}
 		op.close();
