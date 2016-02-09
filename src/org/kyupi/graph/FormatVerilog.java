@@ -30,7 +30,7 @@ public class FormatVerilog {
 
 		Graph g = units.get(0);
 		
-		// some output ports may driver other nodes in the graph.
+		// some output ports may drive other nodes in the graph.
 		// re-wire them.
 
 		Node intf[] = g.accessInterface();
