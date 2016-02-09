@@ -175,7 +175,7 @@ public class VerilogParseTree {
 			for (PortConnection pc : mi.portConnections) {
 				int pidx = l.pinIndex(n.type(), pc.portName);
 				if (pidx < 0) {
-					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.queryName() );
+					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.queryName() + " of type " + n.typeName());
 				}
 				int pdir = l.pinDirection(n.type(), pc.portName);
 				Node other = findOrDeclareSignal(g, pc.variableName);
