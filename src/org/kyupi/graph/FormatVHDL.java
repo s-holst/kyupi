@@ -16,10 +16,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.kyupi.graph.Graph.Node;
 import org.kyupi.graph.parser.VHDL93;
 
 public class FormatVHDL {
+
+	protected static Logger log = Logger.getLogger(FormatVHDL.class);
 
 	static Graph load(InputStream is, Library library) throws IOException {
 		ArrayList<Graph> units = VHDL93.parse(is, library);
@@ -53,11 +56,17 @@ public class FormatVHDL {
 
 		Node[] nodes = graph.accessNodes();
 		for (Node node : nodes) {
+			if (node == null) {
+				continue;
+			}
 			if (!node.isPort())
 				op.println("  signal " + s(node.queryName()) + ": std_logic;");
 		}
 		op.println("begin");
 		for (Node node : nodes) {
+			if (node == null) {
+				continue;
+			}
 			if (!node.isInput()) {
 				op.print("  " + s(node.queryName()) + " <= ");
 				switch (node.type() & Library.MASK_FUNCTION) {
