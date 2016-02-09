@@ -48,6 +48,7 @@ public class LibrarySAED extends Library {
 	public static final int TYPE_HADD = 0xd00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_FADD = 0xe00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_SDFFAR = 0xf00 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
+	public static final int TYPE_DFFAR = 0xf10 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
 
 	public static final int TYPE_FADD_CO = 0xe10;
 
@@ -70,6 +71,7 @@ public class LibrarySAED extends Library {
 	private String[] pinNamesSCO = { "S", "CO" };
 	private String[] pinNamesSOC1 = { "SO", "C1" };
 	private String[] pinNamesDSSCR = { "D", "SE", "SI", "CLK", "RSTB" };
+	private String[] pinNamesDCR = { "D", "CLK", "RSTB" };
 
 	private final int INTERFACE_SPEC_MASK = 0xfff | INPUTS_MASK | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
 
@@ -119,6 +121,7 @@ public class LibrarySAED extends Library {
 			put(TYPE_XOR | INPUTS_2, new InterfaceSpec("XOR2", pinNamesINx, 2, pinNamesQ, 1));
 			put(TYPE_XOR | INPUTS_3, new InterfaceSpec("XOR3", pinNamesINx, 3, pinNamesQ, 1));
 			put(TYPE_SDFFAR | INPUTS_5, new InterfaceSpec("SDFFAR", pinNamesDSSCR, 5, pinNamesQQN, 2));
+			put(TYPE_DFFAR | INPUTS_3, new InterfaceSpec("DFFAR", pinNamesDCR, 3, pinNamesQQN, 2));
 			put(TYPE_FADD, new InterfaceSpec("FADD", pinNamesABCI, 3, pinNamesSCO, 2));
 			put(TYPE_HADD, new InterfaceSpec("HADD", pinNamesA0B0, 2, pinNamesSOC1, 2));
 			put(TYPE_CONST1, new InterfaceSpec("TIEH", pinNamesIN, 0, pinNamesZ, 1));
@@ -240,6 +243,8 @@ public class LibrarySAED extends Library {
 			put("XOR3X2", TYPE_XOR  | INPUTS_3 | STRENGTH_2);
 			put("SDFFARX1", TYPE_SDFFAR | INPUTS_5 | STRENGTH_1);
 			put("SDFFARX2", TYPE_SDFFAR | INPUTS_5 | STRENGTH_2);
+			put("DFFARX1", TYPE_DFFAR | INPUTS_3 | STRENGTH_1);
+			put("DFFARX2", TYPE_DFFAR | INPUTS_3 | STRENGTH_2);
 			put("TIEH", TYPE_CONST1);
 			put("TIEL", TYPE_CONST0);
 			put("HADDX1", TYPE_HADD | STRENGTH_1);
