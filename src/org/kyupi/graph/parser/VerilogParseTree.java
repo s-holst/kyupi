@@ -170,7 +170,7 @@ public class VerilogParseTree {
 		}
 		for (ModuleInstantiation mi : m.moduleInstantiations) {
 			Node n = g.new Node(mi.instanceName, l.resolve(mi.moduleName));
-			if (n.isInterface())
+			if (n.isPort() || n.isSequential())
 				n.setPosition(interfacePos++);
 			for (PortConnection pc : mi.portConnections) {
 				int pidx = l.pinIndex(n.type(), pc.portName);

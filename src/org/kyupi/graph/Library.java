@@ -19,6 +19,12 @@ import org.kyupi.graph.Graph.Node;
 /**
  * is a library of the most common cell types.
  * 
+ * The type of a cell is encoded into a single 32-bit integer value. The lowest
+ * 8 bits are reserved to encode the cell function. The upper 24 bits are used for
+ * several flags and other parameters.
+ * 
+ * The lowest 16 values of the 8-bit function code are assigned to the most basic
+ * logic functions. 
  * With two inputs, 16 Boolean functions with two inputs are possible. The
  * constants <code>TYPE_*</code> define those by encoding the truth table in the
  * following way:
@@ -50,6 +56,7 @@ import org.kyupi.graph.Graph.Node;
  *     
  *     For TYPE_BNOT and TYPE_BBUF, the first predecessor is ignored.
  * </pre>
+ * 
  * 
  * 
  */
@@ -520,10 +527,6 @@ public class Library {
 		throw new RuntimeException("impossible. should not reach here.");
 	}
 	
-	public boolean isInterface(int type) {
-		return (type & (FLAG_INPUT|FLAG_OUTPUT|FLAG_SEQUENTIAL)) != 0;
-	}
-
 	public boolean isScanCell(int type) {
 		return false;
 	}

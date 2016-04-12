@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -110,6 +111,37 @@ public class GraphTools {
 					ll.add(pred.id());
 			}
 			n.remove();
+		}
+	}
+
+	public static void removeSignalNodes(Graph g) {
+		for (Node signal : g.accessNodes()) {
+			if (signal == null)
+				continue;
+			if (!signal.isPseudo())
+				continue;
+			if (!signal.isType(Library.TYPE_BUF))
+				continue;
+			Node pred = signal.in(0);
+			if (pred.isMultiOutput()) {
+				log.info("Not removing because predecessor is MultiOutput: " + signal);
+				continue;
+			}
+			
+			LinkedList<Node> succs = new LinkedList<>();
+			HashMap<Node,Integer> succport = new HashMap<>();
+			//log.info("signal " + signal.queryName());
+			for (Node r : signal.accessOutputs()) {
+				if (r != null) {
+					succs.add(r);
+					succport.put(r, r.searchInIdx(signal));
+				}
+			}
+			signal.remove();
+			pred.compressOuts();
+			for (Node r: succs) {
+				g.connect(pred, pred.maxOut()+1, r, succport.get(r));
+			}
 		}
 	}
 

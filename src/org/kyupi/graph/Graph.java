@@ -112,7 +112,7 @@ public class Graph {
 		}
 
 		public int position() {
-			if (!isInterface())
+			if (!isPort() && !isSequential())
 				ensureLevels();
 			return position;
 		}
@@ -146,10 +146,6 @@ public class Graph {
 
 		public boolean isPort() {
 			return library.isPort(type);
-		}
-
-		public boolean isInterface() {
-			return library.isInterface(type);
 		}
 
 		public boolean isMultiOutput() {
@@ -221,6 +217,15 @@ public class Graph {
 				throw new IllegalArgumentException("given node " +pred.queryName() + " is not a predecessor of " + queryName());
 			return i;
 		}
+		
+		public Node[] accessInputs() {
+			return inputs;
+		}
+		
+		public Node[] accessOutputs() {
+			return outputs;
+		}
+		
 
 		/*
 		 * edge manipulations
@@ -544,7 +549,7 @@ public class Graph {
 			if (g == null)
 				continue;
 			g.level = -1;
-			if (library.isInterface(g.type)) {
+			if (library.isPort(g.type) || library.isSequential(g.type)) {
 				level0 = (Node[]) ArrayTools.grow(level0, Node.class, g.position + 1, 0.5f);
 				if (level0[g.position] != null) {
 					log.error("Conflicting positions in interface nodes: " + g.queryName() + ", " + level0[g.position].queryName());
@@ -570,7 +575,7 @@ public class Graph {
 				throw new RuntimeException("Detected combinational loop at gate: " + g.queryName());
 			}
 			g.level = 0;
-			if (!library.isInterface(g.type)) {
+			if (!library.isPort(g.type) && !library.isSequential(g.type)) {
 				for (int i = g.maxIn(); i >= 0; i--) {
 					Node d = g.in(i);
 					if (d != null)
@@ -588,7 +593,7 @@ public class Graph {
 			// log.debug("gate " + g.getName() + " is level " + g.level);
 			for (int i = g.countOuts() - 1; i >= 0; i--) {
 				Node succ = g.out(i);
-				if (succ != null && !library.isInterface(succ.type)) {
+				if (succ != null && !library.isPort(succ.type) && !library.isSequential(succ.type)) {
 					succ.position++;
 					if (succ.position == succ.countIns())
 						queue.add(succ);

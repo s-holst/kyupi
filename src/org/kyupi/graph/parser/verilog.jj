@@ -136,9 +136,10 @@ String identifier() :
 	)
 	[ "[" t2=<integer> "]" { suffix = "[" + t2.image + "]"; } ]
 	{
-	  s = t.image;
+	  s = t.image + suffix;
 	  if (s.startsWith("\\"))
 	      s = s.substring(1);
-	  return s + suffix;
+	  s = s.replace(" ", "").replace("\r", "").replace("\n", "").replace("\t", "");
+	  return s;
 	}
 }

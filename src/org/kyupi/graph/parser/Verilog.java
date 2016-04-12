@@ -207,10 +207,11 @@ public class Verilog implements VerilogConstants {
       jj_la1[7] = jj_gen;
       ;
     }
-          s = t.image;
+          s = t.image + suffix;
           if (s.startsWith("\u005c\u005c"))
               s = s.substring(1);
-          {if (true) return s + suffix;}
+          s = s.replace(" ", "").replace("\u005cr", "").replace("\u005cn", "").replace("\u005ct", "");
+          {if (true) return s;}
     throw new Error("Missing return statement in function");
   }
 
