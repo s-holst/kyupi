@@ -148,6 +148,10 @@ public abstract class App extends TestCase implements Callable<Void> {
 	protected void setLib(Library l) {
 		lib = l;
 	}
+	
+	protected Library getLib() {
+		return lib;
+	}
 
 	private void ensureLib() {
 		ensureArgsParsed();
