@@ -43,6 +43,7 @@ public class LibrarySAED extends Library {
 	public static final int TYPE_MUX21 = 0x170;
 	public static final int TYPE_MUX41 = 0x180;
 	public static final int TYPE_NBUFF = 0x190 | TYPE_BUF;
+	public static final int TYPE_CGLPPR = 0x1a0;
 
 	public static final int TYPE_DEC24 = 0xc00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_HADD = 0xd00 | FLAG_MULTIOUTPUT;
@@ -72,6 +73,9 @@ public class LibrarySAED extends Library {
 	private String[] pinNamesSOC1 = { "SO", "C1" };
 	private String[] pinNamesDSSCR = { "D", "SE", "SI", "CLK", "RSTB" };
 	private String[] pinNamesDCR = { "D", "CLK", "RSTB" };
+	private String[] pinNamesSEC = { "SE", "EN", "CLK" };
+	private String[] pinNamesGC = { "GCLK" };
+	
 
 	private final int INTERFACE_SPEC_MASK = 0xfff | INPUTS_MASK | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
 
@@ -127,6 +131,7 @@ public class LibrarySAED extends Library {
 			put(TYPE_CONST1, new InterfaceSpec("TIEH", pinNamesIN, 0, pinNamesZ, 1));
 			put(TYPE_CONST0, new InterfaceSpec("TIEL", pinNamesIN, 0, pinNamesZN, 1));
 			put(TYPE_DEC24, new InterfaceSpec("DEC24", pinNamesINx, 2, pinNamesQx, 4));
+			put(TYPE_CGLPPR, new InterfaceSpec("CGLPPR", pinNamesSEC, 3, pinNamesGC, 1));
 		}
 	};
 
@@ -253,6 +258,8 @@ public class LibrarySAED extends Library {
 			put("FADDX2", TYPE_FADD | STRENGTH_1);
 			put("DEC24X1", TYPE_DEC24 | STRENGTH_1);
 			put("DEC24X2", TYPE_DEC24 | STRENGTH_2);
+			put("CGLPPRX2", TYPE_CGLPPR | STRENGTH_2);
+			put("CGLPPRX8", TYPE_CGLPPR | STRENGTH_8);
 		}
 	};
 
@@ -260,6 +267,8 @@ public class LibrarySAED extends Library {
 		if (name.startsWith("Q"))
 			return DIR_OUT;
 		if (name.startsWith("Z"))
+			return DIR_OUT;
+		if (name.startsWith("GCLK"))
 			return DIR_OUT;
 		if ((type & INTERFACE_SPEC_MASK) == TYPE_FADD)
 			if (name.equals("S") || name.equals("CO"))
@@ -962,6 +971,14 @@ public class LibrarySAED extends Library {
 		if (isType(type, TYPE_SDFFAR))
 			return 2;
 		throw new IllegalArgumentException("Given type is not a scan cell.");
+	}
+	
+	public int getClockPin(int type) {
+		if (isType(type, TYPE_SDFFAR))
+			return 3;
+		if (isType(type, TYPE_DFFAR))
+			return 1;
+		throw new IllegalArgumentException("Given type is not a sequential cell.");
 	}
 
 	public int pinIndex(int type, String name) {
