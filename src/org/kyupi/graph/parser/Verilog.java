@@ -43,15 +43,16 @@ public class Verilog implements VerilogConstants {
   final public void module(Module module) throws ParseException {
     jj_consume_token(MODULE);
     module.moduleName = identifier();
-    jj_consume_token(18);
-    identifier_list(module.portNames);
     jj_consume_token(19);
+    identifier_list(module.portNames);
     jj_consume_token(20);
+    jj_consume_token(21);
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case INPUT:
       case OUTPUT:
+      case TRISTATE:
       case WIRE:
       case ASSIGN:
       case basic_identifier:
@@ -77,6 +78,10 @@ public class Verilog implements VerilogConstants {
       jj_consume_token(OUTPUT);
       ranged_variable_list(module.newOutputDeclaration());
       break;
+    case TRISTATE:
+      jj_consume_token(TRISTATE);
+      ranged_variable_list(module.newTristateDeclaration());
+      break;
     case WIRE:
       jj_consume_token(WIRE);
       ranged_variable_list(module.newWireDeclaration());
@@ -85,7 +90,7 @@ public class Verilog implements VerilogConstants {
       jj_consume_token(ASSIGN);
               Assignment a = module.newAssignment();
       a.targetName = identifier();
-      jj_consume_token(21);
+      jj_consume_token(22);
       a.sourceName = identifier();
       break;
     case basic_identifier:
@@ -97,12 +102,12 @@ public class Verilog implements VerilogConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
-    jj_consume_token(20);
+    jj_consume_token(21);
   }
 
   final public void ranged_variable_list(RangedVariableList rvl) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 24:
+    case 25:
       range(rvl.range);
       break;
     default:
@@ -115,9 +120,9 @@ public class Verilog implements VerilogConstants {
   final public void module_instantiation(ModuleInstantiation mi) throws ParseException {
     mi.moduleName = identifier();
     mi.instanceName = identifier();
-    jj_consume_token(18);
-    list_of_module_connections(mi);
     jj_consume_token(19);
+    list_of_module_connections(mi);
+    jj_consume_token(20);
   }
 
   final public void list_of_module_connections(ModuleInstantiation mi) throws ParseException {
@@ -125,32 +130,32 @@ public class Verilog implements VerilogConstants {
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 22:
+      case 23:
         ;
         break;
       default:
         jj_la1[4] = jj_gen;
         break label_3;
       }
-      jj_consume_token(22);
+      jj_consume_token(23);
       named_port_connection(mi.newPortConnection());
     }
   }
 
   final public void named_port_connection(PortConnection pc) throws ParseException {
-    jj_consume_token(23);
+    jj_consume_token(24);
     pc.portName = identifier();
-    jj_consume_token(18);
-    pc.variableName = identifier();
     jj_consume_token(19);
+    pc.variableName = identifier();
+    jj_consume_token(20);
   }
 
   final public void range(Range range) throws ParseException {
-    jj_consume_token(24);
-    range.start = integer();
     jj_consume_token(25);
-    range.end = integer();
+    range.start = integer();
     jj_consume_token(26);
+    range.end = integer();
+    jj_consume_token(27);
   }
 
   final public void identifier_list(Collection<String> list) throws ParseException {
@@ -160,14 +165,14 @@ public class Verilog implements VerilogConstants {
     label_4:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 22:
+      case 23:
         ;
         break;
       default:
         jj_la1[5] = jj_gen;
         break label_4;
       }
-      jj_consume_token(22);
+      jj_consume_token(23);
       id = identifier();
                                                          list.add(id);
     }
@@ -197,10 +202,10 @@ public class Verilog implements VerilogConstants {
       throw new ParseException();
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 24:
-      jj_consume_token(24);
+    case 25:
+      jj_consume_token(25);
       t2 = jj_consume_token(integer);
-      jj_consume_token(26);
+      jj_consume_token(27);
                                  suffix = "[" + t2.image + "]";
       break;
     default:
@@ -230,7 +235,7 @@ public class Verilog implements VerilogConstants {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x40,0x30b80,0x30b80,0x1000000,0x400000,0x400000,0x30000,0x1000000,};
+      jj_la1_0 = new int[] {0x40,0x61780,0x61780,0x2000000,0x800000,0x800000,0x60000,0x2000000,};
    }
 
   /** Constructor with InputStream. */
@@ -347,7 +352,7 @@ public class Verilog implements VerilogConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[27];
+    boolean[] la1tokens = new boolean[28];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -361,7 +366,7 @@ public class Verilog implements VerilogConstants {
         }
       }
     }
-    for (int i = 0; i < 27; i++) {
+    for (int i = 0; i < 28; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -19,23 +19,25 @@ public interface VerilogConstants {
   /** RegularExpression Id. */
   int OUTPUT = 8;
   /** RegularExpression Id. */
-  int WIRE = 9;
+  int TRISTATE = 9;
   /** RegularExpression Id. */
-  int ENDMODULE = 10;
+  int WIRE = 10;
   /** RegularExpression Id. */
-  int ASSIGN = 11;
+  int ENDMODULE = 11;
   /** RegularExpression Id. */
-  int digit = 12;
+  int ASSIGN = 12;
   /** RegularExpression Id. */
-  int id_head = 13;
+  int digit = 13;
   /** RegularExpression Id. */
-  int id_tail = 14;
+  int id_head = 14;
   /** RegularExpression Id. */
-  int integer = 15;
+  int id_tail = 15;
   /** RegularExpression Id. */
-  int basic_identifier = 16;
+  int integer = 16;
   /** RegularExpression Id. */
-  int extended_identifier = 17;
+  int basic_identifier = 17;
+  /** RegularExpression Id. */
+  int extended_identifier = 18;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -51,6 +53,7 @@ public interface VerilogConstants {
     "\"module\"",
     "\"input\"",
     "\"output\"",
+    "\"tri\"",
     "\"wire\"",
     "\"endmodule\"",
     "\"assign\"",

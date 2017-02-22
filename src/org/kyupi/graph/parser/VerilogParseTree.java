@@ -66,6 +66,7 @@ public class VerilogParseTree {
 		ArrayList<String> portNames = new ArrayList<>();
 		ArrayList<RangedVariableList> inputDeclarations = new ArrayList<>();
 		ArrayList<RangedVariableList> outputDeclarations = new ArrayList<>();
+		ArrayList<RangedVariableList> tristateDeclarations = new ArrayList<>();
 		ArrayList<RangedVariableList> wireDeclarations = new ArrayList<>();
 		ArrayList<Assignment> assignments = new ArrayList<>();
 		ArrayList<ModuleInstantiation> moduleInstantiations = new ArrayList<>();
@@ -79,6 +80,12 @@ public class VerilogParseTree {
 		RangedVariableList newOutputDeclaration() {
 			RangedVariableList rvl = new RangedVariableList();
 			outputDeclarations.add(rvl);
+			return rvl;
+		}
+
+		RangedVariableList newTristateDeclaration() {
+			RangedVariableList rvl = new RangedVariableList();
+			tristateDeclarations.add(rvl);
 			return rvl;
 		}
 
@@ -134,6 +141,12 @@ public class VerilogParseTree {
 				outputNames.put(rv, rvl.range);
 			}
 		}
+		HashMap<String, Range> tristateNames = new HashMap<>();
+		for (RangedVariableList rvl : m.tristateDeclarations) {
+			for (String rv : rvl.variableNames) {
+				tristateNames.put(rv, rvl.range);
+			}
+		}
 		HashSet<String> wireNames = new HashSet<>();
 		for (RangedVariableList rvl : m.wireDeclarations) {
 			wireNames.addAll(expand(rvl.variableNames,rvl.range));
@@ -150,6 +163,9 @@ public class VerilogParseTree {
 			} else if (outputNames.containsKey(portName)) {
 				type |= Library.FLAG_OUTPUT;
 				r = outputNames.get(portName);
+			} else if (tristateNames.containsKey(portName)) {
+				type |= Library.FLAG_INPUT | Library.FLAG_OUTPUT;
+				r = tristateNames.get(portName);
 			} else
 				throw new IOException("direction of port \"" + portName + "\" not declared.");
 			ArrayList<String> pl = new ArrayList<>();

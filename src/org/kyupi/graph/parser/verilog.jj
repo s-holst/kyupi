@@ -50,6 +50,7 @@ TOKEN :
 {   <MODULE:       "module">
   | <INPUT:        "input">
   | <OUTPUT:       "output">
+  | <TRISTATE:	   "tri">
   | <WIRE:         "wire">
   | <ENDMODULE:    "endmodule">
   | <ASSIGN:       "assign">
@@ -81,6 +82,7 @@ void module_item(Module module):
 {
   (
     <INPUT> ranged_variable_list(module.newInputDeclaration())  | <OUTPUT> ranged_variable_list(module.newOutputDeclaration())
+  | <TRISTATE> ranged_variable_list(module.newTristateDeclaration())
   | <WIRE> ranged_variable_list(module.newWireDeclaration())
   | <ASSIGN> {Assignment a = module.newAssignment();} a.targetName=identifier() "=" a.sourceName=identifier()  | module_instantiation(module.newModuleInstantiation())
   ) ";"}
