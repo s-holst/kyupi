@@ -38,6 +38,9 @@ public class GraphTools {
 			return FormatVHDL.load(FileTools.fileOpen(f), l);
 		case FileTools.FILE_TYPE_VERILOG:
 			return FormatVerilog.load(FileTools.fileOpen(f), l);
+		case FileTools.FILE_TYPE_KDB:
+			return FormatKDB.load(FileTools.fileOpen(f));
+			
 		}
 		throw new IOException("unsupported import file type: " + FileTools.fileType(f));
 	}

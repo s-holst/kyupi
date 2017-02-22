@@ -534,6 +534,11 @@ public class Library {
 	public int getScanInPin(int type) {
 		throw new UnsupportedOperationException("Scan cells are not supported by this Library");
 	}
+
+	public int getClockPin(int type) {
+		throw new UnsupportedOperationException("Sequential cells are not supported by this Library");
+	}
+
 	public void replaceWithPseudoPort(Node scan_cell, Graph netlist) {
 		throw new UnsupportedOperationException("Scan cells are not supported by this Library");
 	}
