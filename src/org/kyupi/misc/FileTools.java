@@ -30,8 +30,10 @@ public class FileTools {
 	public static final int FILE_TYPE_ISCAS = 1;
 	public static final int FILE_TYPE_BENCH = 2;
 	public static final int FILE_TYPE_VHDL = 3;
-	public static final int FILE_TYPE_DOT = 4;
 	public static final int FILE_TYPE_VERILOG = 4;
+	public static final int FILE_TYPE_KDB = 5;
+	public static final int FILE_TYPE_DOT = 100;
+	
 
 	private FileTools() {
 	}
@@ -102,6 +104,8 @@ public class FileTools {
 			return FileTools.FILE_TYPE_VHDL;
 		if (n.endsWith(".vhd"))
 			return FileTools.FILE_TYPE_VHDL;
+		if (n.endsWith(".kdb"))
+			return FileTools.FILE_TYPE_KDB;
 		if (n.endsWith(".dot"))
 			return FileTools.FILE_TYPE_DOT;
 		if (n.endsWith(".v"))
