@@ -59,13 +59,14 @@ import org.kyupi.misc.Namespace;
  * 
  * A graph has a Library of possible node types associated with it.
  * 
- * Nodes are topologically ordered. Interface nodes go to level 0, all remaining
- * nodes are sorted into the succeeding levels depending on their neighbors.
- * Each node has a position on a level. For level 0, this position must be
- * assigned explicitly. The positions of the remaining levels are determined
- * automatically.
+ * Nodes are topologically ordered. The first level (level 0) is called the
+ * 'interface'. All nodes n with n.isInterface()==true go to level 0, all other
+ * nodes are sorted into the lowest possible level with all its predecessors on
+ * lower levels. Each node has a position on a level. For level 0, this position
+ * must be assigned explicitly. The positions of the remaining levels are
+ * determined automatically.
  * 
- * Level 0 is also called the 'interface'.
+ * 
  * 
  * @author stefan
  * 
@@ -163,11 +164,11 @@ public class Graph {
 		public boolean isType(int other) {
 			return library.isType(type, other);
 		}
-		
+
 		public String typeName() {
 			return library.typeName(type);
 		}
-		
+
 		public String inName(int input_pin) {
 			return library.inputPinName(type, input_pin);
 		}
@@ -214,18 +215,18 @@ public class Graph {
 		public int searchInIdx(Node pred) {
 			int i = ArrayTools.linearSearchReference(inputs, pred);
 			if (i < 0)
-				throw new IllegalArgumentException("given node " +pred.queryName() + " is not a predecessor of " + queryName());
+				throw new IllegalArgumentException(
+						"given node " + pred.queryName() + " is not a predecessor of " + queryName());
 			return i;
 		}
-		
+
 		public Node[] accessInputs() {
 			return inputs;
 		}
-		
+
 		public Node[] accessOutputs() {
 			return outputs;
 		}
-		
 
 		/*
 		 * edge manipulations
@@ -358,7 +359,8 @@ public class Graph {
 		}
 
 		public String toString() {
-			StringBuilder b = new StringBuilder("" + level + "_" + position + ":" + typeName() + "\"" + queryName() + "\"");
+			StringBuilder b = new StringBuilder(
+					"" + level + "_" + position + ":" + typeName() + "\"" + queryName() + "\"");
 			int m_in = maxIn();
 			int m_out = maxOut();
 			for (int i = 0; i <= m_in; i++) {
@@ -428,6 +430,18 @@ public class Graph {
 		}
 		return count;
 	}
+	
+	public int countSequentials() {
+		Node n[] = nodes;
+		if (levels != null)
+			n = levels[0];
+		int count = 0;
+		for (Node g : n) {
+			if (g != null && g.isSequential())
+				count++;
+		}
+		return count;
+	}
 
 	public int countNodes() {
 		int count = 0;
@@ -447,7 +461,7 @@ public class Graph {
 		ensureLevels();
 		return levels.length;
 	}
-	
+
 	public Node[] accessLevel(int l) {
 		ensureLevels();
 		return levels[l];
@@ -535,8 +549,9 @@ public class Graph {
 	private void ensureLevels() {
 		if (levels != null)
 			return;
-		//log.debug("levelizing\n\t" + StringTools.join(Thread.currentThread().getStackTrace(), "\n\t"));
-		
+		// log.debug("levelizing\n\t" +
+		// StringTools.join(Thread.currentThread().getStackTrace(), "\n\t"));
+
 		Node level0[] = null;
 		LinkedList<Node> queue = new LinkedList<Node>();
 		ArrayList<Node> non_intf_nodes = new ArrayList<Node>();
@@ -552,7 +567,8 @@ public class Graph {
 			if (library.isPort(g.type) || library.isSequential(g.type)) {
 				level0 = (Node[]) ArrayTools.grow(level0, Node.class, g.position + 1, 0.5f);
 				if (level0[g.position] != null) {
-					log.error("Conflicting positions in interface nodes: " + g.queryName() + ", " + level0[g.position].queryName());
+					log.error("Conflicting positions in interface nodes: " + g.queryName() + ", "
+							+ level0[g.position].queryName());
 				}
 				level0[g.position] = g;
 				queue.add(g);

@@ -32,7 +32,7 @@ public class QBPlainSim extends QBSource {
 	public QBPlainSim(Graph netlist, QBSource inputData) {
 		super(inputData.length());
 		if (netlist.accessInterface().length > inputData.length()) {
-			throw new IllegalArgumentException("insufficient data with for the interface of the netlist.");
+			throw new IllegalArgumentException("insufficient data width for the interface of the netlist.");
 		}
 		this.inputData = inputData;
 		this.netlist = netlist;
@@ -52,12 +52,12 @@ public class QBPlainSim extends QBSource {
 		int pos = -1;
 		for (Node intf : netlist.accessInterface()) {
 			pos++;
-			if (intf == null || !library.isInput(intf.type()))
+			if (intf == null)
 				continue;
-			// log.debug("port " + i + " to " +
-			// StringTools.longToReadableBinaryString(b.get(i)));
-			value[0][pos] = b.getV(pos);
-			care[0][pos] = b.getC(pos);
+			if (intf.isInput() || intf.isSequential()) {
+				value[0][pos] = b.getV(pos);
+				care[0][pos] = b.getC(pos);
+			}
 		}
 	}
 
@@ -65,10 +65,12 @@ public class QBPlainSim extends QBSource {
 		int pos = -1;
 		for (Node intf : netlist.accessInterface()) {
 			pos++;
-			if (intf == null || !library.isOutput(intf.type()))
+			if (intf == null)
 				continue;
-			simNode(intf);
-			b.set(pos, value[0][pos], care[0][pos]);
+			if (intf.isOutput() || intf.isSequential()) {
+				simNode(intf);
+				b.set(pos, value[0][pos], care[0][pos]);
+			}
 		}
 	}
 
@@ -82,22 +84,23 @@ public class QBPlainSim extends QBSource {
 		dataC = ArrayTools.grow(dataC, input_count, 4, 0L);
 		for (int i = 0; i < input_count; i++) {
 			Node pred = n.in(i);
-			if (pred == null){
+			if (pred == null) {
 				dataV[i] = 0L;
 				dataC[i] = 0L;
-			}
-			else{
+			} else {
 				dataV[i] = value[pred.level()][pred.position()];
 				dataC[i] = care[pred.level()][pred.position()];
+				if (pred.isMultiOutput()) {
+					cv = library.calcOutput(pred.type(), pred.searchOutIdx(n), dataV[i], dataC[i]);
+					dataV[i] = cv[1];
+					dataC[i] = cv[0];
+				}
 			}
 		}
-		// log.debug("simulate: " +
-		// netlist.getLibrary().typeName(n.type()));
-		cv = library.evaluate(n.type(), dataV, dataC, input_count);			
+		cv = library.evaluate(n.type(), dataV, dataC, input_count);
 
 		care[n.level()][n.position()] = cv[0];
-		value[n.level()][n.position()] = cv[1];	
-	
+		value[n.level()][n.position()] = cv[1];
 	}
 
 	private void simLevel(int level) {

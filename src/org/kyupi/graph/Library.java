@@ -23,6 +23,8 @@ import org.kyupi.graph.Graph.Node;
  * 8 bits are reserved to encode the cell function. The upper 24 bits are used for
  * several flags and other parameters.
  * 
+ * ffff f000 iiii ssss vvvv vvvv llll LLLL
+ * 
  * The lowest 16 values of the 8-bit function code are assigned to the most basic
  * logic functions. 
  * With two inputs, 16 Boolean functions with two inputs are possible. The
@@ -545,5 +547,12 @@ public class Library {
 	
 	public int getSubCell(int multi_output_type, int output_idx) {
 		throw new UnsupportedOperationException("Multi-output cells are not supported by this Library");
+	}
+
+	public long[] calcOutput(int type, int output_idx, long v, long c) {
+		long cv[] = new long[2];
+		cv[0] = c;
+		cv[1] = v;
+		return cv;
 	}
 }

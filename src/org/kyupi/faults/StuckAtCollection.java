@@ -9,11 +9,16 @@
  */
 package org.kyupi.faults;
 
+import org.apache.log4j.Logger;
 import org.kyupi.graph.Graph;
-import org.kyupi.graph.Library;
 import org.kyupi.graph.Graph.Node;
+import org.kyupi.graph.Library;
 
+
+// FIXME proper handling of signals between interface nodes. 
 public class StuckAtCollection {
+
+	protected static Logger log = Logger.getLogger(StuckAtCollection.class);
 
 	public class NodeAssignment {
 		public FaultState inputSA0[];
@@ -51,6 +56,7 @@ public class StuckAtCollection {
 			if (n == null || !n.isOutput())
 				continue;
 			NodeAssignment a = na[0][pos_idx] = new NodeAssignment(n);
+			//log.debug("adding faults to inputs of: " + n);
 			for (int i = 0; i < a.inputSA0.length; i++) {
 				if (a.node.in(i) != null) {
 					a.inputSA0[i] = new FaultState();
@@ -71,11 +77,12 @@ public class StuckAtCollection {
 				if (n == null)
 					continue;
 				
-				if (level_idx == 0 && !n.isInput())
+				if (level_idx == 0 && !(n.isInput() || n.isSequential()))
 					continue;
 
 				NodeAssignment a = na[level_idx][pos_idx] = new NodeAssignment(n);
 
+				//log.debug("handling " + n + " is seq " + n.isSequential());
 				if (a.node.maxOut() == 0) {
 					Node succ = a.node.out(0);
 					NodeAssignment succ_a = na[succ.level()][succ.position()];
@@ -98,7 +105,7 @@ public class StuckAtCollection {
 					} else if (a.node.isType(Library.TYPE_NOT)) {
 						a.inputSA0[ipin] = a.outputSA1;
 						a.inputSA1[ipin] = a.outputSA0;
-					} else if (a.node.isType(Library.TYPE_BUF)) {
+					} else if (a.node.isType(Library.TYPE_BUF) && !a.node.isSequential()) {
 						a.inputSA0[ipin] = a.outputSA0;
 						a.inputSA1[ipin] = a.outputSA1;
 					} else {

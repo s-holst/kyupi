@@ -10,12 +10,11 @@
 package org.kyupi.sim;
 
 import java.io.File;
-
-
-import junit.framework.TestCase;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
@@ -28,15 +27,65 @@ import org.kyupi.graph.LibraryNangate;
 import org.kyupi.graph.LibrarySAED;
 import org.kyupi.misc.RuntimeTools;
 
+import junit.framework.TestCase;
+
 public class QBPlainSimTest extends TestCase {
 
 	protected static Logger log = Logger.getLogger(QBPlainSimTest.class);
+
+	@Test
+	public void testIntf() {
+		Graph g = new Graph(new Library());
+		Node out2 = g.new Node("out2", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		out2.setPosition(0);
+		Node out = g.new Node("out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		out.setPosition(1);
+		Node in = g.new Node("in", Library.TYPE_BUF | Library.FLAG_INPUT);
+		in.setPosition(2);
+		g.connect(in, -1, out, 0);
+		g.connect(out, -1, out2, 0);
+		log.info("graph " + g);
+		QVector v = new QVector("--1");
+		ArrayList<QVector> va = new ArrayList<>();
+		va.add(v);
+		QVSource pat = QVSource.from(3, va);
+		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.from(pat)));
+		assertEquals("11-", sim.next().toString());
+	}
+
+	public void testOAI21() {
+		Graph g = new Graph(new LibrarySAED());
+		Node i0 = g.new Node("i0", Library.TYPE_BUF | Library.FLAG_INPUT);
+		Node i1 = g.new Node("i1", Library.TYPE_BUF | Library.FLAG_INPUT);
+		Node i2 = g.new Node("i2", Library.TYPE_BUF | Library.FLAG_INPUT);
+		Node o0 = g.new Node("o0", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		i0.setPosition(0);
+		i1.setPosition(1);
+		i2.setPosition(2);
+		o0.setPosition(3);
+		Node n = g.new Node("n", LibrarySAED.TYPE_OAI21);
+		g.connect(i0, -1, n, 0);
+		g.connect(i1, -1, n, 1);
+		g.connect(i2, -1, n, 2);
+		g.connect(n, -1, o0, 0);
+		Graph g2 = GraphTools.benchToGraph("input(i0) input(i1) input(i2) output(o0) s0=OR(i0,i1) o0=NAND(i2,s0)");
+
+		QVSource pat = QVSource.from(QBSource.random(4, 42));
+		QVSource tst = QVSource.from(new QBPlainSim(g, QBSource.random(4, 42)));
+		QVSource ref = QVSource.from(new QBPlainSim(g2, QBSource.random(4, 42)));
+
+		// simulate 128 random patterns and compare the responses.
+		for (int i = 0; i < 128; i++) {
+			assertEqualsReport(ref.next(), tst.next(), pat.next(), i, g.accessInterface());
+		}
+	}
 
 	@Test
 	public void testNorInv() {
 		Graph g = GraphTools.benchToGraph("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
 		int length = g.accessInterface().length;
 
+		QVSource pat = QVSource.from(QBSource.random(length, 42));
 		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.random(length, 42)));
 		QVSource ref = QVSource.from(new QBSource(length) {
 			private QBSource rand = QBSource.random(length(), 42);
@@ -51,46 +100,101 @@ public class QBPlainSimTest extends TestCase {
 				long k = 0L;
 				long j = 0L;
 				QBlock output = rand.next();
-				for (int i = 0; i < 2; i++){
+				for (int i = 0; i < 2; i++) {
+					// log.debug("v " + i + " " +
+					// StringTools.longToReadableBinaryString(output.getV(i)));
+					// log.debug("c " + i + " " +
+					// StringTools.longToReadableBinaryString(output.getC(i)));
 					l |= ~output.getC(i) & output.getV(i);
 					k |= output.getC(i) & output.getV(i);
 					j |= ~output.getC(i) & ~output.getV(i);
 				}
-				cv[0] = -1L; cv[1] = -1L;
-				cv[0] &= ~j; cv[1] &= ~j;				
-				cv[0] |= k;	 cv[1] &= ~k;				
-				cv[0] &= ~l; cv[1] |= l;
-				
+				cv[0] = -1L;
+				cv[1] = -1L;
+				cv[0] &= ~j;
+				cv[1] &= ~j;
+				cv[0] |= k;
+				cv[1] &= ~k;
+				cv[0] &= ~l;
+				cv[1] |= l;
+
 				output.set(2, cv[1], cv[0]);
 				output.set(3, (output.getV(0) ^ output.getC(0)), output.getC(0));
+				//output.set(0, 0, 0);
+				//output.set(1, 0, 0);
+				// log.debug("out3 set V: " +
+				// StringTools.longToReadableBinaryString(output.getV(3)));
+				// log.debug("out3 set C: " +
+				// StringTools.longToReadableBinaryString(output.getC(3)));
 				return output;
 			}
 		});
 
 		// simulate 128 random patterns and compare the responses.
 		for (int i = 0; i < 128; i++) {
-			assertEqualsReport(ref.next(), sim.next(), i, g.accessInterface());
+			assertEqualsReport(ref.next(), sim.next(), pat.next(), i, g.accessInterface());
+		}
+	}
+
+	@Test
+	public void testS27() throws Exception {
+		Library l = new LibrarySAED();
+		Graph g = GraphTools.loadGraph(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
+		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", g);
+		QVSource tests = p.getStimuliSource();
+		QVSource resp = p.getResponsesSource();
+
+		for (Node n : g.accessInterface()) {
+			if (n == null)
+				continue;
+			StringBuffer buf = new StringBuffer();
+			if (n.isOutput())
+				buf.append("o");
+			if (n.isInput())
+				buf.append("i");
+			if (n.isSequential())
+				buf.append("s");
+
+			log.debug("intf " + buf.toString() + " " + n.queryName());
+		}
+
+		ArrayList<QVector> ta = tests.toArrayList();
+		ArrayList<QVector> ra = resp.toArrayList();
+
+		QVSource sim = new QVPlainSim(g, tests);
+
+		ArrayList<QVector> sa = sim.toArrayList();
+		
+		for (int idx = 0; idx < ta.size(); idx++) {
+			log.debug("--------------------");
+			log.debug("test " + ta.get(idx));
+			log.debug("exp  " + ra.get(idx));
+			log.debug("sim  " + sa.get(idx));
 		}
 	}
 
 	@Test
 	public void testC17Nangate() throws Exception {
 		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), new LibraryNangate());
+		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"),
+				new LibraryNangate());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testC17Saed90() throws Exception {
 		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), new LibrarySAED());
+		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
+				new LibrarySAED());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testAllSaed90() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
+		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
+				new LibrarySAED());
+		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
+				new LibrarySAED());
 		GraphTools.splitMultiOutputCells(g_test);
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
@@ -99,16 +203,17 @@ public class QBPlainSimTest extends TestCase {
 		int length = g_ref.accessInterface().length;
 		assertEquals(length, g_test.accessInterface().length);
 
+		QVSource pat = QVSource.from(QBSource.random(length, 42));
 		QVSource ref = QVSource.from(new QBPlainSim(g_ref, QBSource.random(length, 42)));
 		QVSource test = QVSource.from(new QBPlainSim(g_test, QBSource.random(length, 42)));
 
 		// simulate 128 random patterns and compare the responses.
 		for (int i = 0; i < 128; i++) {
-			assertEqualsReport(ref.next(), test.next(), i, g_ref.accessInterface());
+			assertEqualsReport(ref.next(), test.next(), pat.next(), i, g_ref.accessInterface());
 		}
 	}
 
-	private void assertEqualsReport(QVector expected, QVector actual, int pindex, Node[] intf) {
+	private void assertEqualsReport(QVector expected, QVector actual, QVector inp, int pindex, Node[] intf) {
 		if (!expected.equals(actual)) {
 			int l = expected.length();
 			StringBuffer buf = new StringBuffer();
@@ -119,7 +224,8 @@ public class QBPlainSimTest extends TestCase {
 					buf.append(" " + intf[i].queryName() + "=" + a + "(exp:" + e + ")");
 				}
 			}
-			fail("Mismatched pattern " + pindex + ": " + actual + "(exp:" + expected + ")" + buf.toString());
+			fail("Mismatched pattern " + pindex + "(" + inp + "): " + actual + "(exp:" + expected + ")"
+					+ buf.toString());
 		}
 		expected.free();
 		actual.free();

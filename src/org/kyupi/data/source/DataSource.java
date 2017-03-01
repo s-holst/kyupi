@@ -9,6 +9,7 @@
  */
 package org.kyupi.data.source;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -21,17 +22,17 @@ public abstract class DataSource<T extends DataItem<T>> implements Iterable<T>, 
 	protected static Logger log = Logger.getLogger(DataSource.class);
 
 	private final int length;
-	
+
 	protected DataSource(int length) {
 		if (length <= 0)
 			throw new IllegalArgumentException("length must be > 0.");
 		this.length = length;
 	}
-	
+
 	public int length() {
 		return length;
 	}
-	
+
 	public abstract void reset();
 
 	protected abstract T compute();
@@ -72,6 +73,16 @@ public abstract class DataSource<T extends DataItem<T>> implements Iterable<T>, 
 		throw new UnsupportedOperationException();
 	}
 
+	public ArrayList<T> toArrayList() {
+		ArrayList<T> array = new ArrayList<>();
+		forEach(array::add);
+		// As the ArrayList holds maintains references to the data items, they
+		// cannot be re-used anymore.
+		for (T d : array)
+			d.setPool(null);
+		return array;
+	}
+
 	/*
 	 * T pool
 	 */
@@ -79,7 +90,6 @@ public abstract class DataSource<T extends DataItem<T>> implements Iterable<T>, 
 	protected T newDataItem(int length) {
 		throw new RuntimeException("can not use pool without implementing newDataItem(int)");
 	}
-	
 
 	protected Pool<T> pool = new Pool<T>() {
 		public T produce() {

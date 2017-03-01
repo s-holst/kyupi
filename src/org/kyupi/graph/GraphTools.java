@@ -110,9 +110,20 @@ public class GraphTools {
 
 			for (int ii = n.maxIn(); ii >= 0; ii--) {
 				Node pred = n.in(ii);
-				if (pred != null)
-					ll.add(pred.id());
+				if (pred != null) {
+					boolean retain = false;
+					for (Node ps: pred.accessOutputs()) {
+						if (ps == null)
+							continue;
+						if (!ps.equals(n)) {
+							retain = true;
+						}
+					}
+					if (!retain)
+						ll.add(pred.id());
+				}
 			}
+			//log.debug("removing " + n);
 			n.remove();
 		}
 	}

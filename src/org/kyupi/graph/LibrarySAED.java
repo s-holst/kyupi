@@ -48,7 +48,7 @@ public class LibrarySAED extends Library {
 	public static final int TYPE_DEC24 = 0xc00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_HADD = 0xd00 | FLAG_MULTIOUTPUT;
 	public static final int TYPE_FADD = 0xe00 | FLAG_MULTIOUTPUT;
-	public static final int TYPE_SDFFAR = 0xf00 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
+	public static final int TYPE_SDFFAR = 0xf00 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL | TYPE_BUF;
 	public static final int TYPE_DFFAR = 0xf10 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL;
 
 	public static final int TYPE_FADD_CO = 0xe10;
@@ -1006,7 +1006,7 @@ public class LibrarySAED extends Library {
 			String name = scan_cell.queryName();
 			int pos = scan_cell.position();
 			scan_cell.remove();
-			Node buf = netlist.new Node(name, Library.TYPE_BUF | Library.FLAG_INPUT | Library.FLAG_OUTPUT | LibraryNangate.FLAG_PSEUDO);
+			Node buf = netlist.new Node(name, Library.TYPE_BUF | Library.FLAG_INPUT | Library.FLAG_OUTPUT | Library.FLAG_PSEUDO);
 			buf.setPosition(pos);
 			netlist.connect(d_in, -1, buf, 0);
 			if (q_out != null) {
@@ -1036,6 +1036,21 @@ public class LibrarySAED extends Library {
 			return SUBTYPES_FADD[output_idx];
 		}
 		throw new IllegalArgumentException("Cannot get sub types from given type: " + multi_output_type);
+	}
+	
+	public long[] calcOutput(int type, int output_idx, long v, long c) {
+		long cv[] = new long[2];
+		cv[0] = c;
+		cv[1] = v;
+		if (isType(TYPE_SDFFAR, type)) {
+			if(output_idx==1)
+				cv[1] = ~cv[1];
+			if(output_idx>1) {
+				cv[1] = 0;
+				cv[0] = 0;
+			}
+		}
+		return cv;
 	}
 
 }

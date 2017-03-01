@@ -140,6 +140,8 @@ class FormatBench {
 					|| (current_char == '_') || (current_char == '.') || ((current_char >= '0') && (current_char <= '9'))) {
 				appendToString(current_char);
 				advanceChar();
+				if (current_int == -1)
+					break;
 			}
 
 			int sym = SYM_IDENT;
@@ -232,7 +234,7 @@ class FormatBench {
 				int type = scanner.next();
 				if (type == BenchScanner.SYM_DFF) {
 					getParams(scanner, params, 1);
-					GateSpec ff = checkedPut(gates, dest, Library.TYPE_BUF | Library.FLAG_INPUT | Library.FLAG_OUTPUT | Library.FLAG_PSEUDO);
+					GateSpec ff = checkedPut(gates, dest, Library.TYPE_BUF | Library.FLAG_SEQUENTIAL);
 					ff.pos = pos++;
 					ff.params.add(params.get(0));
 					ffs.put(params.get(0), gates.get(dest));

@@ -31,13 +31,13 @@ public class FormatStil {
 
 	private ArrayList<QVector> stimuli = new ArrayList<>();
 	private ArrayList<QVector> responses = new ArrayList<>();
-	
+
 	private int length;
 
 	public FormatStil(File stil_file, Graph g) throws IOException {
 		InputStream is = FileTools.fileOpen(stil_file);
 		Stil data = Stil.load(is, stil_file);
-		
+
 		length = g.accessInterface().length;
 
 		// debug output
@@ -48,7 +48,7 @@ public class FormatStil {
 			// reverse the order of scan cells to fit with shift-vectors.
 			ArrayList<String> sc = data.chain_cells.get(i);
 			ArrayList<String> sc2 = new ArrayList<>();
-			for(int j = sc.size()-1; j >= 0; j--) {
+			for (int j = sc.size() - 1; j >= 0; j--) {
 				sc2.add(sc.get(j));
 			}
 			data.chain_cells.set(i, sc2);
@@ -61,11 +61,12 @@ public class FormatStil {
 
 		// cross-reference to circuit interface
 		HashMap<String, Integer> intf = new HashMap<>();
-		ArrayList<Node> intf_names = new ArrayList<>();
+		//ArrayList<Node> intf_names = new ArrayList<>();
 		for (Node inode : g.accessInterface()) {
-			intf_names.add(inode);
+			//intf_names.add(inode);
 			if (inode != null) {
 				intf.put(inode.queryName(), inode.position());
+				//log.debug("intf " + inode.queryName() + " pos " + inode.position());
 			}
 		}
 		//log.debug("intf: " + intf_names);
@@ -77,23 +78,46 @@ public class FormatStil {
 			scan2intf[chain] = crossRef(data.chain_cells.get(chain), intf);
 		}
 
-		// assemble patterns and responses for all capture cycles.
+		// assemble patterns and responses for all capture cycles. FIXME
+		// multi-scan
+		String scanout = null;
+		String scanin = null;
+		String pi = null;
+		String po = null;
 		int nops = data.ops.size();
 		for (int i = 0; i < nops; i++) {
 			Operation op = data.ops.get(i);
-			if (op.pi != null && op.pi.charAt(clock_port) != '0') {
-				String scanin = data.ops.get(i - 1).scanin;
-				String scanout = data.ops.get(i + 1).scanout;
-				QVector v = new QVector(length);
-				QVector r = new QVector(length);
-				setValues(v, op.pi, pi2intf);
-				setValues(v, scanin, scan2intf[0]); //FIXME multi-scan
-				setValues(r, op.po, po2intf);
-				setValues(r, scanout, scan2intf[0]); //FIXME multi-scan
-				//log.debug("capture @ " + i + ":\tpi=" + op.pi + " po=" + op.po + " si=" + scanin + " so=" + scanout + " test=" + v + " response=" + r);
-				stimuli.add(v);
-				responses.add(r);
+			if (op.scanout != null) {
+				scanout = op.scanout;
+				if (scanin != null && pi != null && po != null) {
+					// assemble new pattern
+					QVector v = new QVector(length);
+					QVector r = new QVector(length);
+					setValues(v, pi, pi2intf);
+					setValues(v, scanin, scan2intf[0]);
+					setValues(r, po, po2intf);
+					setValues(r, scanout, scan2intf[0]);
+
+					//log.debug("capture @ " + i + ":\tpi=" + pi + " po=" + po + " si=" + scanin + " so=" + scanout);
+					//log.debug("  test=" + v);
+					//log.debug("  resp=" + r);
+					stimuli.add(v);
+					responses.add(r);
+
+					scanout = null;
+					scanin = null;
+					po = null;
+					pi = null;
+				}
 			}
+			if (op.scanin != null) {
+				scanin = op.scanin;
+			}
+			if (op.pi != null && op.po != null && op.pi.charAt(clock_port) != '0') {
+				po = op.po;
+				pi = op.pi;
+			}
+
 		}
 
 	}
@@ -103,6 +127,10 @@ public class FormatStil {
 	}
 
 	private void setValues(QVector dest, String src, int map[]) {
+		if (src == null) {
+			log.error("No values to set! (src=null)");
+			return;
+		}
 		int l = src.length();
 		for (int i = 0; i < l; i++) {
 			if (map[i] < 0)
@@ -127,7 +155,7 @@ public class FormatStil {
 		Arrays.fill(map, -1);
 		for (int i = 0; i < name_count; i++) {
 			String pi_name = names.get(i);
-			//String pi_name_orig = pi_name;
+			String pi_name_orig = pi_name;
 			while (!intf.containsKey(pi_name)) {
 				if (pi_name.endsWith(".SI")) {
 					pi_name = pi_name.substring(0, pi_name.length() - 3);
@@ -140,18 +168,25 @@ public class FormatStil {
 			if (intf.containsKey(pi_name)) {
 				map[i] = intf.get(pi_name);
 			} else {
-				//log.info("Not found in graph: " + pi_name_orig);
+				log.warn("Not found in graph: " + pi_name_orig);
 			}
 		}
 		return map;
 	}
 
-	public QVSource getPatternSource() {
+	public QVSource getStimuliSource() {
 		return QVSource.from(length, stimuli);
 	}
 
-	public QVSource getResponseSource() {
+	public QVSource getResponsesSource() {
 		return QVSource.from(length, responses);
 	}
 
+	public ArrayList<QVector> getStimuliArray() {
+		return stimuli;
+	}
+
+	public ArrayList<QVector> getResponsesArray() {
+		return responses;
+	}
 }

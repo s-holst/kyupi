@@ -44,6 +44,11 @@ public class QVector extends DataItem<QVector> {
 		this(s.length());
 		setString(s);
 	}
+	
+	public QVector(QVector v) {
+		this(v.length());
+		v.copyTo(0, this);
+	}
 
 	public void setValue(int position, char vc) {
 		switch (vc) {
@@ -147,6 +152,12 @@ public class QVector extends DataItem<QVector> {
 			}
 			dest.setC(i, l);
 		}
+	}
+	
+	public QVector and(QVector vector) {
+		value.and(vector.value);
+		care.and(vector.care);
+		return this;
 	}
 
 	public String toString() {

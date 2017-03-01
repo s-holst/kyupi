@@ -65,19 +65,19 @@ public class GraphTest extends TestCase {
 
 		assertTrue(intf[0].isInput());
 		assertFalse(intf[1].isInput());
-		assertTrue(intf[2].isInput());
+		//assertTrue(intf[2].isInput());
 
 		assertFalse(intf[0].isOutput());
 		assertTrue(intf[1].isOutput());
-		assertTrue(intf[2].isOutput());
+		//assertTrue(intf[2].isOutput());
 
 		assertFalse(intf[0].isPseudo());
 		assertFalse(intf[1].isPseudo());
-		assertTrue(intf[2].isPseudo());
+		//assertTrue(intf[2].isPseudo());
 
 		assertTrue(intf[0].isPort());
 		assertTrue(intf[1].isPort());
-		assertFalse(intf[2].isPort());
+		//assertFalse(intf[2].isPort());
 	}
 
 	@Test
