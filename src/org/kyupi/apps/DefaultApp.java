@@ -12,6 +12,7 @@ package org.kyupi.apps;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+import org.kyupi.data.QVExpanderTest;
 import org.kyupi.data.item.BBlockTest;
 import org.kyupi.data.item.BVectorTest;
 import org.kyupi.data.item.QBlockTest;
@@ -25,12 +26,15 @@ import org.kyupi.graph.GraphTest;
 import org.kyupi.ipc.ProcessManagerTest;
 import org.kyupi.sim.BBPlainSimTest;
 import org.kyupi.sim.FaultSimSimpleTest;
+import org.kyupi.sim.QBPlainSimTest;
 
 public class DefaultApp extends App {
 
 	private static Class<?> ALL_TEST_CLASSES[] = { BBlockTest.class, BVectorTest.class, QBlockTest.class,
-			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class, StuckAtCollectionTest.class,
-			GraphTest.class, ProcessManagerTest.class, BBPlainSimTest.class, FaultSimSimpleTest.class };
+			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class,
+			StuckAtCollectionTest.class, GraphTest.class, ProcessManagerTest.class, BBPlainSimTest.class,
+			QBPlainSimTest.class, FaultSimSimpleTest.class, QVExpanderTest.class, DesignStatistics.class,
+			Circuits.class, JvmStats.class, DefaultApp.class };
 
 	public static void main(String[] args) throws Exception {
 		new DefaultApp().setArgs(args).call();
@@ -59,8 +63,8 @@ public class DefaultApp extends App {
 		if (res.getFailureCount() > 0) {
 			log.error("Some tests failed. Please ensure the following:");
 			log.error(" * Execute with Java 7 or newer, preferably using the JDK from Oracle.");
-			log.error(" * The kernel subdirectory contains the necessary binaries (compile them with make, if necessary).");
-			log.error("If problems persist, try to troubleshoot from within Eclipse and get in touch with us. See README.md for details.");
+			log.error(" * The kernel subdirectory contains the necessary binaries (compile them with make).");
+			log.error("If problems persist, try to troubleshoot and get in touch with us. See README.md for details.");
 		} else {
 			log.info("Everything looks fine.");
 		}

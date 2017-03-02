@@ -154,9 +154,27 @@ public class QVector extends DataItem<QVector> {
 		}
 	}
 	
+	public void shuffleTo(int[] shuffle, QVector dest) {
+		int l = Math.min(shuffle.length, dest.length);
+		dest.value.clear();
+		dest.care.clear();
+		for (int i = 0; i < l; i++) {
+			if (shuffle[i] >= 0 && shuffle[i] < length) {
+				dest.value.set(i, value.get(shuffle[i]));
+				dest.care.set(i, care.get(shuffle[i]));
+			}
+		}
+	}
+	
 	public QVector and(QVector vector) {
 		value.and(vector.value);
 		care.and(vector.care);
+		return this;
+	}
+
+	public QVector or(QVector vector) {
+		value.or(vector.value);
+		care.or(vector.care);
 		return this;
 	}
 
