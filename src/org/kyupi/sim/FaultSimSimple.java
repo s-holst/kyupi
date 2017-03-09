@@ -9,118 +9,72 @@
  */
 package org.kyupi.sim;
 
-import org.kyupi.data.item.BBlock;
-import org.kyupi.data.source.BBSource;
-import org.kyupi.faults.FaultState;
+import java.util.HashMap;
+
+import org.kyupi.data.item.QBlock;
+import org.kyupi.data.source.QBSource;
 import org.kyupi.faults.StuckAtCollection;
-import org.kyupi.faults.StuckAtCollection.NodeAssignment;
+import org.kyupi.faults.StuckAtCollection.StuckAtFault;
 import org.kyupi.graph.Graph;
-import org.kyupi.graph.Library;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.misc.ArrayTools;
+import org.kyupi.misc.StringTools;
 
-public class FaultSimSimple extends BBSource {
+public class FaultSimSimple extends QBSource {
 
-	private BBPlainSim sim;
-	private StuckAtCollection faults;
-	private Graph netlist;
-	private Library library;
-	private int generation;
-	private ChangeCollector coll;
+	private Graph circuit;
+	private QBSource source;
+	private Observability obssim;
 
-	public FaultSimSimple(StuckAtCollection faults, BBSource tests) {
-		super(tests.length());
-		this.faults = faults;
-		this.faults.clear();
-		this.netlist = faults.netlist;
-		this.library = netlist.library();
-		this.sim = new BBPlainSim(netlist, tests);
-		coll = new ChangeCollector(tests.length());
+	class Fstate {
+		int ndetects;
+	}
+
+	private HashMap<StuckAtFault, Fstate> faults = new HashMap<>();
+
+	public FaultSimSimple(StuckAtCollection faults, QBSource source) {
+		super(source.length());
+		this.source = source;
+		this.circuit = faults.netlist;
+		this.obssim = new Observability(circuit);
+		for (StuckAtFault flt : faults.getAllFaultsCollapsed()) {
+			this.faults.put(flt, new Fstate());
+		}
+	}
+
+	@Override
+	protected QBlock compute() {
+		if (!source.hasNext())
+			return null;
+		QBlock b = source.next();
+		obssim.loadInputsFrom(b);
+
+		for (StuckAtFault fault : faults.keySet()) {
+			if (fault.pin.isOutput()) {
+				long obs = obssim.getObservability(fault.pin.node());
+				long val = obssim.getValue(fault.pin.node());
+				log.debug(fault.toString() + " obs " + StringTools.longToReadableBinaryString(obs));
+				log.debug(fault.toString() + " val " + StringTools.longToReadableBinaryString(val));
+				if (fault.isSA0()) {
+					int cnt = Long.bitCount(obs & val);
+					faults.get(fault).ndetects += cnt;
+				} else {
+					int cnt = Long.bitCount(obs & ~val);
+					faults.get(fault).ndetects += cnt;					
+				}
+			} else {
+				// TODO handle faults at inputs
+			}
+		}
+
+		obssim.storeOutputsTo(b);
+		return b;
 	}
 
 	@Override
 	public void reset() {
-		sim.reset();
-		faults.clear();
-		generation = 0;
+		source.reset();
 	}
 
-	@Override
-	protected BBlock compute() {
-		if (!sim.hasNext())
-			return null;
-		BBlock test = sim.next();
-		test.copyTo(-1L, coll);
-		generation++;
-		for (Node n : netlist.accessNodes()) {
-			if (n == null)
-				continue;
-			NodeAssignment a = faults.na[n.level()][n.position()];
-			int iidx = 0;
-			for (FaultState fs : a.inputSA0)
-				ensureInputFault(fs, n, iidx++, 0L);
-			iidx = 0;
-			for (FaultState fs : a.inputSA1)
-				ensureInputFault(fs, n, iidx++, -1L);
-			ensureOutputFault(a.outputSA0, n, 0L);
-			ensureOutputFault(a.outputSA1, n, -1L);
-		}
-		return test;
+	public int getDetects(StuckAtFault flt) {
+		return faults.get(flt).ndetects;
 	}
-
-	private void ensureInputFault(FaultState fs, Node n, int iidx, long value) {
-		if (fs != null && fs.generation < generation) {
-			//log.debug("simulate input: " + n + " " + iidx + " " + value);
-			coll.start();
-			if (n.isOutput()) {
-				coll.set(n.position(), value);
-			} else {
-				BBPlainDeltaSim dsim = sim.newDeltaSim();
-				injectAtInput(dsim, n, iidx, value);
-				dsim.sim(coll);
-				dsim.free();
-			}
-			fs.obs = coll.stopAndReport();
-			fs.detects += Long.bitCount(fs.obs);
-			fs.generation = generation;
-		}
-	}
-
-	private void ensureOutputFault(FaultState fs, Node n, long value) {
-		if (fs != null && fs.generation < generation) {
-			//log.debug("simulate output: " + n + " " + value);
-			coll.start();
-			BBPlainDeltaSim dsim = sim.newDeltaSim();
-			injectAtOutput(dsim, n, value);
-			dsim.sim(coll);
-			dsim.free();
-			fs.obs = coll.stopAndReport();
-			fs.detects += Long.bitCount(fs.obs);
-			fs.generation = generation;
-		}
-	}
-
-	private long data[];
-
-	private void injectAtInput(BBPlainDeltaSim dsim, Node node, int input_idx, long value) {
-		int input_count = node.maxIn() + 1;
-		data = ArrayTools.grow(data, input_count, 4, 0L);
-		for (int i = 0; i < input_count; i++) {
-			if (i == input_idx) {
-				data[i] = value;
-			} else {
-				Node pred = node.in(i);
-				if (pred == null)
-					data[i] = 0L;
-				else
-					data[i] = sim.get(pred);
-			}
-		}
-		injectAtOutput(dsim, node, library.evaluate(node.type(), data, input_count));
-	}
-
-	private void injectAtOutput(BBPlainDeltaSim dsim, Node node, long value) {
-		dsim.force(node, value);
-	}
-
 }

@@ -36,23 +36,33 @@ public class QBPlainSimTest extends TestCase {
 	@Test
 	public void testIntf() {
 		Graph g = new Graph(new Library());
-		Node out2 = g.new Node("out2", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		out2.setPosition(0);
-		Node out = g.new Node("out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		out.setPosition(1);
-		Node in = g.new Node("in", Library.TYPE_BUF | Library.FLAG_INPUT);
-		in.setPosition(2);
-		g.connect(in, -1, out, 0);
-		g.connect(out, -1, out2, 0);
+		Node pos0out = g.new Node("p0out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		pos0out.setPosition(0);
+		Node pos1out = g.new Node("p1out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		pos1out.setPosition(1);
+		Node pos2in = g.new Node("p2in", Library.TYPE_BUF | Library.FLAG_INPUT);
+		pos2in.setPosition(2);
+		
+		Node buf = g.new Node("buf", Library.TYPE_BUF);
+
+		Node pos3out = g.new Node("p3out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		pos3out.setPosition(3);
+		Node pos4out = g.new Node("p4out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		pos4out.setPosition(4);
+		g.connect(pos2in, -1, buf, 0);		
+		g.connect(buf, -1, pos1out, 0);
+		g.connect(pos1out, -1, pos0out, 0);
+		g.connect(buf, -1, pos3out, 0);
+		g.connect(pos3out, -1, pos4out, 0);
 		log.info("graph " + g);
-		QVector v = new QVector("--1");
+		QVector v = new QVector("--1--");
 		ArrayList<QVector> va = new ArrayList<>();
 		va.add(v);
-		QVSource pat = QVSource.from(3, va);
+		QVSource pat = QVSource.from(5, va);
 		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.from(pat)));
-		assertEquals("11-", sim.next().toString());
+		assertEquals("11111", sim.next().toString());
 	}
-
+	
 	public void testOAI21() {
 		Graph g = new Graph(new LibrarySAED());
 		Node i0 = g.new Node("i0", Library.TYPE_BUF | Library.FLAG_INPUT);

@@ -9,6 +9,8 @@
  */
 package org.kyupi.graph;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -19,14 +21,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import junit.framework.TestCase;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.kyupi.graph.Graph.Node;
+import org.kyupi.graph.Graph.Node.PinAnnotation;
 import org.kyupi.misc.RuntimeTools;
 
-public class GraphTest extends TestCase {
+public class GraphTest {
 
 	private static Logger log = Logger.getLogger(GraphTest.class);
 
@@ -55,6 +56,24 @@ public class GraphTest extends TestCase {
 		assertEquals(4, input_port.countOuts());
 		assertEquals(4, and_gate.countIns());
 		assertEquals(6, and_gate.maxIn());
+	}
+	
+	@Test
+	public void testAnnotatedPinRef() {
+		Graph circuit = new Graph(new Library());
+		Node n1 = circuit.new Node("n1", Library.TYPE_BUF);
+		Node n2 = circuit.new Node("n2", Library.TYPE_BUF);
+		circuit.connect(n1, -1, n2, 0);
+		PinAnnotation<Integer> n1out0 = n1.newOutputPinAnnotation(0,0);
+		PinAnnotation<Integer> n2in0 = n2.newInputPinAnnotation(0,0);
+
+		assertFalse(n1out0.equals(n2in0));
+		
+		PinAnnotation<Integer> n1out0b = n1.newOutputPinAnnotation(0,0);
+		PinAnnotation<Integer> n1out0c = n1.newOutputPinAnnotation(0,1);
+		
+		assertTrue(n1out0.equals(n1out0b));	
+		assertFalse(n1out0.equals(n1out0c));	
 	}
 
 	@Test

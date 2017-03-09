@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -193,5 +194,25 @@ public class GraphTools {
 			}
 			cell.remove();
 		}
+	}
+	
+	public static long[][] allocLong(Graph circuit) {
+		int levels = circuit.levels();
+		long value[][] = new long[levels][];
+		for (int l = 0; l < levels; l++) {
+			value[l] = new long[circuit.accessLevel(l).length];
+			Arrays.fill(value[l], 0L);
+		}
+		return value;
+	}
+
+	public static int[][] allocInt(Graph circuit) {
+		int levels = circuit.levels();
+		int value[][] = new int[levels][];
+		for (int l = 0; l < levels; l++) {
+			value[l] = new int[circuit.accessLevel(l).length];
+			Arrays.fill(value[l], 0);
+		}
+		return value;
 	}
 }

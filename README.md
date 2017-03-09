@@ -13,7 +13,7 @@ For latest information on KyuPI, visit [kyupi.org](http://kyupi.org).
 Quick Start
 -----------
 
-1. KyuPI requires Java version 7 or above. It is tested only with the
+1. KyuPI requires Java version 8 or above. It is tested only with the
    [JDK provided by Oracle](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 
 2. KyuPI is distributed as configured [Eclipse](http://www.eclipse.org)
@@ -68,11 +68,11 @@ We feel, that following the principles described in this section will be useful
 for succeeding on the mission.
 
 * *Design the APIs for minimal documentation.* Documentation is the first thing
-  that gets neglected if time is pressing and outdated documentation is often
+  that gets neglected if time is pressing and out-dated documentation is often
   worse than no documentation at all. We consider APIs, which are full of
   surprises and require lengthy usage documentation badly designed. Instead, we
   like to have self-explaining classes and methods which are fool-proof to use
-  with terse JavaDocs explaining behavior and side-effects not obvious to the
+  with minimal JavaDocs explaining behavior and side-effects not obvious to the
   user.
 
 * *Unit testing for code quality and as usage examples.* Testing is an important
@@ -96,6 +96,17 @@ for succeeding on the mission.
   scale well on multi-core and many-core machines.
 
 
+Current State of Development
+----------------------------
+
+After a few months of initial design and development, KyuPI has been made
+available to the public on Aug. 1st 2013. Although the library already provides
+some usable functionality, the project is still in its infancy. Currently, we
+develop continuously and push frequently to the public repository. All APIs are
+subject to change and we plan to provide backward compatibility only after the
+APIs become reasonably stable.
+
+
 Contributing
 ------------
 
@@ -114,23 +125,86 @@ available at [kyupi.org](http://kyupi.org). The main repository is hosted on
 github, which makes it easy for anyone to fork, experiment with the code,
 generate patches and propose pull-requests. 
 
-Current State and Overview
---------------------------
 
-After a few months of initial design and development, KyuPI has been made
-available to the public on Aug. 1st 2013. Although the library already provides
-some usable functionality, the project is still in its infancy. Currently, we
-develop continuously and push frequently to the public repository. All APIs are
-subject to change and we plan to provide backward compatibility only after the
-APIs become reasonably stable. This overview should give you some initial
-orientation and an idea of the functionality currently available:
+Library Design Overview
+-----------------------
+
+This overview should give you some initial orientation on the design choices made
+in the library and an idea of the functionality currently available.
 
 *org.kyupi.graph:* Importing, exporting and manipulating circuits.
-Basic import/export support for VHDL, verilog, ISCAS, Bench, dot.
 
-*org.kyupi.data.item:* Data structures for 2-valued and 4-valued vector data both for individual processing and bit-parallel processing.
+The class Graph is the main data structure for holding circuit netlists in memory.
+A Graph is associated with a Library that defines the available cells.
+Each cell is represented in the graph as an instance of Graph.Node.
+The graph can be traversed in two ways. (1) follow the references in individual
+nodes to their neighbors. (2) directly access arrays containing all nodes in
+topological order. The graph is ordered automatically on-demand. Whenever the graph
+structure is changed by adding or removing nodes, the graph is sorted into
+topological order once the direct access arrays are requested.
+
+The very first level in the topological order is special. It is called the
+interface. It contains (and only contains) all primary inputs, all primary outputs,
+and all sequential cells of the circuit. The position of the nodes on this level
+can be defined by the user. This level directly corresponds the bit positions in
+vectors during simulation. Thus, the state of sequential circuits during simulation
+is always stored in a single vector together with all inputs and outputs.
+
+Graphs can contain pseudo-nodes (flag FLAG_PSEUDO is set). Pseudo nodes do not
+represent a physical cell in the design, but encode signal names and branch points.
+
+By default, each node in the graph also contains a branching point. I.e. all
+outgoing signal connections to the successor nodes are considered branches of the
+same signal. This default behavior can be turned off by setting the flag
+FLAG_MULTIOUTPUT on a node. Outputs of nodes with this flag are considered different
+and explicit pseudo nodes have to be added to fan-out from each of the distinct
+outputs.
+
+Basic import/export support is available for VHDL, verilog, ISCAS, Bench, dot.
+
+*org.kyupi.data.item:* Data structures for 2-valued and 4-valued vector data both
+for individual processing and bit-parallel processing.
+
+The 2-valued data items are prefixed with B for 'binary': BVector, BBlock.
+
+The 4-valued data items are prefixed with Q for 'quaternary': QVector, QBlock.
+
+BVector and QVector classes represent a single vector of data stored internally
+with one or two BitSets.
+BBlock and QBlock classes represent a set of at most 64 vectors. These vectors
+are stored using one or two long for each bit position.
+
+The width of vectors (number of bit positions) is immutable after creation, but
+the bit data itself is mutable to reduce object creation overhead. 
+
 
 *org.kyupi.data.source:* Streaming-based test data processing.
+
+Sets of vector data is organized in streams of data items. Each stream is created
+by specifying one or more source streams and some operation. KyuPI encourages
+lazy evaluation by having a pull-based streaming setup. I.e. a simulator is set up
+by declaring 'resp = sim(tests)' and later run by pulling vectors from the resp
+stream 'v = resp.next();'.
+
+Data items used in streams are re-usable. Whenever a data item (vector) is not needed
+anymore, item.free() is called so that the source stream can re-use the data item
+again.
+
+There is a stream class for each of the basic vector formats BVector, QVector,
+BBlock, QBlock called (BV|QV|BB|QB)Stream.
+
+Data streams can be plugged together in arbitrary complex ways for advanced data
+processing. The basic source classes support easy conversion between the four
+vector data formats by using the static method '.from(stream)'.
+
+Streams implement the Iterable and Iterator interfaces. Thus they can be used
+easily in for loops 'for(QVector v: stream) {...}'. Be aware, that there is only one
+iterator state per stream. Nested loops on a single stream will not work. Also,
+a second for loop will cause the stream (and all of its sources) to reset, which
+repeats all the processing again. If a single stream is used multiple times, its data
+should be stored first e.g. in an ArrayList by using 'toArrayList()'. Then, multiple
+new streams can be created from the array: 's2 = QVStream.from(width,array)'.
+
 Basic import of some STIL files.
 
 *org.kyupi.sim:* Plain logic simulation and fault simulation.

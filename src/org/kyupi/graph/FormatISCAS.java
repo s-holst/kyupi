@@ -111,17 +111,17 @@ class FormatISCAS {
 		IscasScanner scanner = new IscasScanner(new InputStreamReader(is));
 
 		HashMap<Integer, Node> address_gate = new HashMap<Integer, Node>();
-		
+
 		int intf_pos = 0;
 
 		scanner.assertNext(IscasScanner.SYM_INTEGER);
 		while (scanner.hasNext()) {
-			int adr = Integer.parseInt(scanner.getString());
+			int adr = Integer.parseInt(scanner.getString()); // column 1
 			scanner.next();
-			String name = scanner.getString();
+			String name = scanner.getString(); // column 2
 			scanner.next();
 			int type;
-			switch (scanner.getSymbol()) {
+			switch (scanner.getSymbol()) { // column 3
 			case IscasScanner.SYM_INPUT:
 				type = Library.TYPE_BUF | Library.FLAG_INPUT;
 				break;
@@ -150,11 +150,11 @@ class FormatISCAS {
 				throw new IOException("Unknown gate type: " + scanner.getString());
 			}
 			scanner.assertNext(IscasScanner.SYM_INTEGER);
-			int fanouts = Integer.parseInt(scanner.getString());
+			int fanouts = Integer.parseInt(scanner.getString()); // column 4
 			scanner.assertNext(IscasScanner.SYM_INTEGER);
-			int fanins = Integer.parseInt(scanner.getString());
+			int fanins = Integer.parseInt(scanner.getString()); // column 5
 			nextAndSkipFaults(scanner);
-			ArrayList<Node> driver = new ArrayList<Node>();
+			ArrayList<Node> driver = new ArrayList<Node>(); // read all fanins
 			for (int i = 0; i < fanins; i++) {
 				if (scanner.getSymbol() != IscasScanner.SYM_INTEGER)
 					throw new IOException("Expected fanin address at " + scanner.pos());
@@ -170,13 +170,13 @@ class FormatISCAS {
 			}
 			if (g.isInput())
 				g.setPosition(intf_pos++);
-			if (fanouts == 0) {
+			if (fanouts == 0) { // nodes with no fanout are outputs.
 				Node output = c.new Node(name + "_out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 				c.connect(g, -1, output, 0);
-				output.setPosition(intf_pos++);				
+				output.setPosition(intf_pos++);
 			}
 			address_gate.put(adr, g);
-			if (fanouts > 1) {
+			if (fanouts > 1) { // read fanout lines if present
 				for (int i = 0; i < fanouts; i++) {
 					if (scanner.getSymbol() != IscasScanner.SYM_INTEGER)
 						throw new IOException("Expected integer address at " + scanner.pos());

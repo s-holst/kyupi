@@ -118,7 +118,7 @@ class FormatKDB {
 			int type = data[1];
 			faninCount[signal] = data[2];
 			faninPtr[signal] = data[3];
-			int signalName = data[4];
+			//int signalName = data[4];
 			fanoutCount[signal] = data[5];
 			fanoutPtr[signal] = data[6];
 			if (!map.containsKey(type)) {

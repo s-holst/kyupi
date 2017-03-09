@@ -10,9 +10,6 @@
 package org.kyupi.sim;
 
 import java.io.File;
-import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -21,12 +18,14 @@ import org.kyupi.data.item.BVector;
 import org.kyupi.data.source.BBSource;
 import org.kyupi.data.source.BVSource;
 import org.kyupi.graph.Graph;
+import org.kyupi.graph.Graph.Node;
 import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;
 import org.kyupi.graph.LibraryNangate;
 import org.kyupi.graph.LibrarySAED;
-import org.kyupi.graph.Graph.Node;
 import org.kyupi.misc.RuntimeTools;
+
+import junit.framework.TestCase;
 
 public class BBPlainSimTest extends TestCase {
 
@@ -57,78 +56,6 @@ public class BBPlainSimTest extends TestCase {
 		for (int i = 0; i < 128; i++) {
 			assertEqualsReport(ref.next(), sim.next(), i, g.accessInterface());
 		}
-	}
-
-	public void testForced() throws Exception {
-		Graph g = GraphTools.benchToGraph("input(a) input(b) output(nor) output(iinv) nor=NOR(a,b) inv=NOT(a) iinv=NOT(inv)");
-		ArrayList<BVector> tests = new ArrayList<>();
-		tests.add(new BVector("1100"));
-		tests.add(new BVector("0100"));
-		tests.add(new BVector("1000"));
-		tests.add(new BVector("0000"));
-
-		BBPlainSim sim = new BBPlainSim(g, BBSource.from(4, tests));
-
-		BBlock good = sim.next();
-		log.debug("ports:  a  b  !(a+b)  a");
-		for (int i = 0; i < 4; i++) {
-			log.debug("good[" + i + "] = " + good.toString(i));
-		}
-		Node node_a = g.searchNode("a");
-		Node node_b = g.searchNode("b");
-		Node node_nor_ = g.searchNode("nor_");
-		Node node_inv_ = g.searchNode("inv");
-		
-		assertEquals(5L, sim.get(node_a));
-		assertEquals(3L, sim.get(node_b));
-		assertEquals(-8L, sim.get(node_nor_));
-		assertEquals(-6L, sim.get(node_inv_));
-		
-		BBPlainDeltaSim dsim = sim.newDeltaSim();
-		
-		dsim.force(node_inv_, 0L);
-		
-		BBlock faulty = new BBlock(4);
-		good.copyTo(-1L, faulty);
-		dsim.sim(faulty);
-		for (int i = 0; i < 4; i++) {
-			log.debug("faulty1[" + i + "] = " + faulty.toString(i));
-		}
-		
-		dsim.force(node_a, 0L);
-		dsim.sim(faulty);
-		for (int i = 0; i < 4; i++) {
-			log.debug("faulty2[" + i + "] = " + faulty.toString(i));
-		}
-		dsim.free();
-	}
-	
-	public void testFaultSimNaive() {
-		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
-		log.debug("Graph=\n" + g);
-		ArrayList<BVector> patterns = new ArrayList<BVector>();
-		patterns.add(new BVector("000"));
-		patterns.add(new BVector("100"));
-		patterns.add(new BVector("001"));
-		patterns.add(new BVector("101"));
-		BBPlainSim sim = new BBPlainSim(g, BBSource.from(3, patterns));
-		BBlock good = sim.next();
-
-		log.debug("good: " + good);
-		BBlock faulty = new BBlock(3);
-		good.copyTo(-1L, faulty);
-		
-		BBPlainDeltaSim dsim = sim.newDeltaSim();
-		
-		dsim.force(g.searchNode("z_"), -1L);
-		dsim.sim(faulty);
-		
-		assertEquals(-1L, faulty.get(1));
-		assertEquals(good.get(2), faulty.get(2)); // injection must not change ff value itself.
-
-		log.debug("faulty: " + faulty);
-
-		dsim.free();
 	}
 
 	@Test
