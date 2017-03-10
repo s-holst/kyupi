@@ -12,12 +12,9 @@ package org.kyupi.sim;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.Test;
-import org.kyupi.data.item.QVector;
-import org.kyupi.data.source.QVSource;
 import org.kyupi.graph.Graph;
 import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;

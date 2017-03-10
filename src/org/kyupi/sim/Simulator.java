@@ -69,6 +69,10 @@ public class Simulator {
 		public void set(int level, int pos, long value, long care) {
 			this.value[level][pos] = value;
 			this.care[level][pos] = care;
+			setValid(level, pos);
+		}
+
+		public void setValid(int level, int pos) {
 			valid_rev[level][pos] = rev;
 			dirty_rev[level][pos] = rev - 1;
 			Node[] outs = circuit.accessLevel(level)[pos].accessOutputs();
@@ -190,9 +194,9 @@ public class Simulator {
 				}
 			}
 		}
-		for (DeferredAssignment d: da) {
-			state.value[d.level][d.position] = d.value;
-			state.care[d.level][d.position] = d.care;
+		for (DeferredAssignment d : da) {
+			state.value[d.level][d.position] = d.value[0];
+			state.care[d.level][d.position] = d.care[0];
 		}
 		da.clear();
 	}
@@ -200,7 +204,7 @@ public class Simulator {
 	private long[] dataV;
 	private long[] dataC;
 	private long[] cv;
-	
+
 	private ArrayList<DeferredAssignment> da = new ArrayList<>();
 
 	private void simNode(State s, Node n) {
@@ -222,27 +226,28 @@ public class Simulator {
 				}
 			}
 		}
-		cv = circuit.library().evaluate(n.type(), dataV, dataC, input_count);
 		if (n.isSequential()) {
-			//System.out.println("new DA " + n.position() + " " + cv[1]);
-			da.add(new DeferredAssignment(n.level(), n.position(), cv));
+			// System.out.println("new DA " + n.position() + " " + cv[1]);
+			DeferredAssignment d = new DeferredAssignment(n.level(), n.position());
+			da.add(d);
+			circuit.library().propagate(n.type(), dataV, dataC, 0, input_count, d.value, d.care, 0, 1);			
 			s.valid_rev[n.level()][n.position()] = s.rev;
 			s.dirty_rev[n.level()][n.position()] = s.rev - 1;
 		} else {
-			s.set(n.level(), n.position(), cv[1], cv[0]);
+			circuit.library().propagate(n.type(), dataV, dataC, 0, input_count, s.value[n.level()], s.care[n.level()], n.position(), 1);
+			s.setValid(n.level(), n.position());
 		}
 	}
-	
+
 	private class DeferredAssignment {
 		int level;
 		int position;
-		long care;
-		long value;
-		public DeferredAssignment(int l, int p, long[] cv ) {
+		long[] care = new long[1];
+		long[] value = new long[1];
+
+		public DeferredAssignment(int l, int p) {
 			level = l;
 			position = p;
-			care = cv[0];
-			value = cv[1];
 		}
 	}
 }

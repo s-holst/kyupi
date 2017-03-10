@@ -42,14 +42,14 @@ public class QBPlainSimTest extends TestCase {
 		pos1out.setPosition(1);
 		Node pos2in = g.new Node("p2in", Library.TYPE_BUF | Library.FLAG_INPUT);
 		pos2in.setPosition(2);
-		
+
 		Node buf = g.new Node("buf", Library.TYPE_BUF);
 
 		Node pos3out = g.new Node("p3out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos3out.setPosition(3);
 		Node pos4out = g.new Node("p4out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos4out.setPosition(4);
-		g.connect(pos2in, -1, buf, 0);		
+		g.connect(pos2in, -1, buf, 0);
 		g.connect(buf, -1, pos1out, 0);
 		g.connect(pos1out, -1, pos0out, 0);
 		g.connect(buf, -1, pos3out, 0);
@@ -62,7 +62,7 @@ public class QBPlainSimTest extends TestCase {
 		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.from(pat)));
 		assertEquals("11111", sim.next().toString());
 	}
-	
+
 	public void testOAI21() {
 		Graph g = new Graph(new LibrarySAED());
 		Node i0 = g.new Node("i0", Library.TYPE_BUF | Library.FLAG_INPUT);
@@ -130,8 +130,8 @@ public class QBPlainSimTest extends TestCase {
 
 				output.set(2, cv[1], cv[0]);
 				output.set(3, (output.getV(0) ^ output.getC(0)), output.getC(0));
-				//output.set(0, 0, 0);
-				//output.set(1, 0, 0);
+				// output.set(0, 0, 0);
+				// output.set(1, 0, 0);
 				// log.debug("out3 set V: " +
 				// StringTools.longToReadableBinaryString(output.getV(3)));
 				// log.debug("out3 set C: " +
@@ -174,7 +174,7 @@ public class QBPlainSimTest extends TestCase {
 		QVSource sim = new QVPlainSim(g, tests);
 
 		ArrayList<QVector> sa = sim.toArrayList();
-		
+
 		for (int idx = 0; idx < ta.size(); idx++) {
 			log.debug("--------------------");
 			log.debug("test " + ta.get(idx));
@@ -207,6 +207,46 @@ public class QBPlainSimTest extends TestCase {
 				new LibrarySAED());
 		GraphTools.splitMultiOutputCells(g_test);
 		assertEqualsByRandomSimulation(g_ref, g_test);
+	}
+
+	@Test
+	public void testB13Transition() throws Exception {
+		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v"),
+				new LibrarySAED());
+		FormatStil stil = new FormatStil(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13_trans.stil"), graph);
+		ArrayList<QVector> stimuli = stil.getStimuliArray();
+		ArrayList<QVector> responses = stil.getResponsesArray();
+
+		Node[] intf = graph.accessInterface();
+
+		// transition patterns: simulate each scan load for two clock cycles.
+		QBSource launch = new QBPlainSim(graph, QBSource.from(intf.length, stimuli));
+		QVSource capture = QVSource.from(new QBPlainSim(graph, launch));
+
+		// this causes simulation of all vectors:
+		ArrayList<QVector> simresult = capture.toArrayList();
+
+		// only compare scan state as stil files don't contain expects for POs.
+		QVector mask = new QVector(intf.length);
+		for (int i = 0; i < intf.length; i++) {
+			if (intf[i] != null && (intf[i].isSequential()))
+				mask.setValue(i, '1');
+		}
+
+		int errors = 0;
+		for (int i = 0; i < stimuli.size(); i++) {
+			QVector exp = new QVector(responses.get(i)).and(mask);
+			QVector sim = new QVector(simresult.get(i)).and(mask);
+
+			if (!exp.equals(sim)) {
+				log.error("---Validation error---------");
+				log.error("stimuli  : " + stimuli.get(i));
+				log.error("expected : " + responses.get(i));
+				log.error("capture  : " + simresult.get(i));
+				errors++;
+			}
+		}
+		assertEquals(0, errors);
 	}
 
 	private void assertEqualsByRandomSimulation(Graph g_ref, Graph g_test) {

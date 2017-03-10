@@ -79,16 +79,6 @@ public class GraphTools {
 		return new Graph(new Library());
 	}
 
-	public static void replaceScanCellsWithPseudoPorts(Graph g) {
-		Library l = g.library();
-		for (Node cell : g.accessNodes()) {
-			if (cell == null || !l.isScanCell(cell.type()))
-				continue;
-			l.replaceWithPseudoPort(cell, g);
-		}
-		removeDanglingNodes(g);
-	}
-
 	public static void removeDanglingNodes(Graph g) {
 		LinkedList<Integer> ll = new LinkedList<>();
 		for (Node n : g.accessNodes()) {

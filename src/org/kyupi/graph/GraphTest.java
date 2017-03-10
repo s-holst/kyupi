@@ -140,10 +140,6 @@ public class GraphTest {
 		assertEquals(122, c.countNodes());
 		assertEquals(8, c.countInputs());
 		assertEquals(2, c.countOutputs());
-		GraphTools.replaceScanCellsWithPseudoPorts(c);
-		//File f = File.createTempFile("s27_scan_removed", ".dot");
-		//FormatDOT.save(FileTools.fileCreate(f, true), c);
-		//log.debug("wrote dot to " + f.getPath());
 	}
 
 	@Test

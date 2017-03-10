@@ -25,7 +25,7 @@ public class Circuits extends App {
 	}
 
 	public Circuits() {
-		options.addOption("p", true, "process the netlist");
+		// options.addOption("p", true, "process the netlist");
 	}
 
 	public Void call() throws Exception {
@@ -34,21 +34,20 @@ public class Circuits extends App {
 
 		Graph graph = loadCircuitFromArgs();
 
-		if (argsParsed().hasOption("p")) {
-			switch (argsParsed().getOptionValue("p")) {
-			case "fs":
-				GraphTools.replaceScanCellsWithPseudoPorts(graph);
-				break;
-			}
-		}
+		// if (argsParsed().hasOption("p")) {
+		// switch (argsParsed().getOptionValue("p")) {
+		// case "x":
+		// break;
+		// }
+		// }
 		ArrayList<File> files = outputFilesFromArgs();
 		if (files.size() > 0) {
 			GraphTools.saveGraph(graph, files.get(0), argsParsed().hasOption("f"));
 			log.info("Written " + files.get(0));
 		}
-		
+
 		printGoodbye();
-		
+
 		return null;
 	}
 
