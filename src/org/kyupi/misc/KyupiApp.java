@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * Copyright 2013-2017 The KyuPI project contributors. See the COPYRIGHT.md file
  * at the top-level directory of this distribution.
  * This file is part of the KyuPI project. It is subject to the license terms
  * in the LICENSE.md file found in the top-level directory of this distribution.
@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.apps;
+package org.kyupi.misc;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,16 +29,15 @@ import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;
 import org.kyupi.graph.LibraryNangate;
 import org.kyupi.graph.LibrarySAED;
-import org.kyupi.misc.RuntimeTools;
 
 /**
  * handles common command line options and provides utilities to build main
  * applications.
  * 
- * To build a new application, subclass App and add a main function:
+ * To build a new application, subclass KyupiApp and add a main function:
  * 
  * <pre>
- * public class MyApp extends App {
+ * public class MyApp extends KyupiApp {
  * 	public static void main(String[] args) throws Exception {
  * 		new MyApp().setArgs(args).call();
  * 	}
@@ -55,9 +54,9 @@ import org.kyupi.misc.RuntimeTools;
  * At the same time, any App extends TestCase and public test*() methods can be
  * added that will be run by JUnit.
  */
-public abstract class App extends TestCase implements Callable<Void> {
+public abstract class KyupiApp extends TestCase implements Callable<Void> {
 
-	protected static Logger log = Logger.getLogger(App.class);
+	protected static Logger log = Logger.getLogger(KyupiApp.class);
 
 	protected Options options = new Options();
 
@@ -73,17 +72,19 @@ public abstract class App extends TestCase implements Callable<Void> {
 	protected static String OPT_INPUT = "i";
 	protected static String OPT_OUTPUT = "o";
 	protected static String OPT_FORCE = "f";
+	protected static String OPT_JVMSTAT = "js";
 
-	public App() {
+	public KyupiApp() {
 		options.addOption(OPT_DESIGN, true, "design file to load (d.v, d.vhdl, d.bench, d.isc, d.*.gz, d.*.bz2)");
 		options.addOption(OPT_TESTS, true, "test data to read (t.stil, t.*.gz, t.*.bz2)");
 		options.addOption(OPT_FORCE, false, "force overwriting any existing files");
 		options.addOption(OPT_INPUT, true, "comma-seperated list of generic input files");
 		options.addOption(OPT_OUTPUT, true, "comma-seperated list of generic output files");
 		options.addOption(OPT_LIB, true, "technology library (*Basic, Saed90, Nangate)");
+		options.addOption(OPT_JVMSTAT, false, "print some statictics on the memory footprints of various objects in the JVM");
 	}
 
-	public App setArgs(String... args) {
+	public KyupiApp setArgs(String... args) {
 		this.args = args;
 		CommandLineParser parser = new GnuParser();
 		try {
@@ -110,7 +111,7 @@ public abstract class App extends TestCase implements Callable<Void> {
 		if (argsParsed.hasOption(OPT_DESIGN)) {
 			String c_spec = argsParsed.getOptionValue(OPT_DESIGN);
 			File f = new File(c_spec).getAbsoluteFile();
-			log.debug("LoadingCircuit " + f.getAbsolutePath());
+			//log.debug("LoadingCircuit " + f.getAbsolutePath());
 			ensureLib();
 			return GraphTools.loadGraph(f, lib);
 		} else
@@ -130,7 +131,7 @@ public abstract class App extends TestCase implements Callable<Void> {
 	}
 
 	protected void printWelcome() {
-		log.info("App " + this.getClass().getCanonicalName());
+		log.info("KyupiApp " + this.getClass().getCanonicalName());
 		RuntimeTools.printRuntimeInfo();
 	}
 

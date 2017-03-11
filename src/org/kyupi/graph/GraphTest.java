@@ -9,7 +9,9 @@
  */
 package org.kyupi.graph;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.kyupi.graph.Graph.Node;
 import org.kyupi.graph.Graph.Node.PinAnnotation;
@@ -29,7 +30,7 @@ import org.kyupi.misc.RuntimeTools;
 
 public class GraphTest {
 
-	private static Logger log = Logger.getLogger(GraphTest.class);
+	//private static Logger log = Logger.getLogger(GraphTest.class);
 
 	@Test
 	public void testGate() {
@@ -79,7 +80,7 @@ public class GraphTest {
 	@Test
 	public void testFlags() {
 		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
-		log.debug("Graph=\n" + g);
+		//log.debug("Graph=\n" + g);
 		Node intf[] = g.accessInterface();
 
 		assertTrue(intf[0].isInput());
@@ -172,7 +173,7 @@ public class GraphTest {
 
 			LibrarySAED lib = new LibrarySAED();
 			for (Path pth : cont) {
-				log.debug("load: " + pth.toString());
+				//log.debug("load: " + pth.toString());
 				GraphTools.loadGraph(pth.toFile(), lib);
 			}
 		}

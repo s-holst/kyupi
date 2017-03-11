@@ -84,7 +84,7 @@ public class ScanChains {
 			}
 		}
 
-		log.info("ScanChainCount " + node_to_scanin.size());
+		//log.info("ScanChainCount " + node_to_scanin.size());
 
 		// assign chain position to each scan cell
 		for (ScanCell head : node_to_scanin.values()) {
@@ -99,7 +99,7 @@ public class ScanChains {
 				if (head != null)
 					chn.cells.add(head);
 			} while (head != null);
-			log.info("ScanChainLength " + chn.cells.size());
+			//log.info("ScanChainLength " + chn.cells.size());
 		}
 
 		// FIXME find a scan out port for each chain

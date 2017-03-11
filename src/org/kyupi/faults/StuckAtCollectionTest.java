@@ -9,10 +9,8 @@
  */
 package org.kyupi.faults;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -32,7 +30,7 @@ public class StuckAtCollectionTest {
 		Graph g;
 
 		g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
-		log.debug("Graph=\n" + g);
+		//log.debug("Graph=\n" + g);
 		f = new StuckAtCollection(g);
 		assertEquals(8, f.size());
 
@@ -53,17 +51,17 @@ public class StuckAtCollectionTest {
 		StuckAtFault n2i0sa0 = StuckAtFault.newInputSA0(n2, 0);
 
 		assertFalse(n1o0sa0.equals(n2i0sa0));
-		assertNotEquals(n1o0sa0.hashCode(), n2i0sa0.hashCode());
+		assertNotEquals("faults on different nodes have same hash code", n1o0sa0.hashCode(), n2i0sa0.hashCode());
 
 		StuckAtFault n1o0sa1 = StuckAtFault.newOutputSA1(n1, 0);
 
 		assertFalse(n1o0sa0.equals(n1o0sa1));
-		assertNotEquals(n1o0sa0.hashCode(), n1o0sa1.hashCode());
+		assertNotEquals("sa0 and sa1 on same pin have same hash code", n1o0sa0.hashCode(), n1o0sa1.hashCode());
 
 		StuckAtFault n2o0sa0 = StuckAtFault.newOutputSA0(n2, 0);
 
 		assertFalse(n1o0sa0.equals(n2o0sa0));
-		assertNotEquals(n1o0sa0.hashCode(), n2o0sa0.hashCode());
+		assertNotEquals("sa0 on different nodes have same hash code", n1o0sa0.hashCode(), n2o0sa0.hashCode());
 
 
 		StuckAtFault n2i0sa0b = StuckAtFault.newInputSA0(n2, 0);

@@ -2,14 +2,15 @@ package org.kyupi.graph;
 
 import java.io.File;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.kyupi.graph.Graph.Node;
 import org.kyupi.graph.ScanChains.ScanChain;
 import org.kyupi.misc.RuntimeTools;
 
-import junit.framework.TestCase;
 
-public class ScanChainsTest extends TestCase {
+public class ScanChainsTest {
 
 	@Test
 	public void testScanOutMapping() throws Exception {
@@ -49,7 +50,7 @@ public class ScanChainsTest extends TestCase {
 		assertEquals(map[1][sc1.position()], map[2][sc2.position()]);
 		assertEquals(map[0][sc1.position()], map[1][sc2.position()]);
 
-		System.out.println(mapToString(map));
+		//System.out.println(mapToString(map));
 
 	}
 	

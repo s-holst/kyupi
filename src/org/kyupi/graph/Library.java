@@ -328,7 +328,7 @@ public class Library {
 	public int resolve(String name) {
 		HashMap<String, Integer> typeNames = getTypeNames();
 		if (!typeNames.containsKey(name)) {
-			throw new IllegalArgumentException("Unable to resolve type name: " + name);
+			throw new IllegalArgumentException("Unknown type: " + name + " (wrong library?)");
 		}
 		return typeNames.get(name);
 	}

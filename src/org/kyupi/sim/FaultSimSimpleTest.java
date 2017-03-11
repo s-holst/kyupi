@@ -48,7 +48,7 @@ public class FaultSimSimpleTest extends TestCase {
 	@Test
 	public void testFaultSimSimple() {
 		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
-		log.info("Graph=\n" + g);
+		//log.info("Graph=\n" + g);
 		StuckAtCollection f = new StuckAtCollection(g);
 		ArrayList<BVector> patterns = new ArrayList<BVector>();
 		patterns.add(new BVector("000"));

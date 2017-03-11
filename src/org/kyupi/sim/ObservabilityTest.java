@@ -21,7 +21,7 @@ public class ObservabilityTest {
 	@Test
 	public void test() {
 		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
-		log.info("Graph=\n" + g);
+		//log.info("Graph=\n" + g);
 		Observability obs = new Observability(g);
 		
 		ArrayList<QVector> patterns = new ArrayList<QVector>();

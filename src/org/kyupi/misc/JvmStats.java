@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * Copyright 2013-2017 The KyuPI project contributors. See the COPYRIGHT.md file
  * at the top-level directory of this distribution.
  * This file is part of the KyuPI project. It is subject to the license terms
  * in the LICENSE.md file found in the top-level directory of this distribution.
@@ -7,22 +7,20 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.apps;
+package org.kyupi.misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.kyupi.misc.RuntimeTools;
+import org.apache.log4j.Logger;
 
 /**
  * prints some JVM statistics like memory footprints of various objects.
  */
-public class JvmStats extends App {
+public class JvmStats {
 
-	public static void main(String[] args) throws Exception {
-		new JvmStats().call();
-	}
-	
+	protected static Logger log = Logger.getLogger(JvmStats.class);
+
 	private static final int COUNT = 10000;
 
 	private static final int TYPE_OBJECT = 1;
@@ -37,12 +35,7 @@ public class JvmStats extends App {
 	private static final int TYPE_LONGARRAY1000 = 10;
 	private static final int TYPE_OBJARRAYLIST1000 = 11;
 
-	/**
-	 * @exclude
-	 */
-	@Override
-	public Void call() throws Exception {
-		printWelcome();
+	public void print_stats() throws Exception {
 		long int1000, long1000, ref1000;
 		int1000 = measure(TYPE_INTARRAY1000);
 		log.info("sizeof(int) = " + format((int1000 / 1000000) * 1000));
@@ -61,8 +54,6 @@ public class JvmStats extends App {
 		log.info("sizeof(Object[1000]) = " + format(ref1000));
 		log.info("sizeof(HashMap<Int,Int>(100)) = " + format(measure(TYPE_HASHMAP100)));
 		log.info("sizeof(ArrayList<Object>(1000)) = " + format(measure(TYPE_OBJARRAYLIST1000)));
-		printGoodbye();
-		return null;
 	}
 
 	private String format(long size) {

@@ -54,7 +54,7 @@ public class QBPlainSimTest extends TestCase {
 		g.connect(pos1out, -1, pos0out, 0);
 		g.connect(buf, -1, pos3out, 0);
 		g.connect(pos3out, -1, pos4out, 0);
-		log.info("graph " + g);
+		// log.info("graph " + g);
 		QVector v = new QVector("--1--");
 		ArrayList<QVector> va = new ArrayList<>();
 		va.add(v);
@@ -165,7 +165,7 @@ public class QBPlainSimTest extends TestCase {
 			if (n.isSequential())
 				buf.append("s");
 
-			log.debug("intf " + buf.toString() + " " + n.queryName());
+			// log.debug("intf " + buf.toString() + " " + n.queryName());
 		}
 
 		ArrayList<QVector> ta = tests.toArrayList();
@@ -175,12 +175,15 @@ public class QBPlainSimTest extends TestCase {
 
 		ArrayList<QVector> sa = sim.toArrayList();
 
-		for (int idx = 0; idx < ta.size(); idx++) {
-			log.debug("--------------------");
-			log.debug("test " + ta.get(idx));
-			log.debug("exp  " + ra.get(idx));
-			log.debug("sim  " + sa.get(idx));
-		}
+		assertEquals(ta.size(), ra.size());
+		assertEquals(64, sa.size());
+
+		// for (int idx = 0; idx < ta.size(); idx++) {
+		// log.debug("--------------------");
+		// log.debug("test " + ta.get(idx));
+		// log.debug("exp " + ra.get(idx));
+		// log.debug("sim " + sa.get(idx));
+		// }
 	}
 
 	@Test

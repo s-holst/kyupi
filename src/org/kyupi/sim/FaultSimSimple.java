@@ -16,7 +16,6 @@ import org.kyupi.data.source.QBSource;
 import org.kyupi.faults.StuckAtCollection;
 import org.kyupi.faults.StuckAtCollection.StuckAtFault;
 import org.kyupi.graph.Graph;
-import org.kyupi.misc.StringTools;
 
 public class FaultSimSimple extends QBSource {
 
@@ -51,8 +50,8 @@ public class FaultSimSimple extends QBSource {
 			if (fault.pin.isOutput()) {
 				long obs = obssim.getObservability(fault.pin.node());
 				long val = obssim.getValue(fault.pin.node());
-				log.debug(fault.toString() + " obs " + StringTools.longToReadableBinaryString(obs));
-				log.debug(fault.toString() + " val " + StringTools.longToReadableBinaryString(val));
+				//log.debug(fault.toString() + " obs " + StringTools.longToReadableBinaryString(obs));
+				//log.debug(fault.toString() + " val " + StringTools.longToReadableBinaryString(val));
 				if (fault.isSA0()) {
 					int cnt = Long.bitCount(obs & val);
 					faults.get(fault).ndetects += cnt;
