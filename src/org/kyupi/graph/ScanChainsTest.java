@@ -30,25 +30,25 @@ public class ScanChainsTest {
 		Node sc2 = chain.cells.get(2).node;
 		
 		// fully loaded in the first vector
-		assertEquals(sc0.position(), map[0][sc0.position()]);
-		assertEquals(sc1.position(), map[0][sc1.position()]);
-		assertEquals(sc2.position(), map[0][sc2.position()]);
+		assertEquals(sc0.intfPosition(), map[0][sc0.intfPosition()]);
+		assertEquals(sc1.intfPosition(), map[0][sc1.intfPosition()]);
+		assertEquals(sc2.intfPosition(), map[0][sc2.intfPosition()]);
 
 		// completely empty in the last vector
-		assertEquals(-1, map[3][sc0.position()]);
-		assertEquals(-1, map[3][sc1.position()]);
-		assertEquals(-1, map[3][sc2.position()]);
+		assertEquals(-1, map[3][sc0.intfPosition()]);
+		assertEquals(-1, map[3][sc1.intfPosition()]);
+		assertEquals(-1, map[3][sc2.intfPosition()]);
 
 		// ScanIn port is unassigned
-		assertEquals(-1, map[2][chain.in.node.position()]);
-		assertEquals(-1, map[1][chain.in.node.position()]);
-		assertEquals(-1, map[0][chain.in.node.position()]);
+		assertEquals(-1, map[2][chain.in.node.intfPosition()]);
+		assertEquals(-1, map[1][chain.in.node.intfPosition()]);
+		assertEquals(-1, map[0][chain.in.node.intfPosition()]);
 		
 		// shifted correctly
-		assertEquals(map[1][sc0.position()], map[2][sc1.position()]);
-		assertEquals(map[0][sc0.position()], map[1][sc1.position()]);
-		assertEquals(map[1][sc1.position()], map[2][sc2.position()]);
-		assertEquals(map[0][sc1.position()], map[1][sc2.position()]);
+		assertEquals(map[1][sc0.intfPosition()], map[2][sc1.intfPosition()]);
+		assertEquals(map[0][sc0.intfPosition()], map[1][sc1.intfPosition()]);
+		assertEquals(map[1][sc1.intfPosition()], map[2][sc2.intfPosition()]);
+		assertEquals(map[0][sc1.intfPosition()], map[1][sc2.intfPosition()]);
 
 		//System.out.println(mapToString(map));
 
@@ -72,25 +72,25 @@ public class ScanChainsTest {
 		Node sc2 = chain.cells.get(2).node;
 		
 		// fully loaded in the last vector
-		assertEquals(sc0.position(), map[3][sc0.position()]);
-		assertEquals(sc1.position(), map[3][sc1.position()]);
-		assertEquals(sc2.position(), map[3][sc2.position()]);
+		assertEquals(sc0.intfPosition(), map[3][sc0.intfPosition()]);
+		assertEquals(sc1.intfPosition(), map[3][sc1.intfPosition()]);
+		assertEquals(sc2.intfPosition(), map[3][sc2.intfPosition()]);
 
 		// completely empty in the first vector
-		assertEquals(-1, map[0][sc0.position()]);
-		assertEquals(-1, map[0][sc1.position()]);
-		assertEquals(-1, map[0][sc2.position()]);
+		assertEquals(-1, map[0][sc0.intfPosition()]);
+		assertEquals(-1, map[0][sc1.intfPosition()]);
+		assertEquals(-1, map[0][sc2.intfPosition()]);
 
 		// scan-in data appears on ScanIn port
-		assertEquals(sc0.position(), map[2][chain.in.node.position()]);
-		assertEquals(sc1.position(), map[1][chain.in.node.position()]);
-		assertEquals(sc2.position(), map[0][chain.in.node.position()]);
+		assertEquals(sc0.intfPosition(), map[2][chain.in.node.intfPosition()]);
+		assertEquals(sc1.intfPosition(), map[1][chain.in.node.intfPosition()]);
+		assertEquals(sc2.intfPosition(), map[0][chain.in.node.intfPosition()]);
 		
 		// shifted correctly
-		assertEquals(map[2][sc0.position()], map[3][sc1.position()]);
-		assertEquals(map[1][sc0.position()], map[2][sc1.position()]);
-		assertEquals(map[2][sc1.position()], map[3][sc2.position()]);
-		assertEquals(map[1][sc1.position()], map[2][sc2.position()]);
+		assertEquals(map[2][sc0.intfPosition()], map[3][sc1.intfPosition()]);
+		assertEquals(map[1][sc0.intfPosition()], map[2][sc1.intfPosition()]);
+		assertEquals(map[2][sc1.intfPosition()], map[3][sc2.intfPosition()]);
+		assertEquals(map[1][sc1.intfPosition()], map[2][sc2.intfPosition()]);
 
 		//System.out.println(mapToString(map));
 

@@ -9,10 +9,9 @@
  */
 package org.kyupi.sim;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Arrays;
 
+import org.apache.log4j.Logger;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.graph.Graph;
 import org.kyupi.graph.Graph.Node;
@@ -21,13 +20,21 @@ import org.kyupi.misc.ArrayTools;
 
 public class Simulator {
 
+	protected static Logger log = Logger.getLogger(Simulator.class);
+
 	public class State {
 		private long[][] care;
 		private long[][] value;
 
+		private long[] intf_care;
+		private long[] intf_value;
+
 		private int rev;
 		private int[][] valid_rev;
 		private int[][] dirty_rev;
+
+		private int[] intf_valid_rev;
+		// private int[] intf_dirty_rev;
 
 		public final State parent;
 		int min_dirty_level;
@@ -38,6 +45,12 @@ public class Simulator {
 			value = GraphTools.allocLong(circuit);
 			valid_rev = GraphTools.allocInt(circuit);
 			dirty_rev = GraphTools.allocInt(circuit);
+			intf_care = new long[circuit.accessInterface().length];
+			intf_value = new long[circuit.accessInterface().length];
+			intf_valid_rev = new int[circuit.accessInterface().length];
+			Arrays.fill(intf_value, 0L);
+			Arrays.fill(intf_care, 0L);
+			Arrays.fill(intf_valid_rev, 0);
 			clear();
 		}
 
@@ -58,6 +71,14 @@ public class Simulator {
 			return 0L;
 		}
 
+		public long getIntfV(int pos) {
+			if (rev == intf_valid_rev[pos])
+				return intf_value[pos];
+			if (parent != null)
+				return parent.getIntfV(pos);
+			return 0L;
+		}
+
 		public long getC(int level, int pos) {
 			if (rev == valid_rev[level][pos])
 				return care[level][pos];
@@ -66,13 +87,21 @@ public class Simulator {
 			return 0L;
 		}
 
+		public long getIntfC(int pos) {
+			if (rev == intf_valid_rev[pos])
+				return intf_care[pos];
+			if (parent != null)
+				return parent.getIntfC(pos);
+			return 0L;
+		}
+
 		public void set(int level, int pos, long value, long care) {
 			this.value[level][pos] = value;
 			this.care[level][pos] = care;
-			setValid(level, pos);
+			setSuccessorsDirty(level, pos);
 		}
 
-		public void setValid(int level, int pos) {
+		public void setSuccessorsDirty(int level, int pos) {
 			valid_rev[level][pos] = rev;
 			dirty_rev[level][pos] = rev - 1;
 			Node[] outs = circuit.accessLevel(level)[pos].accessOutputs();
@@ -80,24 +109,35 @@ public class Simulator {
 				for (Node succ : outs) {
 					if (succ == null)
 						continue;
-					if (valid_rev[succ.level()][succ.position()] == rev && !succ.isOutput() && !succ.isSequential())
+					if (valid_rev[succ.level()][succ.levelPosition()] == rev)
 						continue;
-					dirty_rev[succ.level()][succ.position()] = rev;
+					dirty_rev[succ.level()][succ.levelPosition()] = rev;
 					min_dirty_level = Math.min(min_dirty_level, succ.level());
 				}
+		}
+
+		public void setIntf(int pos, long value, long care) {
+			this.intf_value[pos] = value;
+			this.intf_care[pos] = care;
+			intf_valid_rev[pos] = rev;
+			Node n = circuit.accessInterface()[pos];
+			circuit.library().propagate(n.type(), intf_value, intf_care, pos, 1, this.value[n.level()],
+					this.care[n.level()], n.levelPosition(), 1);
+			log.debug("intf prop " + pos + " " + this.value[n.level()][n.levelPosition()]);
+			setSuccessorsDirty(n.level(), n.levelPosition());
 		}
 
 		public void loadInputsFrom(QBlock b) {
 			int pos = 0;
 			for (Node n : circuit.accessInterface()) {
 				if (n != null && n.isSequential())
-					set(0, pos, b.getV(pos), b.getC(pos));
+					setIntf(pos, b.getV(pos), b.getC(pos));
 				pos++;
 			}
 			pos = 0;
 			for (Node n : circuit.accessInterface()) {
 				if (n != null && n.isInput())
-					set(0, pos, b.getV(pos), b.getC(pos));
+					setIntf(pos, b.getV(pos), b.getC(pos));
 				pos++;
 			}
 		}
@@ -106,7 +146,7 @@ public class Simulator {
 			int pos = 0;
 			for (Node n : circuit.accessInterface()) {
 				if (n != null && (n.isOutput() || n.isSequential()))
-					b.set(pos, getV(0, pos), getC(0, pos));
+					b.set(pos, getIntfV(pos), getIntfC(pos));
 				pos++;
 			}
 		}
@@ -116,68 +156,27 @@ public class Simulator {
 		}
 
 		public void simulate() {
-			propagate(this);
+			propagate_state(this);
+			capture_state(this);
 		}
+
+		public void propagate() {
+			propagate_state(this);
+		}
+
+		public void capture() {
+			capture_state(this);
+		}
+
 	}
 
 	private Graph circuit;
 
-	// interface nodes may be driven by other interface nodes.
-	// need to simulate interface nodes in proper order.
-	private int[] intf_sim_order;
-
 	public Simulator(Graph circuit) {
 		this.circuit = circuit;
-		intf_sim_order = calculateIntfSimOrder();
 	}
 
-	private int[] calculateIntfSimOrder() {
-		int length = circuit.accessInterface().length;
-		int[] order = new int[length];
-		LinkedList<Node> queue = new LinkedList<Node>();
-		HashSet<Node> placed = new HashSet<>();
-		for (Node n : circuit.accessInterface()) {
-			if (n == null)
-				continue;
-			if (n.countIns() == 0) {
-				queue.add(n);
-				continue;
-			} else {
-				boolean has_intf_drivers = false;
-				for (Node in : n.accessInputs()) {
-					if (in != null && in.level() == 0)
-						has_intf_drivers = true;
-				}
-				if (!has_intf_drivers)
-					queue.add(n);
-			}
-		}
-		int o = 0;
-		while (!queue.isEmpty()) {
-			Node n = queue.removeFirst();
-			placed.add(n);
-			order[o++] = n.position();
-			if (n.countOuts() > 0) {
-				for (Node out : n.accessOutputs()) {
-					if (out != null && out.level() == 0) {
-						boolean all_placed = true;
-						for (Node in : out.accessInputs()) {
-							if (in != null && in.level() == 0 && !placed.contains(in))
-								all_placed = false;
-						}
-						if (all_placed)
-							queue.add(out);
-					}
-				}
-			}
-		}
-		if (o != length) {
-			throw new RuntimeException("missed some interface nodes during interface order calculation");
-		}
-		return order;
-	}
-
-	private void propagate(State state) {
+	private void propagate_state(State state) {
 		for (int l = state.min_dirty_level; l <= state.value.length; l++) {
 			int level = l;
 			if (l == state.value.length) {
@@ -186,26 +185,31 @@ public class Simulator {
 			}
 			for (int i = 0; i < state.value[level].length; i++) {
 				int pos = i;
-				if (level == 0) {
-					pos = intf_sim_order[i];
-				}
 				if (state.isDirty(level, pos)) {
 					simNode(state, circuit.accessLevel(level)[pos]);
 				}
 			}
 		}
-		for (DeferredAssignment d : da) {
-			state.value[d.level][d.position] = d.value[0];
-			state.care[d.level][d.position] = d.care[0];
+	}
+
+	private void capture_state(State state) {
+		for (Node n : circuit.accessInterface()) {
+			if (n == null || n.isInput())
+				continue;
+			// FIXME implement capture operation on cells.
+			for (Node pred : n.accessInputs()) {
+				if (pred == null)
+					continue;
+				state.setIntf(n.intfPosition(), state.getV(pred.level(), pred.levelPosition()),
+						state.getC(pred.level(), pred.levelPosition()));
+				break;
+			}
 		}
-		da.clear();
 	}
 
 	private long[] dataV;
 	private long[] dataC;
 	private long[] cv;
-
-	private ArrayList<DeferredAssignment> da = new ArrayList<>();
 
 	private void simNode(State s, Node n) {
 		int input_count = n.maxIn() + 1;
@@ -217,8 +221,8 @@ public class Simulator {
 				dataV[i] = 0L;
 				dataC[i] = 0L;
 			} else {
-				dataV[i] = s.getV(pred.level(), pred.position());
-				dataC[i] = s.getC(pred.level(), pred.position());
+				dataV[i] = s.getV(pred.level(), pred.levelPosition());
+				dataC[i] = s.getC(pred.level(), pred.levelPosition());
 				if (pred.isMultiOutput()) {
 					cv = circuit.library().calcOutput(pred.type(), pred.searchOutIdx(n), dataV[i], dataC[i]);
 					dataV[i] = cv[1];
@@ -226,28 +230,9 @@ public class Simulator {
 				}
 			}
 		}
-		if (n.isSequential()) {
-			// System.out.println("new DA " + n.position() + " " + cv[1]);
-			DeferredAssignment d = new DeferredAssignment(n.level(), n.position());
-			da.add(d);
-			circuit.library().propagate(n.type(), dataV, dataC, 0, input_count, d.value, d.care, 0, 1);			
-			s.valid_rev[n.level()][n.position()] = s.rev;
-			s.dirty_rev[n.level()][n.position()] = s.rev - 1;
-		} else {
-			circuit.library().propagate(n.type(), dataV, dataC, 0, input_count, s.value[n.level()], s.care[n.level()], n.position(), 1);
-			s.setValid(n.level(), n.position());
-		}
+		circuit.library().propagate(n.type(), dataV, dataC, 0, input_count, s.value[n.level()], s.care[n.level()],
+				n.levelPosition(), 1);
+		s.setSuccessorsDirty(n.level(), n.levelPosition());
 	}
 
-	private class DeferredAssignment {
-		int level;
-		int position;
-		long[] care = new long[1];
-		long[] value = new long[1];
-
-		public DeferredAssignment(int l, int p) {
-			level = l;
-			position = p;
-		}
-	}
 }

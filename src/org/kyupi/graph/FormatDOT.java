@@ -39,10 +39,10 @@ public class FormatDOT {
 			s += "{" + StringTools.join(inports, "|") + "}|";
 		}
 		if (n.isInput())
-			s += "INTF " + n.position() + " (in)|";
+			s += "INTF " + n.intfPosition() + " (in)|";
 		s += n.queryName() + "\\n" + n.typeName();
 		if (n.isOutput())
-			s += "|INTF " + n.position() + " (out)";
+			s += "|INTF " + n.intfPosition() + " (out)";
 		if (n.countOuts() > 0) {
 			num = 1;
 			if (n.isMultiOutput()) {

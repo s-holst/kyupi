@@ -23,6 +23,18 @@ import org.kyupi.sim.Simulator.State;
 
 public class SimulatorTest {
 
+	private void stateSet(State state, Graph circuit, String node, long value, long care) {
+		state.set(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition(), value, care);
+	}
+	
+	private long stateGetV(State state, Graph circuit, String node) {
+		return state.getV(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition());
+	}
+
+	private long stateGetC(State state, Graph circuit, String node) {
+		return state.getC(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition());
+	}
+	
 	@Test
 	public void test() throws Exception {
 		Graph circuit = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
@@ -30,25 +42,26 @@ public class SimulatorTest {
 		State state = sim.new State();
 		
 		// assign all inputs
-		state.set(0, 0, 1, 1);
-		state.set(0, 1, 0, 1);
-		state.set(0, 2, 1, 1);
-		state.set(0, 3, 0, 1);
-		state.set(0, 4, 0, 1);
-		
+		stateSet(state, circuit, "1gat", 1, 1);
+		stateSet(state, circuit, "2gat", 0, 1);
+		stateSet(state, circuit, "3gat", 1, 1);
+		stateSet(state, circuit, "6gat", 0, 1);
+		stateSet(state, circuit, "7gat", 0, 1);
+
 		state.simulate();
 		
-		assertEquals(1, state.getV(0, 5)); // output 1
-		assertEquals(1, state.getC(0, 5)); // output 1
-		assertEquals(0, state.getV(0, 6)); // output 2
-		assertEquals(1, state.getC(0, 6)); // output 2
+		
+		assertEquals(1, stateGetV(state, circuit, "22gat_out")); // output 1
+		assertEquals(1, stateGetC(state, circuit, "22gat_out")); // output 1
+		assertEquals(0, stateGetV(state, circuit, "23gat_out")); // output 2
+		assertEquals(1, stateGetC(state, circuit, "23gat_out")); // output 2
 		
 		state.clear();
 		
-		assertEquals(0, state.getV(0, 0)); // input 1
-		assertEquals(0, state.getC(0, 1)); // input 1
-		assertEquals(0, state.getV(0, 5)); // output 1
-		assertEquals(0, state.getC(0, 5)); // output 1
+		assertEquals(0, stateGetV(state, circuit, "1gat")); // input 1
+		assertEquals(0, stateGetC(state, circuit, "1gat")); // input 1
+		assertEquals(0, stateGetV(state, circuit, "22gat_out")); // output 1
+		assertEquals(0, stateGetC(state, circuit, "22gat_out")); // output 1
 		
 		Random r = new Random();
 		for (int i = 0; i < 10; i++) {
@@ -58,11 +71,11 @@ public class SimulatorTest {
 			long i4 = r.nextLong();
 			long i5 = r.nextLong();
 			
-			state.set(0, 0, i1, -1L);
-			state.set(0, 1, i2, -1L);
-			state.set(0, 2, i3, -1L);
-			state.set(0, 3, i4, -1L);
-			state.set(0, 4, i5, -1L);
+			stateSet(state, circuit, "1gat", i1, -1L);
+			stateSet(state, circuit, "2gat", i2, -1L);
+			stateSet(state, circuit, "3gat", i3, -1L);
+			stateSet(state, circuit, "6gat", i4, -1L);
+			stateSet(state, circuit, "7gat", i5, -1L);
 			
 			state.simulate();
 			
@@ -73,10 +86,10 @@ public class SimulatorTest {
 			long o1 = ~(s1 & s3);
 			long o2 = ~(s3 & s4);
 			
-			assertEquals(o1, state.getV(0, 5));
-			assertEquals(-1L, state.getC(0, 5));
-			assertEquals(o2, state.getV(0, 6));
-			assertEquals(-1L, state.getC(0, 6));
+			assertEquals(o1, stateGetV(state, circuit, "22gat_out"));
+			assertEquals(-1L, stateGetC(state, circuit, "22gat_out"));
+			assertEquals(o2, stateGetV(state, circuit, "23gat_out"));
+			assertEquals(-1L, stateGetC(state, circuit, "23gat_out"));
 			
 			state.clear();
 		}
@@ -88,17 +101,17 @@ public class SimulatorTest {
 		Simulator sim = new Simulator(circuit);
 		State state = sim.new State();
 		
-		state.set(0, 3, 2L, -1L); // z1=DFF(a)
-		state.set(0, 4, 4L, -1L); // z2=DFF(z1)
-		state.set(0, 0, 1L, -1L); // INPUT(a)
+		state.setIntf(3, 2L, -1L); // z1=DFF(a)
+		state.setIntf(4, 4L, -1L); // z2=DFF(z1)
+		state.setIntf(0, 1L, -1L); // INPUT(a)
 		
 		state.simulate();
 		
-		assertEquals(1L, state.getV(0, 0)); // INPUT(a)
-		assertEquals(2L, state.getV(0, 1)); // OUTPUT(z1)
-		assertEquals(4L, state.getV(0, 2)); // OUTPUT(z2)
-		assertEquals(1L, state.getV(0, 3)); // z1=DFF(a)
-		assertEquals(2L, state.getV(0, 4)); // z2=DFF(z1)
+		assertEquals(1L, state.getIntfV(0)); // INPUT(a)
+		assertEquals(2L, state.getIntfV(1)); // OUTPUT(z1)
+		assertEquals(4L, state.getIntfV(2)); // OUTPUT(z2)
+		assertEquals(1L, state.getIntfV(3)); // z1=DFF(a)
+		assertEquals(2L, state.getIntfV(4)); // z2=DFF(z1)
 		
 		
 	}

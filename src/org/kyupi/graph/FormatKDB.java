@@ -126,10 +126,10 @@ class FormatKDB {
 			}
 			nodes[signal] = c.new Node("id"+signal, map.get(type));
 			if (c.library().isPrimary(nodes[signal].type())) {
-				nodes[signal].setPosition(intfIdx++);
+				nodes[signal].setIntfPosition(intfIdx++);
 			}
 			if (c.library().isSequential(nodes[signal].type())) {
-				nodes[signal].setPosition(intfIdx++);
+				nodes[signal].setIntfPosition(intfIdx++);
 			}
 		}
 

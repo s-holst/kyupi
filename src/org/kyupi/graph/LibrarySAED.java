@@ -130,6 +130,8 @@ public class LibrarySAED extends Library {
 			put(TYPE_CONST0, new InterfaceSpec("TIEL", pinNamesIN, 0, pinNamesZN, 1));
 			put(TYPE_DEC24, new InterfaceSpec("DEC24", pinNamesINx, 2, pinNamesQx, 4));
 			put(TYPE_CGLPPR, new InterfaceSpec("CGLPPR", pinNamesSEC, 3, pinNamesGC, 1));
+
+			put(TYPE_FADD_CO, new InterfaceSpec("FADD_CO", pinNamesABCI, 3, pinNamesQ, 1));
 		}
 	};
 
@@ -328,9 +330,9 @@ public class LibrarySAED extends Library {
 		switch (type & 0xffff) {
 		case TYPE_AO21:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -343,8 +345,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[1] = inC[inOffset+2];
-			tmpInV[1] = inV[inOffset+2];
+			tmpInC[1] = inC[inOffset + 2];
+			tmpInV[1] = inV[inOffset + 2];
 			for (int i = 0; i < 2; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & tmpInV[i];
@@ -361,9 +363,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AO221:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -377,9 +379,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -392,8 +394,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[2] = inC[inOffset+4];
-			tmpInV[2] = inV[inOffset+4];
+			tmpInC[2] = inC[inOffset + 4];
+			tmpInV[2] = inV[inOffset + 4];
 			for (int i = 0; i < 3; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & tmpInV[i];
@@ -410,9 +412,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AO222:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -426,9 +428,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -442,9 +444,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 4; i < 6; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[2] = -1L;
 			tmpInV[2] = -1L;
@@ -473,9 +475,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AO22:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -489,9 +491,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -520,9 +522,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AOI21:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -535,8 +537,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[1] = inC[inOffset+2];
-			tmpInV[1] = inV[inOffset+2];
+			tmpInC[1] = inC[inOffset + 2];
+			tmpInV[1] = inV[inOffset + 2];
 			for (int i = 0; i < 2; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & tmpInV[i];
@@ -554,9 +556,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AOI221:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -570,9 +572,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -585,8 +587,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[2] = inC[inOffset+4];
-			tmpInV[2] = inV[inOffset+4];
+			tmpInC[2] = inC[inOffset + 4];
+			tmpInV[2] = inV[inOffset + 4];
 			for (int i = 0; i < 3; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & tmpInV[i];
@@ -604,9 +606,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AOI222:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -620,9 +622,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -636,9 +638,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 4; i < 6; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[2] = -1L;
 			tmpInV[2] = -1L;
@@ -668,9 +670,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_AOI22:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = -1L;
@@ -684,9 +686,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & ~inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & ~inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = -1L;
@@ -716,9 +718,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OA21:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -731,8 +733,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[1] = inC[inOffset+2];
-			tmpInV[1] = inV[inOffset+2];
+			tmpInC[1] = inC[inOffset + 2];
+			tmpInV[1] = inV[inOffset + 2];
 			for (int i = 0; i < 2; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & ~tmpInV[i];
@@ -749,9 +751,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OA221:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -765,9 +767,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -780,8 +782,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[2] = inC[inOffset+4];
-			tmpInV[2] = inV[inOffset+4];
+			tmpInC[2] = inC[inOffset + 4];
+			tmpInV[2] = inV[inOffset + 4];
 			for (int i = 0; i < 3; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & ~tmpInV[i];
@@ -798,9 +800,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OA222:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -814,9 +816,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -830,9 +832,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 4; i < 6; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[2] = -1L;
 			tmpInV[2] = 0L;
@@ -861,9 +863,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OA22:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -877,9 +879,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -908,9 +910,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OAI21:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -923,8 +925,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[1] = inC[inOffset+2];
-			tmpInV[1] = inV[inOffset+2];
+			tmpInC[1] = inC[inOffset + 2];
+			tmpInV[1] = inV[inOffset + 2];
 			for (int i = 0; i < 2; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & ~tmpInV[i];
@@ -942,9 +944,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OAI221:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -958,9 +960,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -973,8 +975,8 @@ public class LibrarySAED extends Library {
 			l = 0L;
 			k = 0L;
 			j = 0L;
-			tmpInC[2] = inC[inOffset+4];
-			tmpInV[2] = inV[inOffset+4];
+			tmpInC[2] = inC[inOffset + 4];
+			tmpInV[2] = inV[inOffset + 4];
 			for (int i = 0; i < 3; i++) {
 				l |= ~tmpInC[i] & tmpInV[i];
 				k |= tmpInC[i] & ~tmpInV[i];
@@ -992,9 +994,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OAI222:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -1008,9 +1010,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -1024,9 +1026,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 4; i < 6; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[2] = -1L;
 			tmpInV[2] = 0L;
@@ -1056,9 +1058,9 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_OAI22:
 			for (int i = 0; i < 2; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[0] = -1L;
 			tmpInV[0] = 0L;
@@ -1072,9 +1074,9 @@ public class LibrarySAED extends Library {
 			k = 0L;
 			j = 0L;
 			for (int i = 2; i < 4; i++) {
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-				k |= inC[inOffset+i] & inV[inOffset+i];
-				j |= ~inC[inOffset+i] & ~inV[inOffset+i];
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+				k |= inC[inOffset + i] & inV[inOffset + i];
+				j |= ~inC[inOffset + i] & ~inV[inOffset + i];
 			}
 			tmpInC[1] = -1L;
 			tmpInV[1] = 0L;
@@ -1104,17 +1106,18 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_MUX21:
 			for (int i = 0; i < inCount; i++)
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-			k |= (inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset] & ~inV[inOffset])
-					| (inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+1] & ~inV[inOffset+1])
-					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset+1] & ~inV[inOffset+1]);
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+			k |= (inC[inOffset + 2] & ~inV[inOffset + 2] & inC[inOffset] & ~inV[inOffset])
+					| (inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset + 1] & ~inV[inOffset + 1])
+					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 1] & ~inV[inOffset + 1]);
 
-			j |= (inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset] & inV[inOffset])
-					| (inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+1] & inV[inOffset+1]);
+			j |= (inC[inOffset + 2] & ~inV[inOffset + 2] & inC[inOffset] & inV[inOffset])
+					| (inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset + 1] & inV[inOffset + 1]);
 			/*
-			 * j |= (inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset] & inV[inOffset]) |
-			 * (inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+1] & inV[inOffset+1]) | (inC[inOffset]
-			 * & inV[inOffset] & inC[inOffset+1] & inV[inOffset+1]);
+			 * j |= (inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset] &
+			 * inV[inOffset]) | (inC[inOffset+2] & inV[inOffset+2] &
+			 * inC[inOffset+1] & inV[inOffset+1]) | (inC[inOffset] &
+			 * inV[inOffset] & inC[inOffset+1] & inV[inOffset+1]);
 			 */
 			// appropriate implement
 
@@ -1129,26 +1132,43 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_MUX41:
 			for (int i = 0; i < inCount; i++)
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-			k |= (inC[inOffset+4] & ~inV[inOffset+4] & inC[inOffset+5] & ~inV[inOffset+5] & inC[inOffset] & ~inV[inOffset])
-					| (inC[inOffset+4] & ~inV[inOffset+4] & inC[inOffset+5] & inV[inOffset+5] & inC[inOffset+1] & ~inV[inOffset+1])
-					| (inC[inOffset+4] & inV[inOffset+4] & inC[inOffset+5] & ~inV[inOffset+5] & inC[inOffset+2] & ~inV[inOffset+2])
-					| (inC[inOffset+4] & inV[inOffset+4] & inC[inOffset+5] & inV[inOffset+5] & inC[inOffset+3] & ~inV[inOffset+3])
-					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset+1] & ~inV[inOffset+1] & inC[inOffset+4] & ~inV[inOffset+4])
-					| (inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset+3] & ~inV[inOffset+3] & inC[inOffset+4] & inV[inOffset+4])
-					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset+5] & ~inV[inOffset+5])
-					| (inC[inOffset+1] & ~inV[inOffset+1] & inC[inOffset+3] & ~inV[inOffset+3] & inC[inOffset+5] & inV[inOffset+5])
-					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset+1] & ~inV[inOffset+1] & inC[inOffset+2] & ~inV[inOffset+2] & inC[inOffset+3]
-							& ~inV[inOffset+3]);
-			j |= (inC[inOffset+4] & ~inV[inOffset+4] & inC[inOffset+5] & ~inV[inOffset+5] & inC[inOffset] & inV[inOffset])
-					| (inC[inOffset+4] & ~inV[inOffset+4] & inC[inOffset+5] & inV[inOffset+5] & inC[inOffset+1] & inV[inOffset+1])
-					| (inC[inOffset+4] & inV[inOffset+4] & inC[inOffset+5] & ~inV[inOffset+5] & inC[inOffset+2] & inV[inOffset+2])
-					| (inC[inOffset+4] & inV[inOffset+4] & inC[inOffset+5] & inV[inOffset+5] & inC[inOffset+3] & inV[inOffset+3])
-					| (inC[inOffset] & inV[inOffset] & inC[inOffset+1] & inV[inOffset+1] & inC[inOffset+4] & ~inV[inOffset+4])
-					| (inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+3] & inV[inOffset+3] & inC[inOffset+4] & inV[inOffset+4])
-					| (inC[inOffset] & inV[inOffset] & inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+5] & ~inV[inOffset+5])
-					| (inC[inOffset+1] & inV[inOffset+1] & inC[inOffset+3] & inV[inOffset+3] & inC[inOffset+5] & inV[inOffset+5]) | (inC[inOffset]
-							& inV[inOffset] & inC[inOffset+1] & inV[inOffset+1] & inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+3] & inV[inOffset+3]);
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+			k |= (inC[inOffset + 4] & ~inV[inOffset + 4] & inC[inOffset + 5] & ~inV[inOffset + 5] & inC[inOffset]
+					& ~inV[inOffset])
+					| (inC[inOffset + 4] & ~inV[inOffset + 4] & inC[inOffset + 5] & inV[inOffset + 5]
+							& inC[inOffset + 1] & ~inV[inOffset + 1])
+					| (inC[inOffset + 4] & inV[inOffset + 4] & inC[inOffset + 5] & ~inV[inOffset + 5]
+							& inC[inOffset + 2] & ~inV[inOffset + 2])
+					| (inC[inOffset + 4] & inV[inOffset + 4] & inC[inOffset + 5] & inV[inOffset + 5] & inC[inOffset + 3]
+							& ~inV[inOffset + 3])
+					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 1] & ~inV[inOffset + 1] & inC[inOffset + 4]
+							& ~inV[inOffset + 4])
+					| (inC[inOffset + 2] & ~inV[inOffset + 2] & inC[inOffset + 3] & ~inV[inOffset + 3]
+							& inC[inOffset + 4] & inV[inOffset + 4])
+					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 2] & ~inV[inOffset + 2] & inC[inOffset + 5]
+							& ~inV[inOffset + 5])
+					| (inC[inOffset + 1] & ~inV[inOffset + 1] & inC[inOffset + 3] & ~inV[inOffset + 3]
+							& inC[inOffset + 5] & inV[inOffset + 5])
+					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 1] & ~inV[inOffset + 1] & inC[inOffset + 2]
+							& ~inV[inOffset + 2] & inC[inOffset + 3] & ~inV[inOffset + 3]);
+			j |= (inC[inOffset + 4] & ~inV[inOffset + 4] & inC[inOffset + 5] & ~inV[inOffset + 5] & inC[inOffset]
+					& inV[inOffset])
+					| (inC[inOffset + 4] & ~inV[inOffset + 4] & inC[inOffset + 5] & inV[inOffset + 5]
+							& inC[inOffset + 1] & inV[inOffset + 1])
+					| (inC[inOffset + 4] & inV[inOffset + 4] & inC[inOffset + 5] & ~inV[inOffset + 5]
+							& inC[inOffset + 2] & inV[inOffset + 2])
+					| (inC[inOffset + 4] & inV[inOffset + 4] & inC[inOffset + 5] & inV[inOffset + 5] & inC[inOffset + 3]
+							& inV[inOffset + 3])
+					| (inC[inOffset] & inV[inOffset] & inC[inOffset + 1] & inV[inOffset + 1] & inC[inOffset + 4]
+							& ~inV[inOffset + 4])
+					| (inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset + 3] & inV[inOffset + 3] & inC[inOffset + 4]
+							& inV[inOffset + 4])
+					| (inC[inOffset] & inV[inOffset] & inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset + 5]
+							& ~inV[inOffset + 5])
+					| (inC[inOffset + 1] & inV[inOffset + 1] & inC[inOffset + 3] & inV[inOffset + 3] & inC[inOffset + 5]
+							& inV[inOffset + 5])
+					| (inC[inOffset] & inV[inOffset] & inC[inOffset + 1] & inV[inOffset + 1] & inC[inOffset + 2]
+							& inV[inOffset + 2] & inC[inOffset + 3] & inV[inOffset + 3]);
 			outC[outOffset] = 0L;
 			outV[outOffset] = 0L;
 			outC[outOffset] |= j;
@@ -1160,18 +1180,21 @@ public class LibrarySAED extends Library {
 			return;
 		case TYPE_FADD_CO:
 			for (int i = 0; i < inCount; i++)
-				l |= ~inC[inOffset+i] & inV[inOffset+i];
-			k |= (inC[inOffset] & ~inV[inOffset] & inC[inOffset+1] & ~inV[inOffset+1])
-					| (inC[inOffset+1] & ~inV[inOffset+1] & inC[inOffset+2] & ~inV[inOffset+2])
-					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset+2] & ~inV[inOffset+2]);
+				l |= ~inC[inOffset + i] & inV[inOffset + i];
+			k |= (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 1] & ~inV[inOffset + 1])
+					| (inC[inOffset + 1] & ~inV[inOffset + 1] & inC[inOffset + 2] & ~inV[inOffset + 2])
+					| (inC[inOffset] & ~inV[inOffset] & inC[inOffset + 2] & ~inV[inOffset + 2]);
 
-			j |= (inC[inOffset] & inV[inOffset] & inC[inOffset+1] & inV[inOffset+1])
-					| (inC[inOffset+1] & inV[inOffset+1] & inC[inOffset+2] & inV[inOffset+2] & inC[inOffset] & ~inV[inOffset])
-					| (inC[inOffset] & inV[inOffset] & inC[inOffset+2] & inV[inOffset+2] & inC[inOffset+1] & ~inV[inOffset+1]);
+			j |= (inC[inOffset] & inV[inOffset] & inC[inOffset + 1] & inV[inOffset + 1])
+					| (inC[inOffset + 1] & inV[inOffset + 1] & inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset]
+							& ~inV[inOffset])
+					| (inC[inOffset] & inV[inOffset] & inC[inOffset + 2] & inV[inOffset + 2] & inC[inOffset + 1]
+							& ~inV[inOffset + 1]);
 			/*
-			 * j |= (inC[inOffset] & inV[inOffset] & inC[inOffset+1] & inV[inOffset+1]) |
-			 * (inC[inOffset+1] & inV[inOffset+1] & inC[inOffset+2] & inV[inOffset+2]) | (inC[inOffset]
-			 * & inV[inOffset] & inC[inOffset+2] & inV[inOffset+2]);
+			 * j |= (inC[inOffset] & inV[inOffset] & inC[inOffset+1] &
+			 * inV[inOffset+1]) | (inC[inOffset+1] & inV[inOffset+1] &
+			 * inC[inOffset+2] & inV[inOffset+2]) | (inC[inOffset] &
+			 * inV[inOffset] & inC[inOffset+2] & inV[inOffset+2]);
 			 */
 			// appropriate implementation
 
@@ -1189,7 +1212,7 @@ public class LibrarySAED extends Library {
 			outV[outOffset] = inV[inOffset];
 			return;
 		}
-		
+
 		super.propagate(type, inV, inC, inOffset, inCount, outV, outC, outOffset, outCount);
 	}
 

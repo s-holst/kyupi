@@ -27,7 +27,7 @@ public class Observability {
 	}
 
 	public long getObservability(Node node) {
-		return getObservability(node.level(), node.position());
+		return getObservability(node.level(), node.levelPosition());
 	}
 	
 	public long getObservability(int level, int pos) {
@@ -39,7 +39,7 @@ public class Observability {
 			for (Node n : circuit.accessInterface()) {
 				if (n == null || n.isInput())
 					continue;
-				int p = n.position();
+				int p = n.levelPosition();
 				long care = base.getC(0, p) & delta.getC(0, p);
 				long change = base.getV(0, p) ^ delta.getV(0, p);
 				o |= care & change;
@@ -52,7 +52,7 @@ public class Observability {
 	}
 	
 	public long getValue(Node node) {
-		return getValue(node.level(), node.position());
+		return getValue(node.level(), node.levelPosition());
 	}
 	
 	public long getValue(int level, int pos) {

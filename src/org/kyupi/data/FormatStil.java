@@ -65,7 +65,7 @@ public class FormatStil {
 		for (Node inode : g.accessInterface()) {
 			//intf_names.add(inode);
 			if (inode != null) {
-				intf.put(inode.queryName(), inode.position());
+				intf.put(inode.queryName(), inode.intfPosition());
 				//log.debug("intf " + inode.queryName() + " pos " + inode.position());
 			}
 		}

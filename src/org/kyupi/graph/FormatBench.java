@@ -184,7 +184,7 @@ class FormatBench {
 
 		void realizeGate(Graph c) {
 			gate = c.new Node(name, type);
-			gate.setPosition(pos);
+			gate.setIntfPosition(pos);
 		}
 	}
 

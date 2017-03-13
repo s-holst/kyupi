@@ -37,18 +37,18 @@ public class QBPlainSimTest extends TestCase {
 	public void testIntf() {
 		Graph g = new Graph(new Library());
 		Node pos0out = g.new Node("p0out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		pos0out.setPosition(0);
+		pos0out.setIntfPosition(0);
 		Node pos1out = g.new Node("p1out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		pos1out.setPosition(1);
+		pos1out.setIntfPosition(1);
 		Node pos2in = g.new Node("p2in", Library.TYPE_BUF | Library.FLAG_INPUT);
-		pos2in.setPosition(2);
+		pos2in.setIntfPosition(2);
 
 		Node buf = g.new Node("buf", Library.TYPE_BUF);
 
 		Node pos3out = g.new Node("p3out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		pos3out.setPosition(3);
+		pos3out.setIntfPosition(3);
 		Node pos4out = g.new Node("p4out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		pos4out.setPosition(4);
+		pos4out.setIntfPosition(4);
 		g.connect(pos2in, -1, buf, 0);
 		g.connect(buf, -1, pos1out, 0);
 		g.connect(pos1out, -1, pos0out, 0);
@@ -69,10 +69,10 @@ public class QBPlainSimTest extends TestCase {
 		Node i1 = g.new Node("i1", Library.TYPE_BUF | Library.FLAG_INPUT);
 		Node i2 = g.new Node("i2", Library.TYPE_BUF | Library.FLAG_INPUT);
 		Node o0 = g.new Node("o0", Library.TYPE_BUF | Library.FLAG_OUTPUT);
-		i0.setPosition(0);
-		i1.setPosition(1);
-		i2.setPosition(2);
-		o0.setPosition(3);
+		i0.setIntfPosition(0);
+		i1.setIntfPosition(1);
+		i2.setIntfPosition(2);
+		o0.setIntfPosition(3);
 		Node n = g.new Node("n", LibrarySAED.TYPE_OAI21);
 		g.connect(i0, -1, n, 0);
 		g.connect(i1, -1, n, 1);

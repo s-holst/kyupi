@@ -173,7 +173,7 @@ public class VerilogParseTree {
 			List<String> expanded = expand(pl, r);
 			for (String na : expanded) {
 				Node n = g.new Node(na, type);
-				n.setPosition(interfacePos++);
+				n.setIntfPosition(interfacePos++);
 			}
 		}
 		for (String wireName : wireNames) {
@@ -187,7 +187,7 @@ public class VerilogParseTree {
 		for (ModuleInstantiation mi : m.moduleInstantiations) {
 			Node n = g.new Node(mi.instanceName, l.resolve(mi.moduleName));
 			if (n.isPort() || n.isSequential())
-				n.setPosition(interfacePos++);
+				n.setIntfPosition(interfacePos++);
 			for (PortConnection pc : mi.portConnections) {
 				int pidx = l.pinIndex(n.type(), pc.portName);
 				if (pidx < 0) {

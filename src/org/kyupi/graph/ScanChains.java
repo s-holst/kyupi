@@ -163,7 +163,7 @@ public class ScanChains {
 				if (sc != null) {
 					// found: copy index from intf pos of successor scan cell
 					if (sc.next != null)
-						map[c][i] = map[c + 1][sc.next.node.position()];
+						map[c][i] = map[c + 1][sc.next.node.intfPosition()];
 					else
 						map[c][i] = -1;
 				} else {
@@ -211,7 +211,7 @@ public class ScanChains {
 
 				if (sc != null) {
 					// found: copy index from intf pos of predecessor scan cell
-					map[c][i] = map[c - 1][sc.prev.node.position()];
+					map[c][i] = map[c - 1][sc.prev.node.intfPosition()];
 				} else {
 					// not found: just copy from previous row
 					map[c][i] = map[c - 1][i];

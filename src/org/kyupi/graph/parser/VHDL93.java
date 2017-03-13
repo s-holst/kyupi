@@ -827,12 +827,12 @@ public class VHDL93 implements VHDL93Constants {
                         {
                           log.trace("input port: " + id);
                           Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_INPUT);
-                          n.setPosition(posIdx++);
+                          n.setIntfPosition(posIdx++);
                         } else
                         {
                           log.trace("output port: " + id);
                           Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_OUTPUT);
-                          n.setPosition(posIdx++);
+                          n.setIntfPosition(posIdx++);
                         }
                 }
   }

@@ -10,6 +10,7 @@
 package org.kyupi.graph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -85,7 +86,9 @@ public class Graph {
 
 		private int level;
 
-		private int position;
+		private int levelPosition;
+
+		private int intfPosition;
 
 		private Node inputs[], outputs[];
 
@@ -112,16 +115,19 @@ public class Graph {
 			return level;
 		}
 
-		public int position() {
-			if (!isPort() && !isSequential())
-				ensureLevels();
-			return position;
+		public int levelPosition() {
+			ensureLevels();
+			return levelPosition;
 		}
 
-		public void setPosition(int pos) {
-			if (this.position != pos) {
+		public int intfPosition() {
+			return intfPosition;
+		}
+
+		public void setIntfPosition(int pos) {
+			if (this.intfPosition != pos) {
 				invalidateLevels();
-				this.position = pos;
+				this.intfPosition = pos;
 			}
 		}
 
@@ -130,7 +136,7 @@ public class Graph {
 		}
 
 		/*
-		 * type queries
+		 * type queries (convenience accessors to library)
 		 */
 
 		public boolean isOutput() {
@@ -367,21 +373,21 @@ public class Graph {
 
 		public String toString() {
 			StringBuilder b = new StringBuilder(
-					"" + level + "_" + position + ":" + typeName() + "\"" + queryName() + "\"");
+					"" + level + "_" + levelPosition + ":" + typeName() + "\"" + queryName() + "\"");
 			int m_in = maxIn();
 			int m_out = maxOut();
 			for (int i = 0; i <= m_in; i++) {
 				if (inputs[i] == null) {
 					b.append("<null");
 				} else {
-					b.append(" <" + inputs[i].level + "_" + inputs[i].position);
+					b.append(" <" + inputs[i].level + "_" + inputs[i].levelPosition);
 				}
 			}
 			for (int o = 0; o <= m_out; o++) {
 				if (outputs[o] == null) {
 					b.append(">null");
 				} else {
-					b.append(" >" + outputs[o].level + "_" + outputs[o].position);
+					b.append(" >" + outputs[o].level + "_" + outputs[o].levelPosition);
 				}
 			}
 			return b.toString();
@@ -430,7 +436,7 @@ public class Graph {
 				}
 				return false;
 			}
-			
+
 			public int hashCode() {
 				return Node.this.hashCode() ^ annotation.hashCode();
 			}
@@ -463,6 +469,8 @@ public class Graph {
 
 	private Node levels[][];
 
+	private Node intf[];
+
 	public Graph(Library lib) {
 		library = lib;
 	}
@@ -480,8 +488,8 @@ public class Graph {
 
 	public int countInputs() {
 		Node n[] = nodes;
-		if (levels != null)
-			n = levels[0];
+		if (intf != null)
+			n = intf;
 		int count = 0;
 		for (Node g : n) {
 			if (g != null && g.isInput())
@@ -492,8 +500,8 @@ public class Graph {
 
 	public int countOutputs() {
 		Node n[] = nodes;
-		if (levels != null)
-			n = levels[0];
+		if (intf != null)
+			n = intf;
 		int count = 0;
 		for (Node g : n) {
 			if (g != null && g.isOutput())
@@ -539,7 +547,8 @@ public class Graph {
 	}
 
 	public Node[] accessInterface() {
-		return accessLevel(0);
+		ensureLevels();
+		return intf;
 	}
 
 	/**
@@ -615,6 +624,7 @@ public class Graph {
 
 	private void invalidateLevels() {
 		levels = null;
+		intf = null;
 	}
 
 	private void ensureLevels() {
@@ -623,66 +633,60 @@ public class Graph {
 		// log.debug("levelizing\n\t" +
 		// StringTools.join(Thread.currentThread().getStackTrace(), "\n\t"));
 
-		Node level0[] = null;
 		LinkedList<Node> queue = new LinkedList<Node>();
-		ArrayList<Node> non_intf_nodes = new ArrayList<Node>();
 		int level_fills[] = new int[1];
 		int maxlevel = 0;
 
-		// interface nodes (level[0]), reset positions of all non-interface
+		// interface nodes, reset positions of all non-interface
 		// nodes.
+		intf = null;
 		for (Node g : nodes) {
 			if (g == null)
 				continue;
 			g.level = -1;
-			if (library.isPort(g.type) || library.isSequential(g.type)) {
-				level0 = (Node[]) ArrayTools.grow(level0, Node.class, g.position + 1, 0.5f);
-				if (level0[g.position] != null) {
-					log.error("Conflicting positions in interface nodes: " + g.queryName() + ", "
-							+ level0[g.position].queryName());
+			g.levelPosition = 0;
+			if (g.isPort() || g.isSequential()) {
+				intf = (Node[]) ArrayTools.grow(intf, Node.class, g.intfPosition + 1, 0.5f);
+				if (intf[g.intfPosition] != null) {
+					log.error("Nodes must not share same intfPosition: " + g.queryName() + ", "
+							+ intf[g.intfPosition].queryName() + " (intfPosition: " + g.intfPosition + ")");
 				}
-				level0[g.position] = g;
-				queue.add(g);
+				intf[g.intfPosition] = g;
+				if (!g.isOutput())
+					queue.add(g);
 			} else if (g.maxIn() < 0) {
 				queue.add(g);
-				g.position = 0;
-				non_intf_nodes.add(g);
-			} else {
-				g.position = 0;
-				non_intf_nodes.add(g);
 			}
 		}
-		level0 = (Node[]) ArrayTools.strip(level0);
-		level_fills[0] = level0.length;
+		intf = (Node[]) ArrayTools.strip(intf);
 
-		// set levels and positions of all nodes.
+		level_fills[0] = 0;
+
+		// set levels and levelPositions of all nodes.
 		while (!queue.isEmpty()) {
 			Node g = queue.poll();
 			if (g.level != -1) {
 				throw new RuntimeException("Detected combinational loop at gate: " + g.queryName());
 			}
 			g.level = 0;
-			if (!library.isPort(g.type) && !library.isSequential(g.type)) {
+			if (!g.isSequential()) {
 				for (int i = g.maxIn(); i >= 0; i--) {
 					Node d = g.in(i);
 					if (d != null)
 						g.level = Math.max(g.level, d.level + 1);
 				}
-				if (g.level == 0) {
-					// node with no inputs, place at level 1
-					g.level = 1;
-				}
 			}
 			level_fills = ArrayTools.grow(level_fills, g.level + 1, 1000, 0);
-			if (g.level > 0)
-				g.position = level_fills[g.level]++;
+			g.levelPosition = level_fills[g.level]++;
 			maxlevel = Math.max(maxlevel, g.level);
-			// log.debug("gate " + g.getName() + " is level " + g.level);
-			for (int i = g.countOuts() - 1; i >= 0; i--) {
-				Node succ = g.out(i);
-				if (succ != null && !library.isPort(succ.type) && !library.isSequential(succ.type)) {
-					succ.position++;
-					if (succ.position == succ.countIns())
+			log.debug("node " + g + " is level " + g.level);
+			if (g.countOuts() == 0)
+				continue;
+			for (Node succ : g.accessOutputs()) {
+				if (succ != null && !succ.isSequential()) {
+					succ.levelPosition++; // re-use levelPosition to count
+											// number of predecessors placed.
+					if (succ.levelPosition == succ.countIns())
 						queue.add(succ);
 				}
 			}
@@ -690,16 +694,15 @@ public class Graph {
 
 		// allocate levels and add nodes.
 		levels = new Node[maxlevel + 1][];
-		levels[0] = level0;
-		for (int i = 1; i <= maxlevel; i++)
+		for (int i = 0; i <= maxlevel; i++)
 			levels[i] = new Node[level_fills[i]];
-		for (Node g : non_intf_nodes) {
+		for (Node g : nodes) {
+			if (g == null)
+				continue;
 			if (g.level == -1)
-				log.trace("Found unconnected gate: " + g.queryName());
-			// throw new RuntimeException("Found unconnected gate: " +
-			// g.getName());
+				log.warn("Unconnected gate not levelized: " + g.queryName());
 			else
-				levels[g.level][g.position] = g;
+				levels[g.level][g.levelPosition] = g;
 		}
 
 		// log.debug("got levels: " + levels.length);

@@ -169,11 +169,11 @@ class FormatISCAS {
 				c.connect(drv, -1, g, -1);
 			}
 			if (g.isInput())
-				g.setPosition(intf_pos++);
+				g.setIntfPosition(intf_pos++);
 			if (fanouts == 0) { // nodes with no fanout are outputs.
 				Node output = c.new Node(name + "_out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 				c.connect(g, -1, output, 0);
-				output.setPosition(intf_pos++);
+				output.setIntfPosition(intf_pos++);
 			}
 			address_gate.put(adr, g);
 			if (fanouts > 1) { // read fanout lines if present
