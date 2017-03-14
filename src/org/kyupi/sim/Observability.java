@@ -34,14 +34,15 @@ public class Observability {
 		if (rev != obs_rev[level][pos]) {
 			ensureSimulated();
 			delta.set(level, pos, ~base.getV(level, pos), base.getC(level, pos));
-			delta.simulate();
+			delta.propagate();
 			long o = 0L;
 			for (Node n : circuit.accessInterface()) {
 				if (n == null || n.isInput())
 					continue;
 				int p = n.levelPosition();
-				long care = base.getC(0, p) & delta.getC(0, p);
-				long change = base.getV(0, p) ^ delta.getV(0, p);
+				int l = n.level();
+				long care = base.getC(l, p) & delta.getC(l, p);
+				long change = base.getV(l, p) ^ delta.getV(l, p);
 				o |= care & change;
 			}
 			delta.clear();

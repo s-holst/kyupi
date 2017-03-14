@@ -67,8 +67,8 @@ public class FaultSimSimpleTest extends TestCase {
 		assertEquals(3, fsim.getDetects(StuckAtFault.newOutputSA1(a,0)));
 		assertEquals(61, fsim.getDetects(StuckAtFault.newOutputSA0(a,0)));
 		// FIXME: correct handling of sequential elements during fault simulation
-		//assertEquals(62, fsim.getDetects(StuckAtFault.newOutputSA0(z,0)));
-		//assertEquals(2, fsim.getDetects(StuckAtFault.newOutputSA1(z,0)));
+		assertEquals(62, fsim.getDetects(StuckAtFault.newOutputSA0(z,0)));
+		assertEquals(2, fsim.getDetects(StuckAtFault.newOutputSA1(z,0)));
 		
 		
 		

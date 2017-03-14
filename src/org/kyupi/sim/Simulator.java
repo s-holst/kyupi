@@ -123,7 +123,7 @@ public class Simulator {
 			Node n = circuit.accessInterface()[pos];
 			circuit.library().propagate(n.type(), intf_value, intf_care, pos, 1, this.value[n.level()],
 					this.care[n.level()], n.levelPosition(), 1);
-			log.debug("intf prop " + pos + " " + this.value[n.level()][n.levelPosition()]);
+			//log.debug("intf prop " + pos + " " + this.value[n.level()][n.levelPosition()]);
 			setSuccessorsDirty(n.level(), n.levelPosition());
 		}
 
