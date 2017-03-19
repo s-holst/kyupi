@@ -33,6 +33,8 @@ public class FormatStil {
 	private ArrayList<QVector> responses = new ArrayList<>();
 
 	private int length;
+	
+	private int[][] scan2intf;
 
 	public FormatStil(File stil_file, Graph g) throws IOException {
 		InputStream is = FileTools.fileOpen(stil_file);
@@ -73,7 +75,7 @@ public class FormatStil {
 
 		int pi2intf[] = crossRef(data.primary_inputs, intf);
 		int po2intf[] = crossRef(data.primary_outputs, intf);
-		int scan2intf[][] = new int[nchains][];
+		scan2intf = new int[nchains][];
 		for (int chain = 0; chain < nchains; chain++) {
 			scan2intf[chain] = crossRef(data.chain_cells.get(chain), intf);
 		}
@@ -188,5 +190,9 @@ public class FormatStil {
 
 	public ArrayList<QVector> getResponsesArray() {
 		return responses;
+	}
+
+	public int[] getScanMap() {
+		return scan2intf[0];
 	}
 }
