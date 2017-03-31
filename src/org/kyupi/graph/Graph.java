@@ -679,7 +679,7 @@ public class Graph {
 			level_fills = ArrayTools.grow(level_fills, g.level + 1, 1000, 0);
 			g.levelPosition = level_fills[g.level]++;
 			maxlevel = Math.max(maxlevel, g.level);
-			log.debug("node " + g + " is level " + g.level);
+			//log.debug("node " + g + " is level " + g.level);
 			if (g.countOuts() == 0)
 				continue;
 			for (Node succ : g.accessOutputs()) {
