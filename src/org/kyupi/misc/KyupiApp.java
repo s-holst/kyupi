@@ -111,8 +111,8 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		if (argsParsed.hasOption(OPT_DESIGN)) {
 			String c_spec = argsParsed.getOptionValue(OPT_DESIGN);
 			File f = new File(c_spec).getAbsoluteFile();
-			//log.debug("LoadingCircuit " + f.getAbsolutePath());
 			ensureLib();
+			log.info("LoadingCircuit " + f.getAbsolutePath());
 			return GraphTools.loadGraph(f, lib);
 		} else
 			throw new IllegalArgumentException("Please specify a circuit with -"+OPT_DESIGN+" ...");
@@ -168,6 +168,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 			if (lib == null)
 				lib = new Library();
 		}
+		log.info("Library " + lib.toString());
 	}
 
 	private void ensureArgsParsed() {

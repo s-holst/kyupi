@@ -149,7 +149,7 @@ public class VerilogParseTree {
 		}
 		HashSet<String> wireNames = new HashSet<>();
 		for (RangedVariableList rvl : m.wireDeclarations) {
-			wireNames.addAll(expand(rvl.variableNames,rvl.range));
+			wireNames.addAll(expand(rvl.variableNames, rvl.range));
 		}
 
 		int interfacePos = 0;
@@ -191,7 +191,8 @@ public class VerilogParseTree {
 			for (PortConnection pc : mi.portConnections) {
 				int pidx = l.pinIndex(n.type(), pc.portName);
 				if (pidx < 0) {
-					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.queryName() + " of type " + n.typeName());
+					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.queryName()
+							+ " of type " + n.typeName());
 				}
 				int pdir = l.pinDirection(n.type(), pc.portName);
 				Node other = findOrDeclareSignal(g, pc.variableName);
@@ -208,7 +209,16 @@ public class VerilogParseTree {
 
 	// private helper
 
+	private int unique;
+
 	private Node findOrDeclareSignal(Graph g, String name) {
+		if (name.equals("##CONST0##")) {
+			return g.new Node("const0_gen" + (unique++), Library.TYPE_CONST0);
+		}
+		if (name.equals("##CONST1##")) {
+			return g.new Node("const1_gen" + (unique++), Library.TYPE_CONST1);
+		}
+
 		Node signal = g.searchNode(name);
 		if (signal != null)
 			return signal;
