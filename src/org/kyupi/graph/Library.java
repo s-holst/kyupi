@@ -587,4 +587,8 @@ public class Library {
 		cv[1] = v;
 		return cv;
 	}
+	
+	public String toString() {
+		return "Basic";
+	}
 }

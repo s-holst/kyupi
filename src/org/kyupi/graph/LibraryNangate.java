@@ -181,4 +181,7 @@ public class LibraryNangate extends Library {
 		super.propagate(type, inV, inC, inOffset, inCount, outV, outC, outOffset, outCount);
 	}
 	
+	public String toString() {
+		return "Nangate";
+	}
 }

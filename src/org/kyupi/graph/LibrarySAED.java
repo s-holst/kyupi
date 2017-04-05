@@ -1251,4 +1251,7 @@ public class LibrarySAED extends Library {
 		return cv;
 	}
 
+	public String toString() {
+		return "SAED90nm";
+	}
 }
