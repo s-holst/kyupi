@@ -24,7 +24,7 @@ public class ScanChains {
 			node = n;
 		}
 
-		Node node;
+		public Node node;
 		int pos = -1;
 		ScanCell next;
 		ScanCell prev;
