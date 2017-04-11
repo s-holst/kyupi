@@ -660,8 +660,8 @@ public class Graph {
 		int level_fills[] = new int[1];
 		int maxlevel = 0;
 
-		// interface nodes, reset positions of all non-interface
-		// nodes.
+		// Reset level and position of all nodes. Construct interface array.
+		// Add all appropriate nodes to queue for level 0.
 		intf = null;
 		for (Node g : nodes) {
 			if (g == null)
@@ -675,9 +675,8 @@ public class Graph {
 							+ intf[g.intfPosition].queryName() + " (intfPosition: " + g.intfPosition + ")");
 				}
 				intf[g.intfPosition] = g;
-				if (!g.isOutput())
-					queue.add(g);
-			} else if (g.maxIn() < 0) {
+			}
+			if (g.maxIn() < 0 || g.isSequential()) {
 				queue.add(g);
 			}
 		}

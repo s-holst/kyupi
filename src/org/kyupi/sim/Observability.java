@@ -39,10 +39,9 @@ public class Observability {
 			for (Node n : circuit.accessInterface()) {
 				if (n == null || n.isInput())
 					continue;
-				int p = n.levelPosition();
-				int l = n.level();
-				long care = base.getC(l, p) & delta.getC(l, p);
-				long change = base.getV(l, p) ^ delta.getV(l, p);
+				int p = n.intfPosition();
+				long care = base.getResponseC(p) & delta.getResponseC(p);
+				long change = base.getResponseV(p) ^ delta.getResponseV(p);
 				o |= care & change;
 			}
 			delta.clear();
@@ -79,7 +78,7 @@ public class Observability {
 	private void ensureSimulated() {
 		if (isSimulated)
 			return;
-		base.simulate();
+		base.propagate();
 		isSimulated = true;
 	}
 

@@ -101,17 +101,17 @@ public class SimulatorTest {
 		Simulator sim = new Simulator(circuit);
 		State state = sim.new State();
 		
-		state.setIntf(3, 2L, -1L); // z1=DFF(a)
-		state.setIntf(4, 4L, -1L); // z2=DFF(z1)
-		state.setIntf(0, 1L, -1L); // INPUT(a)
+		state.setStimulus(3, 2L, -1L); // z1=DFF(a)
+		state.setStimulus(4, 4L, -1L); // z2=DFF(z1)
+		state.setStimulus(0, 1L, -1L); // INPUT(a)
 		
 		state.simulate();
 		
-		assertEquals(1L, state.getIntfV(0)); // INPUT(a)
-		assertEquals(2L, state.getIntfV(1)); // OUTPUT(z1)
-		assertEquals(4L, state.getIntfV(2)); // OUTPUT(z2)
-		assertEquals(1L, state.getIntfV(3)); // z1=DFF(a)
-		assertEquals(2L, state.getIntfV(4)); // z2=DFF(z1)
+		assertEquals(1L, state.getStimulusV(0)); // INPUT(a)
+		assertEquals(2L, state.getResponseV(1)); // OUTPUT(z1)
+		assertEquals(4L, state.getResponseV(2)); // OUTPUT(z2)
+		assertEquals(1L, state.getResponseV(3)); // z1=DFF(a)
+		assertEquals(2L, state.getResponseV(4)); // z2=DFF(z1)
 		
 		
 	}
