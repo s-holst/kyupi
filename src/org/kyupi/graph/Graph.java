@@ -541,22 +541,42 @@ public class Graph {
 		return levels.length;
 	}
 
+	/**
+	 * returns an array with all nodes on the topological level l of the graph.
+	 * 
+	 * The returned array may contain null elements. It is a reference to an
+	 * internal Graph data structure. It must not be changed by the caller.
+	 * 
+	 * @param l
+	 * @return
+	 */
 	public Node[] accessLevel(int l) {
 		ensureLevels();
 		return levels[l];
 	}
 
+	/**
+	 * returns an array containing all interface (port) nodes of the Graph in
+	 * proper order.
+	 * 
+	 * The order of the nodes in the returned array is the same as the order of
+	 * the bits in patterns etc.. The returned array may contain null elements.
+	 * It is a reference to an internal Graph data structure. It must not be
+	 * changed by the caller.
+	 * 
+	 * @return
+	 */
 	public Node[] accessInterface() {
 		ensureLevels();
 		return intf;
 	}
 
 	/**
-	 * returns an array with all nodes contained in the graph.
+	 * returns an array containing all nodes present in the graph.
 	 * 
-	 * If nodes have been removed from the graph previously, the array may
-	 * contain null elements. The returned array is a reference to an internal
-	 * Graph data structure. It should not be changed my the caller.
+	 * The returned array can be used to loop over all the nodes in a Graph. It
+	 * may contain null elements. It is a reference to an internal Graph data
+	 * structure. It must not be changed by the caller.
 	 * 
 	 * @return
 	 */
@@ -679,7 +699,7 @@ public class Graph {
 			level_fills = ArrayTools.grow(level_fills, g.level + 1, 1000, 0);
 			g.levelPosition = level_fills[g.level]++;
 			maxlevel = Math.max(maxlevel, g.level);
-			//log.debug("node " + g + " is level " + g.level);
+			// log.debug("node " + g + " is level " + g.level);
 			if (g.countOuts() == 0)
 				continue;
 			for (Node succ : g.accessOutputs()) {
