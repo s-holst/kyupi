@@ -9,8 +9,6 @@
  */
 package org.kyupi.graph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -18,7 +16,7 @@ import org.kyupi.misc.ArrayTools;
 import org.kyupi.misc.Namespace;
 
 /**
- * is a directed, node-annotated graph.
+ * is a directed, cycle-free, node-annotated graph.
  * 
  * Use this data structure to represent logic circuits or other graph-based
  * information.
@@ -60,14 +58,19 @@ import org.kyupi.misc.Namespace;
  * 
  * A graph has a Library of possible node types associated with it.
  * 
- * Nodes are topologically ordered. The first level (level 0) is called the
- * 'interface'. All nodes n with n.isInterface()==true go to level 0, all other
- * nodes are sorted into the lowest possible level with all its predecessors on
- * lower levels. Each node has a position on a level. For level 0, this position
- * must be assigned explicitly. The positions of the remaining levels are
- * determined automatically.
+ * Nodes are topologically ordered. The first level (level 0) contains all nodes
+ * that have either no predecessors (e.g. primary inputs or constants), or are
+ * sequential elements (n.isSequential()==true). All remaining nodes are
+ * assigned to the lowest possible level for which all of its predecessors are
+ * on even lower levels. Outgoing edges always point to a node on a higher
+ * level. Each node has a position on a level which is automatically assigned.
+ * Each node in the graph can be uniquely addressed using its level and position
+ * index.
  * 
- * 
+ * Performance note: Topological ordering of the graph is done on demand after a
+ * structural change in the graph. When making numerous structural changes, be
+ * sure not to unnecessarily access level and position information of the nodes,
+ * because topological ordering is quite costly.
  * 
  * @author stefan
  * 
