@@ -12,6 +12,7 @@ package org.kyupi.misc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
 
@@ -24,6 +25,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.kyupi.data.FormatStil;
+import org.kyupi.data.item.QVector;
 import org.kyupi.graph.Graph;
 import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;
@@ -81,7 +84,8 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		options.addOption(OPT_INPUT, true, "comma-seperated list of generic input files");
 		options.addOption(OPT_OUTPUT, true, "comma-seperated list of generic output files");
 		options.addOption(OPT_LIB, true, "technology library (*Basic, Saed90, Nangate)");
-		options.addOption(OPT_JVMSTAT, false, "print some statictics on the memory footprints of various objects in the JVM");
+		options.addOption(OPT_JVMSTAT, false,
+				"print some statictics on the memory footprints of various objects in the JVM");
 	}
 
 	public KyupiApp setArgs(String... args) {
@@ -115,7 +119,29 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 			log.info("LoadingCircuit " + f.getAbsolutePath());
 			return GraphTools.loadGraph(f, lib);
 		} else
-			throw new IllegalArgumentException("Please specify a circuit with -"+OPT_DESIGN+" ...");
+			throw new IllegalArgumentException("Please specify a circuit with -" + OPT_DESIGN + " ...");
+	}
+
+	private FormatStil patterns;
+
+	private void ensurePatternsLoaded(Graph circuit) throws IOException {
+		if (patterns == null) {
+			ensureArgsParsed();
+			if (argsParsed.hasOption(OPT_TESTS)) {
+				String pats = argsParsed.getOptionValue(OPT_TESTS);
+				patterns = new FormatStil(new File(pats), circuit);
+			}
+		}
+	}
+
+	protected ArrayList<QVector> loadStimuliFromArgs(Graph circuit) throws IOException {
+		ensurePatternsLoaded(circuit);
+		return patterns.getStimuliArray();
+	}
+
+	protected ArrayList<QVector> loadResponsesFromArgs(Graph circuit) throws IOException {
+		ensurePatternsLoaded(circuit);
+		return patterns.getResponsesArray();
 	}
 
 	protected ArrayList<File> outputFilesFromArgs() {
@@ -131,7 +157,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 	}
 
 	protected void printWelcome() {
-		log.info("KyupiApp " + this.getClass().getCanonicalName());
+		log.info("KyupiApp " + this.getClass().getCanonicalName() + " " + String.join(" ", args()));
 		RuntimeTools.printRuntimeInfo();
 	}
 
@@ -145,11 +171,11 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 			log.info("  -" + op.getOpt() + "\t" + op.getDescription());
 		}
 	}
-	
+
 	protected void setLib(Library l) {
 		lib = l;
 	}
-	
+
 	protected Library getLib() {
 		return lib;
 	}

@@ -44,7 +44,7 @@ public class QVector extends DataItem<QVector> {
 		this(s.length());
 		setString(s);
 	}
-	
+
 	public QVector(QVector v) {
 		this(v.length());
 		v.copyTo(0, this);
@@ -102,6 +102,59 @@ public class QVector extends DataItem<QVector> {
 		return false;
 	}
 
+	/**
+	 * returns true iff given QVector is compatible at every position.
+	 * 
+	 * A vector position is compatible if their values are either equal or one
+	 * of the values is "-".
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public boolean compatible(Object o) {
+		if (o == null)
+			return false;
+		if (o instanceof QVector) {
+			QVector qv = (QVector) o;
+			BitSet dcm1 = (BitSet) value.clone();
+			dcm1.or(care);
+			BitSet mask = (BitSet) qv.value.clone();
+			mask.or(qv.care);
+			mask.and(dcm1);
+			BitSet val = (BitSet) value.clone();
+			val.and(mask);
+			BitSet qval = (BitSet) qv.value.clone();
+			qval.and(mask);
+			return qv.length == length && val.equals(qval);
+		}
+		return false;
+	}
+
+	/**
+	 * returns true iff given QVector has the same logic values.
+	 * 
+	 * Only positions where both vectors are "0" or "1" are compared. If one of
+	 * the vectors are "-" or "X", the position is ignored.
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public boolean equalLogic(Object o) {
+		if (o == null)
+			return false;
+		if (o instanceof QVector) {
+			QVector qv = (QVector) o;
+			BitSet mask = (BitSet) qv.care.clone();
+			mask.and(care);
+			BitSet val = (BitSet) value.clone();
+			val.and(mask);
+			BitSet qval = (BitSet) qv.value.clone();
+			qval.and(mask);
+			return qv.length == length && val.equals(qval);
+		}
+		return false;
+	}
+
 	@Override
 	public void copyTo(int slot, BVector dest) {
 		dest.access().andNot(care);
@@ -153,7 +206,7 @@ public class QVector extends DataItem<QVector> {
 			dest.setC(i, l);
 		}
 	}
-	
+
 	public void shuffleTo(int[] shuffle, QVector dest) {
 		int l = Math.min(shuffle.length, dest.length);
 		dest.value.clear();
@@ -165,7 +218,7 @@ public class QVector extends DataItem<QVector> {
 			}
 		}
 	}
-	
+
 	public QVector and(QVector vector) {
 		value.and(vector.value);
 		care.and(vector.care);
