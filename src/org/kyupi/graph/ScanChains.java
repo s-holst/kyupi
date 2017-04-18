@@ -10,6 +10,7 @@
 package org.kyupi.graph;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -101,6 +102,13 @@ public class ScanChains {
 			} while (head != null);
 			//log.info("ScanChainLength " + chn.cells.size());
 		}
+		
+		chains.sort(new Comparator<ScanChain>() {
+			@Override
+			public int compare(ScanChain o1, ScanChain o2) {
+				return o1.in.node.queryName().compareTo(o2.in.node.queryName());
+			}
+		});
 
 		// FIXME find a scan out port for each chain
 
