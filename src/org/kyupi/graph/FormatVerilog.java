@@ -11,7 +11,10 @@ package org.kyupi.graph;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.kyupi.graph.Graph.Node;
@@ -69,4 +72,111 @@ public class FormatVerilog {
 
 		return g;
 	}
+	
+	private static String s(String raw) {
+		if (Pattern.matches("^[\\d_].*", raw) || raw.contains("["))
+			return "\\" + raw + " ";
+		return raw;
+	}
+	
+	/**
+	 * FIXME do verilog dump.
+	 * 
+	 * @param os
+	 * @param graph
+	 * @param entity_name
+	 */
+	public static void save(OutputStream os, Graph graph, String entity_name) {
+		PrintWriter op = new PrintWriter(os);
+		op.println("module " + entity_name + " ( ");
+		boolean comma_needed = false;
+		for (Node intf_node : graph.accessInterface()) {
+			if (intf_node == null)
+				continue;
+			if (intf_node.isInput() || intf_node.isOutput()) {
+				if (comma_needed)
+					op.print(",\n");
+				op.print(s(intf_node.queryName()));
+				comma_needed = true;
+			}
+		}
+		op.println("  );");
+		
+		op.print("input ");
+		comma_needed = false;
+		for (Node intf_node : graph.accessInterface()) {
+			if (intf_node == null)
+				continue;
+			if (intf_node.isInput()) {
+				if (comma_needed)
+					op.print(",\n");
+				op.print(s(intf_node.queryName()));
+				comma_needed = true;
+			}
+		}
+		op.println(";");
+
+		op.print("output ");
+		comma_needed = false;
+		for (Node intf_node : graph.accessInterface()) {
+			if (intf_node == null)
+				continue;
+			if (intf_node.isOutput()) {
+				if (comma_needed)
+					op.print(",\n");
+				op.print(s(intf_node.queryName()));
+				comma_needed = true;
+			}
+		}
+		op.println(";");
+
+		op.print("wire ");
+		comma_needed = false;
+		Node[] nodes = graph.accessNodes();
+		for (Node node : nodes) {
+			if (node == null) {
+				continue;
+			}
+			if (node.isPseudo()) {
+				if (comma_needed)
+					op.print(",\n");
+				op.print(s(node.queryName()));
+				comma_needed = true;
+			}
+		}
+		op.println(";");
+
+		for (Node node : nodes) {
+			if (node == null || node.isPseudo() || node.isInput() || node.isOutput()) {
+				continue;
+			}
+			op.print("  " + node.typeName() + " " + s(node.queryName()) + " ( ");
+			int i = -1;
+			comma_needed = false;
+			for (Node n : node.accessInputs()) {
+				i++;
+				if (n == null)
+					continue;
+				if (comma_needed)
+					op.print(", ");
+				op.print(" ." + node.inName(i) + "(" + s(n.queryName()) + ") ");
+				comma_needed = true;
+			}
+			i = -1;
+			for (Node n : node.accessOutputs()) {
+				i++;
+				if (n == null)
+					continue;
+				if (comma_needed)
+					op.print(", ");
+				op.print(" ." + node.outName(i) + "(" + s(n.queryName()) + ") ");
+				comma_needed = true;
+			}
+			op.println(");");
+		}
+		op.println("endmodule");
+
+		op.close();
+	}
+
 }
