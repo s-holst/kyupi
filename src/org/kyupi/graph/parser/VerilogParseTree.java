@@ -129,6 +129,7 @@ public class VerilogParseTree {
 
 	public Graph elaborate(Module m, Library l) throws IOException {
 		Graph g = new Graph(l);
+		g.setName(m.moduleName);
 		HashMap<String, Range> inputNames = new HashMap<>();
 		for (RangedVariableList rvl : m.inputDeclarations) {
 			for (String rv : rvl.variableNames) {

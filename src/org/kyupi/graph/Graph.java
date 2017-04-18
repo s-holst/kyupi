@@ -478,6 +478,8 @@ public class Graph {
 
 	private Node intf[];
 
+	private String name;
+
 	public Graph(Library lib) {
 		library = lib;
 	}
@@ -799,6 +801,14 @@ public class Graph {
 			log.info("    " + key + " " + map.get(key));
 		}
 
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 
 }
