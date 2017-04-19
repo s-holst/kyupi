@@ -778,6 +778,7 @@ public class Graph {
 			gates++;
 			combinational.put(type, combinational.getOrDefault(type, 0) + 1);
 		}
+		log.info("CircuitName " + getName());
 		log.info("Levels " + levels());
 		log.info("NodeCount " + nodes);
 		log.info("  PseudoNodeCount " + signals);
