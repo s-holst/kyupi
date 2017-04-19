@@ -97,7 +97,9 @@ public class Graph {
 
 		private int intfPosition;
 
-		private Node inputs[], outputs[];
+		private Node inputs[] = new Node[0];
+
+		private Node outputs[] = new Node[0];
 
 		public Node(String name, int type) {
 			this.id = namespace.idFor(name);
@@ -806,7 +808,7 @@ public class Graph {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}
