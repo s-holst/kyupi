@@ -41,6 +41,7 @@ public class LibrarySAED extends Library {
 
 	public static final int TYPE_DFFAR = 0x50 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL | INPUTS_3;
 	public static final int TYPE_SDFFAR = 0x51 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL | INPUTS_5;
+	public static final int TYPE_SDFFASR = 0x52 | FLAG_MULTIOUTPUT | FLAG_SEQUENTIAL | INPUTS_6;
 
 	public static final int TYPE_FADD_CO = 0xf1 | INPUTS_3; // internal use
 
@@ -71,6 +72,7 @@ public class LibrarySAED extends Library {
 	private String[] pinNamesSCO = { "S", "CO" };
 	private String[] pinNamesSOC1 = { "SO", "C1" };
 	private String[] pinNamesDSSCR = { "D", "SE", "SI", "CLK", "RSTB" };
+	private String[] pinNamesDSSCRS = { "D", "SE", "SI", "CLK", "RSTB", "SETB" };
 	private String[] pinNamesDCR = { "D", "CLK", "RSTB" };
 	private String[] pinNamesSEC = { "SE", "EN", "CLK" };
 	private String[] pinNamesGC = { "GCLK" };
@@ -123,6 +125,7 @@ public class LibrarySAED extends Library {
 			put(TYPE_XOR | INPUTS_2, new InterfaceSpec("XOR2", pinNamesINx, 2, pinNamesQ, 1));
 			put(TYPE_XOR | INPUTS_3, new InterfaceSpec("XOR3", pinNamesINx, 3, pinNamesQ, 1));
 			put(TYPE_SDFFAR, new InterfaceSpec("SDFFAR", pinNamesDSSCR, 5, pinNamesQQN, 2));
+			put(TYPE_SDFFASR, new InterfaceSpec("SDFFASR", pinNamesDSSCRS, 6, pinNamesQQN, 2));
 			put(TYPE_DFFAR, new InterfaceSpec("DFFAR", pinNamesDCR, 3, pinNamesQQN, 2));
 			put(TYPE_FADD, new InterfaceSpec("FADD", pinNamesABCI, 3, pinNamesSCO, 2));
 			put(TYPE_HADD, new InterfaceSpec("HADD", pinNamesA0B0, 2, pinNamesSOC1, 2));
@@ -248,6 +251,8 @@ public class LibrarySAED extends Library {
 			put("XOR3X2", TYPE_XOR | INPUTS_3 | STRENGTH_2);
 			put("SDFFARX1", TYPE_SDFFAR | INPUTS_5 | STRENGTH_1);
 			put("SDFFARX2", TYPE_SDFFAR | INPUTS_5 | STRENGTH_2);
+			put("SDFFASRX1", TYPE_SDFFASR | INPUTS_6 | STRENGTH_1);
+			put("SDFFASRX2", TYPE_SDFFASR | INPUTS_6 | STRENGTH_2);
 			put("DFFARX1", TYPE_DFFAR | INPUTS_3 | STRENGTH_1);
 			put("DFFARX2", TYPE_DFFAR | INPUTS_3 | STRENGTH_2);
 			put("TIEH", TYPE_CONST1);
@@ -1219,17 +1224,23 @@ public class LibrarySAED extends Library {
 	public boolean isScanCell(int type) {
 		if (isType(type, TYPE_SDFFAR))
 			return true;
+		if (isType(type, TYPE_SDFFASR))
+			return true;
 		return false;
 	}
 
 	public int getScanInPin(int type) {
 		if (isType(type, TYPE_SDFFAR))
 			return 2;
+		if (isType(type, TYPE_SDFFASR))
+			return 2;
 		throw new IllegalArgumentException("Given type is not a scan cell.");
 	}
 
 	public int getClockPin(int type) {
 		if (isType(type, TYPE_SDFFAR))
+			return 3;
+		if (isType(type, TYPE_SDFFASR))
 			return 3;
 		if (isType(type, TYPE_DFFAR))
 			return 1;
@@ -1264,6 +1275,14 @@ public class LibrarySAED extends Library {
 		cv[0] = c;
 		cv[1] = v;
 		if (isType(TYPE_SDFFAR, type)) {
+			if (output_idx == 1)
+				cv[1] = ~cv[1];
+			if (output_idx > 1) {
+				cv[1] = 0;
+				cv[0] = 0;
+			}
+		}
+		if (isType(TYPE_SDFFASR, type)) {
 			if (output_idx == 1)
 				cv[1] = ~cv[1];
 			if (output_idx > 1) {
