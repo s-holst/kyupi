@@ -47,7 +47,7 @@ if [ ! -f "$KYUPI_HOME/bin/$app_path/$app_class.class" ]; then
   if [ -f "$KYUPI_HOME/src/$app_path/$app_class.java" ]; then
     echo "Compiling sources from $KYUPI_HOME/src to $KYUPI_HOME/bin ..."
     mkdir -p $KYUPI_HOME/bin
-    find $KYUPI_HOME/src -name *.java |xargs javac -d $KYUPI_HOME/bin
+    find $KYUPI_HOME/src -name *.java |xargs javac -encoding UTF-8 -d $KYUPI_HOME/bin
     cp $KYUPI_HOME/src/log4j.properties $KYUPI_HOME/bin/
   else
     echo "Neither sources nor class files found in directory '$KYUPI_HOME'."
