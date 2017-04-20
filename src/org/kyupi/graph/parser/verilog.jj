@@ -98,7 +98,7 @@ void module_instantiation(ModuleInstantiation mi):
 
 void list_of_module_connections(ModuleInstantiation mi):
 {}{
-  named_port_connection(mi.newPortConnection()) ( "," named_port_connection(mi.newPortConnection()) )*}
+  [ named_port_connection(mi.newPortConnection()) ( "," named_port_connection(mi.newPortConnection()) )* ]}
 
 void named_port_connection(PortConnection pc):
 {}
@@ -135,7 +135,7 @@ String identifier() :
 {  
 	(  t=<basic_identifier>
 	|  t=<extended_identifier>
-	|  t=< integer > "'b1"
+	|  t="1'b"< integer >
 	)
 	[ "[" t2=<integer> "]" { suffix = "[" + t2.image + "]"; } ]
 	{

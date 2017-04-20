@@ -55,9 +55,9 @@ public class Verilog implements VerilogConstants {
       case TRISTATE:
       case WIRE:
       case ASSIGN:
-      case integer:
       case basic_identifier:
       case extended_identifier:
+      case 28:
         ;
         break;
       default:
@@ -94,9 +94,9 @@ public class Verilog implements VerilogConstants {
       jj_consume_token(22);
       a.sourceName = identifier();
       break;
-    case integer:
     case basic_identifier:
     case extended_identifier:
+    case 28:
       module_instantiation(module.newModuleInstantiation());
       break;
     default:
@@ -128,19 +128,26 @@ public class Verilog implements VerilogConstants {
   }
 
   final public void list_of_module_connections(ModuleInstantiation mi) throws ParseException {
-    named_port_connection(mi.newPortConnection());
-    label_3:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 23:
-        ;
-        break;
-      default:
-        jj_la1[4] = jj_gen;
-        break label_3;
-      }
-      jj_consume_token(23);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case 24:
       named_port_connection(mi.newPortConnection());
+      label_3:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case 23:
+          ;
+          break;
+        default:
+          jj_la1[4] = jj_gen;
+          break label_3;
+        }
+        jj_consume_token(23);
+        named_port_connection(mi.newPortConnection());
+      }
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      ;
     }
   }
 
@@ -171,7 +178,7 @@ public class Verilog implements VerilogConstants {
         ;
         break;
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[6] = jj_gen;
         break label_4;
       }
       jj_consume_token(23);
@@ -198,12 +205,12 @@ public class Verilog implements VerilogConstants {
     case extended_identifier:
       t = jj_consume_token(extended_identifier);
       break;
-    case integer:
-      t = jj_consume_token(integer);
-      jj_consume_token(28);
+    case 28:
+      t = jj_consume_token(28);
+      jj_consume_token(integer);
       break;
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -215,7 +222,7 @@ public class Verilog implements VerilogConstants {
                                  suffix = "[" + t2.image + "]";
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[8] = jj_gen;
       ;
     }
           s = t.image + suffix;
@@ -240,13 +247,13 @@ public class Verilog implements VerilogConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[8];
+  final private int[] jj_la1 = new int[9];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x40,0x71780,0x71780,0x2000000,0x800000,0x800000,0x70000,0x2000000,};
+      jj_la1_0 = new int[] {0x40,0x10061780,0x10061780,0x2000000,0x800000,0x1000000,0x800000,0x10060000,0x2000000,};
    }
 
   /** Constructor with InputStream. */
@@ -260,7 +267,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -274,7 +281,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -284,7 +291,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -294,7 +301,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -303,7 +310,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -312,7 +319,7 @@ public class Verilog implements VerilogConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 9; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -368,7 +375,7 @@ public class Verilog implements VerilogConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

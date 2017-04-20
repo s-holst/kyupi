@@ -72,7 +72,7 @@ public interface VerilogConstants {
     "\"[\"",
     "\":\"",
     "\"]\"",
-    "\"\\\'b1\"",
+    "\"1\\\'b\"",
   };
 
 }
