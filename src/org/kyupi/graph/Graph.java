@@ -684,7 +684,7 @@ public class Graph {
 				}
 				intf[g.intfPosition] = g;
 			}
-			if (g.maxIn() < 0 || g.isSequential()) {
+			if (g.maxIn() < 0 || g.isSequential() || g.isInput()) {
 				queue.add(g);
 			}
 		}
@@ -699,7 +699,7 @@ public class Graph {
 				throw new RuntimeException("Detected combinational loop at gate: " + g.queryName());
 			}
 			g.level = 0;
-			if (!g.isSequential()) {
+			if (!g.isSequential() && !g.isInput()) {
 				for (int i = g.maxIn(); i >= 0; i--) {
 					Node d = g.in(i);
 					if (d != null)
@@ -713,7 +713,7 @@ public class Graph {
 			if (g.countOuts() == 0)
 				continue;
 			for (Node succ : g.accessOutputs()) {
-				if (succ != null && !succ.isSequential()) {
+				if (succ != null && !succ.isSequential() && !succ.isInput()) {
 					succ.levelPosition++; // re-use levelPosition to count
 											// number of predecessors placed.
 					if (succ.levelPosition == succ.countIns())
