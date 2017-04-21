@@ -118,6 +118,45 @@ public class GraphTools {
 			n.remove();
 		}
 	}
+	
+	public static void moveOutputOutgoingEdges(Graph g) {
+		// some output ports may drive other nodes in the graph.
+		// re-wire them.
+
+		Node intf[] = g.accessInterface();
+
+		boolean doIterate = true;
+
+		while (doIterate) {
+			doIterate = false;
+			for (Node output : intf) {
+				if (output == null || !output.isOutput())
+					continue;
+				for (int oidx = output.maxOut(); oidx >= 0; oidx--) {
+					doIterate = true;
+					Node successor = output.out(oidx);
+					if (successor != null) {
+						Node predecessor = output.in(0);
+						if (predecessor == null) {
+							log.error("rewire failed: output " + output.queryName() + " has no driver");
+							doIterate = false;
+							break;
+						}
+						if (predecessor.isMultiOutput()) {
+							Node signal = g.new Node(output.queryName() + "_net", Library.TYPE_BUF | Library.FLAG_PSEUDO);
+							int opin = predecessor.searchOutIdx(output);
+							g.connect(predecessor, opin, signal, -1);
+							g.connect(signal, -1, output, 0);
+							predecessor = signal;
+						}
+						int iidx = successor.searchInIdx(output);
+						g.connect(predecessor, -1, successor, iidx);
+						output.setOut(oidx, null);
+					}
+				}
+			}
+		}
+	}
 
 	public static void removeSignalNodes(Graph g) {
 		for (Node signal : g.accessNodes()) {
