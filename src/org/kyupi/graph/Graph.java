@@ -381,8 +381,13 @@ public class Graph {
 		}
 
 		public String toString() {
+			String iosuffix = "";
+			if (isInput())
+				iosuffix = "I" + intfPosition();
+			if (isOutput())
+				iosuffix = "O" + intfPosition();
 			StringBuilder b = new StringBuilder(
-					"" + level + "_" + levelPosition + ":" + typeName() + "\"" + queryName() + "\"");
+					"" + level + "_" + levelPosition + ":" + typeName() + "\"" + queryName() + "\"" + iosuffix);
 			int m_in = maxIn();
 			int m_out = maxOut();
 			for (int i = 0; i <= m_in; i++) {
