@@ -3,6 +3,8 @@ package org.kyupi.graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
@@ -21,6 +23,13 @@ public class Placement {
 	HashMap<Node, Integer> placeY = new HashMap<>();
 	HashSet<Integer> distinctX = new HashSet<>();
 	HashSet<Integer> distinctY = new HashSet<>();
+
+	Node[][] place = new Node[0][0];
+
+	int[] coordX = new int[0];
+	int[] coordY = new int[0];
+	HashMap<Integer, Integer> coordXmap = new HashMap<>();
+	HashMap<Integer, Integer> coordYmap = new HashMap<>();
 
 	public Placement(Graph g) {
 		graph = g;
@@ -76,22 +85,77 @@ public class Placement {
 		log.info("DistinctX " + distinctX.size());
 		log.info("DistinctY " + distinctY.size());
 
+		int i = 0;
+		coordX = new int[distinctX.size()];
+		for (Integer x : distinctX)
+			coordX[i++] = x;
+		Arrays.sort(coordX);
+		for (i = 0; i < coordX.length; i++)
+			coordXmap.put(coordX[i], i);
+
+		i = 0;
+		coordY = new int[distinctY.size()];
+		for (Integer y : distinctY)
+			coordY[i++] = y;
+		Arrays.sort(coordY);
+		for (i = 0; i < coordY.length; i++)
+			coordYmap.put(coordY[i], i);
+
+		place = new Node[coordX.length][coordY.length];
+
 		for (Node n : graph.accessNodes()) {
 			if (n == null || n.isPseudo())
 				continue;
 			if (!placeX.containsKey(n)) {
 				log.info("Missing place annotation for " + n.queryName());
+			} else {
+				place[coordXmap.get(placeX.get(n))][coordYmap.get(placeY.get(n))] = n;
 			}
 		}
+		int minCellXDist = Integer.MAX_VALUE;
+		for (i = 0; i < coordX.length - 1; i++) {
+			minCellXDist = Math.min(minCellXDist, coordX[i + 1] - coordX[i]);
+		}
+
+		HashMap<Integer, Integer> heightHist = new HashMap<>();
+		int minCellYDist = Integer.MAX_VALUE;
+		for (i = 0; i < coordY.length - 1; i++) {
+			int height = coordY[i + 1] - coordY[i];
+			int cnt = heightHist.getOrDefault(height, 0);
+			heightHist.put(height, cnt + 1);
+			minCellYDist = Math.min(minCellYDist, height);
+		}
+		int rowHeight = 0;
+		int commonCnt = -1;
+		for (Integer h : heightHist.keySet()) {
+			int cnt = heightHist.get(h);
+			if (cnt > commonCnt) {
+				rowHeight = h;
+				commonCnt = cnt;
+			}
+		}
+		log.info("MinCellXDist " + minCellXDist);
+		log.info("MinCellYDist " + minCellYDist);
+		log.info("RowHeight " + rowHeight);
+
+		// for (i = 0 ; i < coordY.length; i++) {
+		// int count = 0;
+		// for (int j = 0; j < coordX.length; j++) {
+		// if (place[j][i] != null)
+		// count++;
+		// }
+		// log.debug("Row " + i + " contains " + count + " cells");
+		// }
+
 	}
-	
+
 	public int getX(Node n) {
 		Integer x = placeX.get(n);
 		if (x == null)
 			throw new NoSuchElementException(n.toString());
 		return x;
 	}
-	
+
 	public int getY(Node n) {
 		Integer y = placeY.get(n);
 		if (y == null)
@@ -102,6 +166,56 @@ public class Placement {
 	public boolean containsNode(Node n) {
 		return placeX.containsKey(n);
 	}
-	
-	
+
+	public ArrayList<Node> getRectangle(int x1, int y1, int x2, int y2) {
+
+		// ensure, that x1/y1 are smaller than x2/y2
+		if (x1 > x2) {
+			int x = x1;
+			x1 = x2;
+			x1 = x;
+		}
+		if (y1 > y2) {
+			int y = y1;
+			y1 = y2;
+			y1 = y;
+		}
+
+		// find start and end indices for place array
+		int xi1 = 0, xi2 = 0;
+		for (int i = 0; i < coordX.length; i++) {
+			if (coordX[i] < x1)
+				xi1 = i + 1;
+			if (coordX[i] < x2)
+				xi2 = i;
+		}
+		int yi1 = 0, yi2 = 0;
+		for (int i = 0; i < coordY.length; i++) {
+			if (coordY[i] < y1)
+				yi1 = i + 1;
+			if (coordY[i] < y2)
+				yi2 = i;
+		}
+
+		ArrayList<Node> nodes = new ArrayList<>();
+
+		if (xi2 >= coordX.length || yi2 >= coordY.length) {
+			log.warn("rectangle out of bounds, returning no cells.");
+			return nodes;
+		}
+		log.debug("Collecting cells in rectangle: (" + coordX[xi1] + "," + coordY[yi1] + ") (" + coordX[xi2] + ","
+				+ coordY[yi2] + ")");
+
+
+		for (int y = yi1; y <= yi2; y++) {
+			for (int x = xi1; x <= xi2; x++) {
+				Node n = place[x][y];
+				if (n != null)
+					nodes.add(n);
+			}
+		}
+		log.debug("Found " + nodes.size() + " cells");
+		return nodes;
+	}
+
 }
