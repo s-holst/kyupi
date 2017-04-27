@@ -167,7 +167,7 @@ public class Placement {
 		return placeX.containsKey(n);
 	}
 
-	public ArrayList<Node> getRectangle(int x1, int y1, int x2, int y2) {
+	public HashSet<Node> getRectangle(int x1, int y1, int x2, int y2) {
 
 		// ensure, that x1/y1 are smaller than x2/y2
 		if (x1 > x2) {
@@ -197,14 +197,14 @@ public class Placement {
 				yi2 = i;
 		}
 
-		ArrayList<Node> nodes = new ArrayList<>();
+		HashSet<Node> nodes = new HashSet<>();
 
 		if (xi2 >= coordX.length || yi2 >= coordY.length) {
 			log.warn("rectangle out of bounds, returning no cells.");
 			return nodes;
 		}
-		log.debug("Collecting cells in rectangle: (" + coordX[xi1] + "," + coordY[yi1] + ") (" + coordX[xi2] + ","
-				+ coordY[yi2] + ")");
+		//log.debug("Collecting cells in rectangle: (" + coordX[xi1] + "," + coordY[yi1] + ") (" + coordX[xi2] + ","
+		//		+ coordY[yi2] + ")");
 
 
 		for (int y = yi1; y <= yi2; y++) {
@@ -214,7 +214,7 @@ public class Placement {
 					nodes.add(n);
 			}
 		}
-		log.debug("Found " + nodes.size() + " cells");
+		//log.debug("Found " + nodes.size() + " cells");
 		return nodes;
 	}
 

@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -187,6 +189,27 @@ public class GraphTools {
 				g.connect(pred, pred.maxOut()+1, r, succport.get(r));
 			}
 		}
+	}
+	
+	public static HashSet<Node> collectCombinationalOutputCone(Node head) {
+		HashSet<Node> result = new HashSet<>();
+		
+		LinkedList<Node> frontier = new LinkedList<>();
+		frontier.add(head);
+		
+		while (!frontier.isEmpty()) {
+			Node n = frontier.removeFirst();
+			for (Node successor: n.accessOutputs()) {
+				if (successor == null || successor.isSequential())
+					continue;
+				if (!result.contains(successor)) {
+					frontier.addLast(successor);
+					result.add(successor);
+				}
+			}
+		}
+		
+		return result;
 	}
 
 	public static void splitMultiOutputCells(Graph g) {
