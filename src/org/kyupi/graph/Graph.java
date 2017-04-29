@@ -144,6 +144,17 @@ public class Graph {
 			return id;
 		}
 
+		public boolean equals(Object other) {
+			if (other instanceof Node) {
+				Node n = (Node) other;
+				if (n.type != type)
+					return false;
+				if (!n.queryName().equals(queryName()))
+					return false;
+				return true;
+			}
+			return false;
+		}
 		/*
 		 * type queries (convenience accessors to library)
 		 */
@@ -817,6 +828,54 @@ public class Graph {
 
 	public String getName() {
 		return this.name;
+	}
+	
+	public boolean equals(Object other) {
+		if (other instanceof Graph) {
+			Graph g = (Graph) other;
+			if (g.countNodes() != countNodes())
+				return false;
+			for (Node n : accessNodes()) {
+				if (n == null)
+					continue;
+				Node other_n = g.searchNode(n.queryName());
+				if (other_n == null)
+					return false;
+				if (!n.equals(other_n))
+					return false;
+				if (n.maxIn() != other_n.maxIn())
+					return false;
+				for (int i = 0; i <= n.maxIn(); i++) {
+					Node neighbor = n.in(i);
+					Node other_neighbor = other_n.in(i);
+					if (neighbor == null && other_neighbor != null)
+						return false;
+					if (neighbor != null && other_neighbor == null)
+						return false;
+					if (neighbor != null) {
+						if (!neighbor.equals(other_neighbor))
+							return false;
+					}
+				}
+				if (n.maxOut() != other_n.maxOut())
+					return false;
+				for (int i = 0; i <= n.maxOut(); i++) {
+					Node neighbor = n.out(i);
+					Node other_neighbor = other_n.out(i);
+					if (neighbor == null && other_neighbor != null)
+						return false;
+					if (neighbor != null && other_neighbor == null)
+						return false;
+					if (neighbor != null) {
+						if (!neighbor.equals(other_neighbor))
+							return false;
+					}
+				}
+
+			}
+			return true;
+		}
+		return false;
 	}
 
 }
