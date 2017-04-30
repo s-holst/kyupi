@@ -143,24 +143,22 @@ public class ScanChains {
 	 * @return
 	 */
 	public int[][] scanInMapping() {
-		if (chains.size() != 1)
-			throw new RuntimeException("Multiple scan chains not supported.");
 		int port_count = graph.accessInterface().length;
-		int chain_length = chains.get(0).cells.size();
-		int[][] map = new int[chain_length + 1][port_count];
+		int max_chain_length = maxChainLength();
+		int[][] map = new int[max_chain_length + 1][port_count];
 		Node[] intf = graph.accessInterface();
 
 		// inputs and scan state of the last vector in expanded set is identical
 		// to the source vector.
 		for (int i = 0; i < port_count; i++) {
 			if (intf[i] == null || intf[i].isOutput()) {
-				map[chain_length][i] = -1;
+				map[max_chain_length][i] = -1;
 			} else {
-				map[chain_length][i] = i;
+				map[max_chain_length][i] = i;
 			}
 		}
 
-		for (int c = chain_length - 1; c >= 0; c--) {
+		for (int c = max_chain_length - 1; c >= 0; c--) {
 			for (int i = 0; i < port_count; i++) {
 
 				// look up scan cell or scan-in port for current position i
@@ -194,11 +192,9 @@ public class ScanChains {
 	 * @return
 	 */
 	public int[][] scanOutMapping() {
-		if (chains.size() != 1)
-			throw new RuntimeException("Multiple scan chains not supported.");
 		int port_count = graph.accessInterface().length;
-		int chain_length = chains.get(0).cells.size();
-		int[][] map = new int[chain_length + 1][port_count];
+		int max_chain_length = maxChainLength();
+		int[][] map = new int[max_chain_length + 1][port_count];
 		Node[] intf = graph.accessInterface();
 
 		// outputs and scan state of the first vector in expanded set is
@@ -211,7 +207,7 @@ public class ScanChains {
 			}
 		}
 
-		for (int c = 1; c <= chain_length; c++) {
+		for (int c = 1; c <= max_chain_length; c++) {
 			for (int i = 0; i < port_count; i++) {
 
 				// look up scan cell for current position i
@@ -232,6 +228,14 @@ public class ScanChains {
 
 	public int size() {
 		return chains.size();
+	}
+	
+	public int maxChainLength() {
+		int max = 0;
+		for (ScanChain c : chains) {
+			max = Math.max(max, c.cells.size());
+		}
+		return max;
 	}
 
 	public ScanChain get(int i) {
