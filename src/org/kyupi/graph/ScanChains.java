@@ -10,11 +10,13 @@
 package org.kyupi.graph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.kyupi.graph.Graph.Node;
+import org.kyupi.misc.ArrayTools;
 
 public class ScanChains {
 
@@ -27,6 +29,7 @@ public class ScanChains {
 
 		public Node node;
 		int pos = -1;
+		int chain_idx = -1;
 		ScanCell next;
 		ScanCell prev;
 	}
@@ -85,7 +88,7 @@ public class ScanChains {
 			}
 		}
 
-		//log.info("ScanChainCount " + node_to_scanin.size());
+		// log.info("ScanChainCount " + node_to_scanin.size());
 
 		// assign chain position to each scan cell
 		for (ScanCell head : node_to_scanin.values()) {
@@ -100,15 +103,23 @@ public class ScanChains {
 				if (head != null)
 					chn.cells.add(head);
 			} while (head != null);
-			//log.info("ScanChainLength " + chn.cells.size());
+			// log.info("ScanChainLength " + chn.cells.size());
 		}
-		
+
 		chains.sort(new Comparator<ScanChain>() {
 			@Override
 			public int compare(ScanChain o1, ScanChain o2) {
 				return o1.in.node.queryName().compareTo(o2.in.node.queryName());
 			}
 		});
+
+		// set chain idx in each cell
+		for (int i = 0; i < chains.size(); i++) {
+			chains.get(i).in.chain_idx = i;
+			for (ScanCell sc : chains.get(i).cells) {
+				sc.chain_idx = i;
+			}
+		}
 
 		// FIXME find a scan out port for each chain
 
@@ -143,40 +154,66 @@ public class ScanChains {
 	 * @return
 	 */
 	public int[][] scanInMapping() {
+		int clocking[] = new int[size()];
+		Arrays.fill(clocking, 0);
+		return scanInMapping(clocking);
+	}
+
+	/**
+	 * generates a mapping for QVExpander to generate separate vectors for each
+	 * shift-in cycle starting with a completely empty scan chain and ending
+	 * with a completely loaded scan chain.
+	 * 
+	 * Primary inputs are kept stable over all scan cycles. Primary outputs are
+	 * not assigned in the expanded vectors.
+	 * 
+	 * clocking is an array that contains a clock index for each scan chain.
+	 * First all chains with clock index 0 are shifted, then all the chains with
+	 * clock index 1, and so on. The number of clocks used for a complete shift
+	 * cycle is max(clocking)+1.
+	 * 
+	 * @return
+	 */
+	public int[][] scanInMapping(int clocking[]) {
+		int clock_count = ArrayTools.max(clocking) + 1;
 		int port_count = graph.accessInterface().length;
 		int max_chain_length = maxChainLength();
-		int[][] map = new int[max_chain_length + 1][port_count];
+		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
 		Node[] intf = graph.accessInterface();
 
 		// inputs and scan state of the last vector in expanded set is identical
 		// to the source vector.
 		for (int i = 0; i < port_count; i++) {
 			if (intf[i] == null || intf[i].isOutput()) {
-				map[max_chain_length][i] = -1;
+				map[max_chain_length * clock_count][i] = -1;
 			} else {
-				map[max_chain_length][i] = i;
+				map[max_chain_length * clock_count][i] = i;
 			}
 		}
 
 		for (int c = max_chain_length - 1; c >= 0; c--) {
-			for (int i = 0; i < port_count; i++) {
+			for (int clk = clock_count - 1; clk >= 0; clk--) {
+				int map_idx = clk + (c * clock_count);
+				for (int i = 0; i < port_count; i++) {
 
-				// look up scan cell or scan-in port for current position i
-				ScanCell sc = node_to_scancell.get(intf[i]);
-				if (sc == null)
-					sc = node_to_scanin.get(intf[i]);
+					// look up scan cell or scan-in port for current position i
+					ScanCell sc = node_to_scancell.get(intf[i]);
+					if (sc == null)
+						sc = node_to_scanin.get(intf[i]);
 
-				if (sc != null) {
-					// found: copy index from intf pos of successor scan cell
-					if (sc.next != null)
-						map[c][i] = map[c + 1][sc.next.node.intfPosition()];
-					else
-						map[c][i] = -1;
-				} else {
-					// not found: just copy from next row
-					map[c][i] = map[c + 1][i];
+					if (sc != null && clocking[sc.chain_idx] == clk) {
+						// found and clocked: copy index from intf pos of
+						// successor scan cell
+						if (sc.next != null)
+							map[map_idx][i] = map[map_idx + 1][sc.next.node.intfPosition()];
+						else
+							map[map_idx][i] = -1;
+					} else {
+						// not found or not clocked: just copy from next row
+						map[map_idx][i] = map[map_idx + 1][i];
+					}
+
 				}
-
 			}
 		}
 		return map;
@@ -192,9 +229,30 @@ public class ScanChains {
 	 * @return
 	 */
 	public int[][] scanOutMapping() {
+		int clocking[] = new int[size()];
+		Arrays.fill(clocking, 0);
+		return scanOutMapping(clocking);
+	}
+
+	/**
+	 * generates a mapping for QVExpander to generate separate vectors for each
+	 * shift-out cycle starting with a completely loaded scan chain and ending
+	 * with a completely empty scan chain.
+	 * 
+	 * Primary IO are kept stable over all scan cycles.
+	 * 
+	 * clocking is an array that contains a clock index for each scan chain.
+	 * First all chains with clock index 0 are shifted, then all the chains with
+	 * clock index 1, and so on. The number of clocks used for a complete shift
+	 * cycle is max(clocking)+1.
+	 * 
+	 * @return
+	 */
+	public int[][] scanOutMapping(int clocking[]) {
+		int clock_count = ArrayTools.max(clocking) + 1;
 		int port_count = graph.accessInterface().length;
 		int max_chain_length = maxChainLength();
-		int[][] map = new int[max_chain_length + 1][port_count];
+		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
 		Node[] intf = graph.accessInterface();
 
 		// outputs and scan state of the first vector in expanded set is
@@ -208,19 +266,23 @@ public class ScanChains {
 		}
 
 		for (int c = 1; c <= max_chain_length; c++) {
-			for (int i = 0; i < port_count; i++) {
+			for (int clk = 0; clk < clock_count; clk++) {
+				int map_idx = clk + ((c - 1) * clock_count) + 1;
+				for (int i = 0; i < port_count; i++) {
 
-				// look up scan cell for current position i
-				ScanCell sc = node_to_scancell.get(intf[i]);
+					// look up scan cell for current position i
+					ScanCell sc = node_to_scancell.get(intf[i]);
 
-				if (sc != null) {
-					// found: copy index from intf pos of predecessor scan cell
-					map[c][i] = map[c - 1][sc.prev.node.intfPosition()];
-				} else {
-					// not found: just copy from previous row
-					map[c][i] = map[c - 1][i];
+					if (sc != null && clocking[sc.chain_idx] == clk) {
+						// found and clocked: copy index from intf pos of
+						// predecessor scan cell
+						map[map_idx][i] = map[map_idx - 1][sc.prev.node.intfPosition()];
+					} else {
+						// not found or not clocked: just copy from previous row
+						map[map_idx][i] = map[map_idx - 1][i];
+					}
+
 				}
-
 			}
 		}
 		return map;
@@ -229,7 +291,7 @@ public class ScanChains {
 	public int size() {
 		return chains.size();
 	}
-	
+
 	public int maxChainLength() {
 		int max = 0;
 		for (ScanChain c : chains) {

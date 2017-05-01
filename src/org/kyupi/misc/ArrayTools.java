@@ -106,7 +106,7 @@ public class ArrayTools {
 			}
 		}
 	}
-	
+
 	public static long[] asLongArray(long... a) {
 		return a;
 	}
@@ -131,10 +131,10 @@ public class ArrayTools {
 				break;
 		}
 	}
-	
+
 	public static float min(float[] arr) {
 		float retval = Float.POSITIVE_INFINITY;
-		for (float v: arr) {
+		for (float v : arr) {
 			if (v < retval)
 				retval = v;
 		}
@@ -152,10 +152,16 @@ public class ArrayTools {
 	public static String toString(float[] w1) {
 		StringBuffer buf = new StringBuffer();
 		for (float f : w1) {
-			buf.append(""+ f + " ");
+			buf.append("" + f + " ");
 		}
 		return buf.toString();
 	}
 
+	public static int max(int[] array) {
+		int max = array[0];
+		for (int x: array)
+			max = Math.max(max, x);
+		return max;
+	}
 
 }

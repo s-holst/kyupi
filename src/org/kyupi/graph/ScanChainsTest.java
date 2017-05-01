@@ -149,4 +149,53 @@ public class ScanChainsTest {
 
 		
 	}
+	
+	@Test
+	public void testMultiChainMultiClock() throws Exception {
+		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED());
+		ScanChains chains = new ScanChains(graph);
+		assertEquals(2, chains.size());
+		
+		ScanChain chain0 = chains.get(0);
+		assertNotNull(chain0);
+		assertEquals(3, chain0.cells.size());
+		assertEquals("test_si000", chain0.in.node.queryName());
+		
+		ScanChain chain1 = chains.get(1);
+		assertNotNull(chain1);
+		assertEquals(2, chain1.cells.size());
+		assertEquals("test_si001", chain1.in.node.queryName());
+		
+		int[] clocking = new int[2];
+		clocking[0] = 0;
+		clocking[1] = 1;
+		
+		int[][] map = chains.scanInMapping(clocking);
+		System.out.println(mapToString(map));
+		
+		Node cell000_00 = chain0.cells.get(0).node;
+		Node cell000_01 = chain0.cells.get(1).node;
+		Node cell000_02 = chain0.cells.get(2).node;
+		Node cell001_00 = chain1.cells.get(0).node;
+		Node cell001_01 = chain1.cells.get(1).node;
+
+		Node test_si000 = chain0.in.node;
+		Node test_si001 = chain1.in.node;
+		
+		assertEquals(cell000_02.intfPosition(), map[0][test_si000.intfPosition()]);
+		assertEquals(-1, map[0][test_si001.intfPosition()]);
+		assertEquals(cell000_01.intfPosition(), map[1][test_si000.intfPosition()]);
+		assertEquals(cell001_01.intfPosition(), map[2][test_si001.intfPosition()]);
+		
+		map = chains.scanOutMapping(clocking);
+		
+		System.out.println(mapToString(map));
+
+		assertEquals(cell000_00.intfPosition(), map[3][cell000_02.intfPosition()]);
+		assertEquals(cell000_00.intfPosition(), map[4][cell000_02.intfPosition()]);
+		assertEquals(-1, map[4][cell001_01.intfPosition()]);
+		assertEquals(cell001_00.intfPosition(), map[3][cell001_01.intfPosition()]);
+
+		
+	}
 }
