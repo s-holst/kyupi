@@ -291,6 +291,10 @@ public class ScanChains {
 	public int size() {
 		return chains.size();
 	}
+	
+	public int scanCellCount() {
+		return node_to_scancell.size();
+	}
 
 	public int maxChainLength() {
 		int max = 0;
