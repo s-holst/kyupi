@@ -32,6 +32,10 @@ public class ScanChains {
 		int chain_idx = -1;
 		ScanCell next;
 		ScanCell prev;
+		
+		public int chainIdx() {
+			return chain_idx;
+		}
 	}
 
 	public class ScanChain {
