@@ -109,6 +109,27 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		ensureArgsParsed();
 		return argsParsed;
 	}
+	
+	protected String stringFromArgsOrDefault(String opt, String dflt) {
+		if (argsParsed().hasOption(opt)) {
+			return argsParsed().getOptionValue(opt);
+		}
+		return dflt;
+	}
+
+	protected double doubleFromArgsOrDefault(String opt, double dflt) {
+		if (argsParsed().hasOption(opt)) {
+			return Double.parseDouble(argsParsed().getOptionValue(opt));
+		}
+		return dflt;
+	}
+
+	protected int intFromArgsOrDefault(String opt, int dflt) {
+		if (argsParsed().hasOption(opt)) {
+			return Integer.parseInt(argsParsed().getOptionValue(opt));
+		}
+		return dflt;
+	}
 
 	protected Graph loadCircuitFromArgs() throws IOException {
 		ensureArgsParsed();
