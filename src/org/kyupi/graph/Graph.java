@@ -557,6 +557,15 @@ public class Graph {
 		}
 		return count;
 	}
+	
+	public int countNonPseudoNodes() {
+		int count = 0;
+		for (Node g : nodes) {
+			if (g != null && !g.isPseudo())
+				count++;
+		}
+		return count;
+	}
 
 	/**
 	 * returns the number of levels in the topologically ordered Graph.
