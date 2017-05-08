@@ -11,6 +11,7 @@ package org.kyupi.misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
@@ -34,6 +35,7 @@ public class JvmStats {
 	private static final int TYPE_OBJARRAY1000 = 9;
 	private static final int TYPE_LONGARRAY1000 = 10;
 	private static final int TYPE_OBJARRAYLIST1000 = 11;
+	private static final int TYPE_HASHSET100 = 12;
 
 	public void print_stats() throws Exception {
 		long int1000, long1000, ref1000;
@@ -54,6 +56,7 @@ public class JvmStats {
 		log.info("sizeof(Object[1000]) = " + format(ref1000));
 		log.info("sizeof(HashMap<Int,Int>(100)) = " + format(measure(TYPE_HASHMAP100)));
 		log.info("sizeof(ArrayList<Object>(1000)) = " + format(measure(TYPE_OBJARRAYLIST1000)));
+		log.info("sizeof(HashSet<Int>(100)) = " + format(measure(TYPE_HASHSET100)));
 	}
 
 	private String format(long size) {
@@ -107,6 +110,13 @@ public class JvmStats {
 					hm.put(idx, idx);
 				}
 				object = hm;
+				break;
+			case TYPE_HASHSET100:
+				HashSet<Integer> hs = new HashSet<Integer>();
+				for (int idx = 0; idx < 100; idx++) {
+					hs.add(idx);
+				}
+				object = hs;
 				break;
 			}
 
