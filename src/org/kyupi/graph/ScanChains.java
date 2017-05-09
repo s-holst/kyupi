@@ -29,18 +29,22 @@ public class ScanChains {
 
 		public Node node;
 		int pos = -1;
-		int chain_idx = -1;
+		ScanChain chain;
 		ScanCell next;
 		ScanCell prev;
 		
 		public int chainIdx() {
-			return chain_idx;
+			return chain.chainIdx();
 		}
 	}
 
 	public class ScanChain {
 		public ScanCell in;
 		public ArrayList<ScanCell> cells = new ArrayList<>();
+		int chain_idx = -1;
+		public int chainIdx() {
+			return chain_idx;
+		}
 		// ScanCell scanout;
 	}
 
@@ -117,11 +121,12 @@ public class ScanChains {
 			}
 		});
 
-		// set chain idx in each cell
+		// set chain in each cell
 		for (int i = 0; i < chains.size(); i++) {
-			chains.get(i).in.chain_idx = i;
+			chains.get(i).in.chain = chains.get(i);
+			chains.get(i).chain_idx = i;
 			for (ScanCell sc : chains.get(i).cells) {
-				sc.chain_idx = i;
+				sc.chain = chains.get(i);
 			}
 		}
 
@@ -205,7 +210,7 @@ public class ScanChains {
 					if (sc == null)
 						sc = node_to_scanin.get(intf[i]);
 
-					if (sc != null && clocking[sc.chain_idx] == clk) {
+					if (sc != null && clocking[sc.chainIdx()] == clk) {
 						// found and clocked: copy index from intf pos of
 						// successor scan cell
 						if (sc.next != null)
@@ -277,7 +282,7 @@ public class ScanChains {
 					// look up scan cell for current position i
 					ScanCell sc = node_to_scancell.get(intf[i]);
 
-					if (sc != null && clocking[sc.chain_idx] == clk) {
+					if (sc != null && clocking[sc.chainIdx()] == clk) {
 						// found and clocked: copy index from intf pos of
 						// predecessor scan cell
 						map[map_idx][i] = map[map_idx - 1][sc.prev.node.intfPosition()];
