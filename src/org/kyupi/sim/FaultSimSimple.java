@@ -46,18 +46,21 @@ public class FaultSimSimple extends QBSource {
 		QBlock b = source.next();
 		obssim.loadInputsFrom(b);
 
+		log.info("sim block ");
 		for (StuckAtFault fault : faults.keySet()) {
 			if (fault.pin.isOutput()) {
 				long obs = obssim.getObservability(fault.pin.node());
 				long val = obssim.getValue(fault.pin.node());
-				//log.debug(fault.toString() + " obs " + StringTools.longToReadableBinaryString(obs));
-				//log.debug(fault.toString() + " val " + StringTools.longToReadableBinaryString(val));
+				// log.debug(fault.toString() + " obs " +
+				// StringTools.longToReadableBinaryString(obs));
+				// log.debug(fault.toString() + " val " +
+				// StringTools.longToReadableBinaryString(val));
 				if (fault.isSA0()) {
 					int cnt = Long.bitCount(obs & val);
 					faults.get(fault).ndetects += cnt;
 				} else {
 					int cnt = Long.bitCount(obs & ~val);
-					faults.get(fault).ndetects += cnt;					
+					faults.get(fault).ndetects += cnt;
 				}
 			} else {
 				// TODO handle faults at inputs
@@ -75,5 +78,15 @@ public class FaultSimSimple extends QBSource {
 
 	public int getDetects(StuckAtFault flt) {
 		return faults.get(flt).ndetects;
+	}
+
+	public int countFaultsDetectedAtLeast(int threshold) {
+		int res = 0;
+		for (StuckAtFault fault : faults.keySet()) {
+			if (faults.get(fault).ndetects >= threshold) {
+				res++;
+			}
+		}
+		return res;
 	}
 }

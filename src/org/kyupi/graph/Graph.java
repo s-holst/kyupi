@@ -675,7 +675,7 @@ public class Graph {
 		if (nodes.length > g.id && nodes[g.id] == g) {
 			nodes[g.id] = null;
 		} else
-			throw new IllegalArgumentException("Gate already exists: " + namespace.nameFor(g.id));
+			throw new IllegalArgumentException("Gate does not exist: " + namespace.nameFor(g.id));
 	}
 
 	private void invalidateLevels() {
