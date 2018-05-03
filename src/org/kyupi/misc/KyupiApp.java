@@ -146,8 +146,11 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 			ensureLib();
 			log.info("LoadingCircuit " + f.getAbsolutePath());
 			return GraphTools.loadGraph(f, lib);
-		} else
+		} else {
+			log.error("Expected a design to load, please specify a circuit with -d ...");
+			printOptionHelp();
 			throw new IllegalArgumentException("Please specify a circuit with -" + OPT_DESIGN + " ...");
+		}
 	}
 
 	private FormatStil patterns;
