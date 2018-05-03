@@ -155,6 +155,7 @@ public class Graph {
 			}
 			return false;
 		}
+		
 		/*
 		 * type queries (convenience accessors to library)
 		 */
@@ -701,6 +702,10 @@ public class Graph {
 				continue;
 			g.level = -1;
 			g.levelPosition = 0;
+			// intf array contains:
+			// - primary input ports
+			// - primary output ports
+			// - sequential nodes (flip-flops)
 			if (g.isPort() || g.isSequential()) {
 				intf = (Node[]) ArrayTools.grow(intf, Node.class, g.intfPosition + 1, 0.5f);
 				if (intf[g.intfPosition] != null) {
@@ -709,6 +714,10 @@ public class Graph {
 				}
 				intf[g.intfPosition] = g;
 			}
+			// first level (level[0]) contains:
+			// - primary input ports
+			// - other nodes without inputs (such as constants)
+			// - sequential nodes (flip-flops)
 			if (g.maxIn() < 0 || g.isSequential() || g.isInput()) {
 				queue.add(g);
 			}

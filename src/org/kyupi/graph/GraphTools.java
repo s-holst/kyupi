@@ -258,13 +258,18 @@ public class GraphTools {
 		return value;
 	}
 
-	public static int[][] allocInt(Graph circuit) {
+	public static int[][] allocInt(Graph circuit, int init_value) {
 		int levels = circuit.levels();
 		int value[][] = new int[levels][];
 		for (int l = 0; l < levels; l++) {
 			value[l] = new int[circuit.accessLevel(l).length];
-			Arrays.fill(value[l], 0);
+			Arrays.fill(value[l], init_value);
 		}
 		return value;
 	}
+	
+	public static int[][] allocInt(Graph circuit) {
+		return GraphTools.allocInt(circuit, 0);
+	}
+
 }
