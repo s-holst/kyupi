@@ -138,7 +138,7 @@ public class GraphTest {
 	@Test
 	public void testLoadS27Saed90() throws Exception {
 		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
-		assertEquals(121, c.countNodes());
+		assertEquals(39, c.countNodes());
 		assertEquals(8, c.countInputs());
 		assertEquals(2, c.countOutputs());
 	}
