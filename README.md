@@ -28,10 +28,9 @@ Quick Start
    failures, follow the hints in the output to resolve them. If you have 
    imported the project into Eclipse, run all JUnit tests from there as well.
 
-4. Look at the classes in package org.kyupi.apps for usage examples. Start
-   experimenting with the existing Apps and try to write your own. All public
-   APIs include JavaDoc comments and the JUnit tests also serve as programmatic
-   behavioral description of the APIs.
+4. Take a look at org/kyupi/misc/KyupiApp.java to learn how to make your first
+   Kyupi application. All public APIs include JavaDoc comments and the JUnit tests
+   also serve as programmatic behavioral description of the APIs.
 
 5. We'd love to hear your feedback: info@kyupi.org
 
@@ -212,8 +211,6 @@ Basic import of some STIL files.
 *org.kyupi.faults:* Stuck-at fault sets and fault collapsing.
 
 *org.kyupi.ipc:* Shared-memory based inter-process communication support.
-
-*org.kyupi.apps:* Sample applications and usage examples.
 
 *org.kyupi.misc:* Various helpers and tools used globally.
 
