@@ -124,12 +124,12 @@ public class StuckAtCollection {
 		// add S@0, S@1 to each pin of each non-pseudo node in the circuit
 		for (int lev = 0; lev < levels; lev++) {
 			Node[] level = g.accessLevel(lev);
-			log.debug("lev " + lev);
+			//log.debug("lev " + lev);
 			NodeAssignment[] nalevel = new NodeAssignment[level.length];
 			na[lev] = nalevel;
 			for (int pos_idx = 0; pos_idx < level.length; pos_idx++) {
 				Node n = level[pos_idx];
-				log.debug("node " + n);
+				//log.debug("node " + n);
 				if (n == null || n.isPseudo())
 					continue;
 				nalevel[pos_idx] = new NodeAssignment(n);
