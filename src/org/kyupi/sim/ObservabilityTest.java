@@ -41,7 +41,8 @@ public class ObservabilityTest {
 		assertNotNull(a);
 		assertNotNull(z);
 		
-		assertEquals(-1L, obs.getObservability(a));		
+		int idx = obs.signalMap().idxForOutput(a, 0);
+		assertEquals(-1L, obs.getObservability(idx));		
 	}
 
 }

@@ -11,8 +11,6 @@ package org.kyupi;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -26,9 +24,7 @@ import org.kyupi.data.source.BBSourceTest;
 import org.kyupi.data.source.BVSourceTest;
 import org.kyupi.data.source.QBSourceTest;
 import org.kyupi.data.source.QVSourceTest;
-import org.kyupi.faults.StuckAtCollectionTest;
 import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
 import org.kyupi.graph.GraphTest;
 import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.ScanChainsTest;
@@ -37,8 +33,8 @@ import org.kyupi.misc.JvmStats;
 import org.kyupi.misc.KyupiApp;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.BBPlainSimTest;
-import org.kyupi.sim.FaultSimSimpleTest;
 import org.kyupi.sim.ObservabilityTest;
+import org.kyupi.sim.QBObservabilityCounterTest;
 import org.kyupi.sim.QBPlainSimTest;
 import org.kyupi.sim.QVPlainSimTest;
 import org.kyupi.sim.SimulatorTest;
@@ -47,8 +43,8 @@ public class Main extends KyupiApp {
 
 	private static Class<?> ALL_TEST_CLASSES[] = { BBlockTest.class, BVectorTest.class, QBlockTest.class,
 			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class,
-			StuckAtCollectionTest.class, GraphTest.class, ScanChainsTest.class, ProcessManagerTest.class,
-			BBPlainSimTest.class, QBPlainSimTest.class, QVPlainSimTest.class, FaultSimSimpleTest.class,
+			GraphTest.class, ScanChainsTest.class, ProcessManagerTest.class,
+			BBPlainSimTest.class, QBPlainSimTest.class, QVPlainSimTest.class, QBObservabilityCounterTest.class,
 			ObservabilityTest.class, SimulatorTest.class, QVExpanderTest.class, Main.class };
 
 	public static void main(String[] args) throws Exception {

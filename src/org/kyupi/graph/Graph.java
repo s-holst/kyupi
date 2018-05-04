@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
 import org.kyupi.misc.ArrayTools;
 import org.kyupi.misc.Namespace;
 
@@ -419,72 +418,8 @@ public class Graph {
 			return b.toString();
 		}
 
-		/*
-		 * reference a pin of a node for organizing fault sets etc.
-		 */
-
-		public class PinAnnotation<T> {
-
-			private final int pin_id;
-			private final T annotation;
-
-			private PinAnnotation(int pin_id, T annotation) {
-				this.pin_id = pin_id;
-				this.annotation = annotation;
-			}
-
-			public boolean isInput() {
-				return pin_id > 0;
-			}
-
-			public boolean isOutput() {
-				return !isInput();
-			}
-
-			public int index() {
-				return Math.abs(pin_id) - 1;
-			}
-
-			public Node node() {
-				return Node.this;
-			}
-
-			public T annotation() {
-				return annotation;
-			}
-
-			public boolean equals(Object other) {
-				if (other instanceof PinAnnotation) {
-					PinAnnotation<?> otherpinref = (PinAnnotation<?>) other;
-					if (otherpinref.node().equals(node()) && otherpinref.pin_id == pin_id
-							&& otherpinref.annotation.equals(annotation))
-						return true;
-				}
-				return false;
-			}
-
-			public int hashCode() {
-				return Node.this.hashCode() ^ annotation.hashCode();
-			}
-
-			public String name() {
-				if (isInput())
-					return inName(index());
-				else
-					return outName(index());
-			}
-		}
-
-		public <T> PinAnnotation<T> newInputPinAnnotation(int idx, T annotation) {
-			return new PinAnnotation<T>(idx + 1, annotation);
-		}
-
-		public <T> PinAnnotation<T> newOutputPinAnnotation(int idx, T annotation) {
-			return new PinAnnotation<T>(-idx - 1, annotation);
-		}
-
 	}
-
+	
 	protected static Logger log = Logger.getLogger(Graph.class);
 
 	private Namespace namespace = new Namespace();
