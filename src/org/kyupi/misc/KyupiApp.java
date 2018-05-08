@@ -12,11 +12,8 @@ package org.kyupi.misc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -32,6 +29,8 @@ import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;
 import org.kyupi.graph.LibraryNangate;
 import org.kyupi.graph.LibrarySAED;
+
+import junit.framework.TestCase;
 
 /**
  * handles common command line options and provides utilities to build main

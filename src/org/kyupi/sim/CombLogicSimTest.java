@@ -17,19 +17,19 @@ public class CombLogicSimTest {
 
 	private void stateSet(State state, Graph circuit, String node, long value, long care) {
 		Node n = circuit.searchNode(node);
-		int signalIdx = state.sigMap().idxForOutput(n, 0);
+		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		state.set(signalIdx, value, care);
 	}
 	
 	private long stateGetV(State state, Graph circuit, String node) {
 		Node n = circuit.searchNode(node);
-		int signalIdx = state.sigMap().idxForOutput(n, 0);
+		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		return state.getV(signalIdx);
 	}
 
 	private long stateGetC(State state, Graph circuit, String node) {
 		Node n = circuit.searchNode(node);
-		int signalIdx = state.sigMap().idxForOutput(n, 0);
+		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		return state.getC(signalIdx);
 	}
 	
@@ -175,8 +175,8 @@ public class CombLogicSimTest {
 		
 		assertNotNull(n);
 		
-		int sigA = state.sigMap().idxForInput(n, 0);
-		int sigB = state.sigMap().idxForInput(n, 1);
+		int sigA = circuit.accessSignalMap().idxForInput(n, 0);
+		int sigB = circuit.accessSignalMap().idxForInput(n, 1);
 		
 		assertEquals(0b0101L, state.getV(sigA));
 		assertEquals(-1L, state.getC(sigA));
@@ -184,7 +184,7 @@ public class CombLogicSimTest {
 		assertEquals(0b1100L, state.getV(sigB));
 		assertEquals(-1L, state.getC(sigB));
 
-		int sigZ = state.sigMap().idxForOutput(n, 0);
+		int sigZ = circuit.accessSignalMap().idxForOutput(n, 0);
 
 		assertEquals(~(0b0101L & 0b1100L), state.getV(sigZ));
 		assertEquals(-1L, state.getC(sigZ));

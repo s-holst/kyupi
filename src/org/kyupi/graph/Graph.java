@@ -105,6 +105,13 @@ public class Graph {
 			this.type = type;
 			register(this);
 		}
+		
+		public Node(Node n) {
+			this.id = namespace.idFor(n.queryName());
+			this.type = n.type;
+			this.intfPosition = n.intfPosition;
+			register(this);
+		}
 
 		/*
 		 * accessors
@@ -434,8 +441,37 @@ public class Graph {
 
 	private String name;
 
+	private SignalMap signalMap;
+
 	public Graph(Library lib) {
 		library = lib;
+	}
+	
+	public Graph(Graph g) {
+		library = g.library;
+		name = g.name;
+		for (int idx = 0; idx < g.nodes.length; idx++) {
+			Node n = g.nodes[idx];
+			if (n != null)
+				new Node(n);
+		}
+		for (int idx = 0; idx < g.nodes.length; idx++) {
+			Node n = g.nodes[idx];
+			if (n == null)
+				continue;
+			int outCount = n.maxOut() + 1;
+			for (int i = 0; i < outCount; i++) {
+				Node succ = n.out(i);
+				if (succ != null)
+					nodes[idx].setOut(i, nodes[succ.id]);
+			}
+			int inCount = n.maxIn() + 1;
+			for (int i = 0; i < inCount; i++) {
+				Node pred = n.in(i);
+				if (pred != null)
+					nodes[idx].setIn(i, nodes[pred.id]);
+			}
+		}
 	}
 
 	public Library library() {
@@ -554,6 +590,11 @@ public class Graph {
 	 */
 	public Node[] accessNodes() {
 		return nodes;
+	}
+	
+	public SignalMap accessSignalMap() {
+		ensureLevels();
+		return signalMap;
 	}
 
 	public void connect(Node driver, int out_idx, Node receiver, int in_idx) {
@@ -705,6 +746,7 @@ public class Graph {
 		}
 
 		// log.debug("got levels: " + levels.length);
+		signalMap = new SignalMap(this);
 	}
 
 	public void printStats() {

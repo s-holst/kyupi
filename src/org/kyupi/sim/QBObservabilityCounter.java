@@ -5,7 +5,6 @@ import java.util.Arrays;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
 import org.kyupi.graph.Graph;
-import org.kyupi.graph.SignalMap;
 
 public class QBObservabilityCounter extends QBSource {
 
@@ -13,16 +12,20 @@ public class QBObservabilityCounter extends QBSource {
 	private Observability obscalc;
 	private int[] obsCount0;
 	private int[] obsCount1;
+	private int dropThreshold = Integer.MAX_VALUE;
 
 	public QBObservabilityCounter(Graph circuit, QBSource source) {
 		super(source.length());
 		this.source = source;
 		this.obscalc = new Observability(circuit);
-		obsCount0 = new int[obscalc.signalMap().length()];
-		obsCount1 = new int[obscalc.signalMap().length()];
+		obsCount0 = new int[circuit.accessSignalMap().length()];
+		obsCount1 = new int[circuit.accessSignalMap().length()];
 		Arrays.fill(obsCount0, 0);
 		Arrays.fill(obsCount1, 0);
-
+	}
+	
+	public void setDropThreshold(int ndetects) {
+		dropThreshold = ndetects;
 	}
 
 	@Override
@@ -40,6 +43,8 @@ public class QBObservabilityCounter extends QBSource {
 		obscalc.loadInputsFrom(s);
 		
 		for (int i = 0; i < obsCount0.length; i++) {
+			if (obsCount0[i] >= dropThreshold && obsCount1[i] >= dropThreshold)
+				continue;
 			long obs = obscalc.getObservability(i);
 			long val = obscalc.getV(i);
 			long obs0 = obs & val;
@@ -55,10 +60,6 @@ public class QBObservabilityCounter extends QBSource {
 	
 	public int length() {
 		return obsCount0.length;
-	}
-	
-	public SignalMap signalMap() {
-		return obscalc.signalMap();
 	}
 	
 	public int getSA0ObsCount(int sig_idx) {

@@ -138,6 +138,14 @@ public class GraphTest {
 		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
 		c.levels();
 	}
+	
+	@Test
+	public void testCopy() throws Exception {
+		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
+		Graph c2 = new Graph(c);
+		assertTrue(c.equals(c2));
+	}
+	
 
 	@Test
 	public void testLoadBenchmarks() throws Exception {

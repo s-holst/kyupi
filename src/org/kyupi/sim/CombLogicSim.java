@@ -15,19 +15,16 @@ import org.apache.log4j.Logger;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.graph.Graph;
 import org.kyupi.graph.Graph.Node;
-import org.kyupi.misc.ArrayTools;
 import org.kyupi.graph.GraphTools;
 import org.kyupi.graph.Library;
 import org.kyupi.graph.LibrarySAED;
-import org.kyupi.graph.SignalMap;
+import org.kyupi.misc.ArrayTools;
 
 public class CombLogicSim {
 
 	protected static Logger log = Logger.getLogger(CombLogicSim.class);
 
 	private Graph circuit;
-
-	private SignalMap signal_map;
 
 	public class State {
 
@@ -52,11 +49,11 @@ public class CombLogicSim {
 
 		public State(State parent) {
 			this.parent = parent;
-			care = new long[signal_map.length()];
-			value = new long[signal_map.length()];
+			care = new long[circuit.accessSignalMap().length()];
+			value = new long[circuit.accessSignalMap().length()];
 			Arrays.fill(care, 0L);
 			Arrays.fill(value, 0L);
-			valid_rev = new int[signal_map.length()];
+			valid_rev = new int[circuit.accessSignalMap().length()];
 			Arrays.fill(valid_rev, 0);
 
 			dirty_rev = GraphTools.allocInt(circuit);
@@ -78,10 +75,6 @@ public class CombLogicSim {
 
 		public State() {
 			this(null);
-		}
-
-		public SignalMap sigMap() {
-			return signal_map;
 		}
 
 		public long getV(int signal_idx) {
@@ -140,7 +133,7 @@ public class CombLogicSim {
 			this.value[signal_idx] = value;
 			this.care[signal_idx] = care;
 			valid_rev[signal_idx] = rev;
-			Node receiver = signal_map.receiverForIdx(signal_idx);
+			Node receiver = circuit.accessSignalMap().receiverForIdx(signal_idx);
 			dirty_rev[receiver.level()][receiver.levelPosition()] = rev;
 			min_dirty_level = Math.min(min_dirty_level, receiver.level());
 		}
@@ -222,11 +215,6 @@ public class CombLogicSim {
 
 	public CombLogicSim(Graph circuit) {
 		this.circuit = circuit;
-		signal_map = new SignalMap(circuit);
-	}
-
-	public SignalMap edgeMap() {
-		return signal_map;
 	}
 
 	private long[] tmpIV = new long[32];
@@ -258,7 +246,7 @@ public class CombLogicSim {
 						tmpIV = ArrayTools.grow(tmpIV, input_count, 32, 0);
 						tmpIC = ArrayTools.grow(tmpIC, input_count, 32, 0);
 						for (int i = 0; i < input_count; i++) {
-							int sidx = signal_map.idxForInput(n, i);
+							int sidx = circuit.accessSignalMap().idxForInput(n, i);
 							if (sidx >= 0) {
 								tmpIV[i] = state.getV(sidx);
 								tmpIC[i] = state.getC(sidx);
@@ -271,7 +259,7 @@ public class CombLogicSim {
 					}
 					
 					for (int o = 0; o < output_count; o++) {
-						int sidx = signal_map.idxForOutput(n, o);
+						int sidx = circuit.accessSignalMap().idxForOutput(n, o);
 						if (sidx >= 0 && state.valid_rev[sidx] != state.rev) {
 							//log.debug("set signal " + n + " " + sidx + " " + tmpOV[o]);
 
@@ -287,7 +275,7 @@ public class CombLogicSim {
 			if (n.isSequential() || n.isOutput()) {
 				int input_count = n.maxIn() + 1;
 				for (int i = 0; i < input_count; i++) {
-					int sidx = signal_map.idxForInput(n, i);
+					int sidx = circuit.accessSignalMap().idxForInput(n, i);
 					if (sidx >= 0) {
 						tmpIV[i] = state.getV(sidx);
 						tmpIC[i] = state.getC(sidx);

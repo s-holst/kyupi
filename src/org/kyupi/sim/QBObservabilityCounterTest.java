@@ -60,8 +60,8 @@ public class QBObservabilityCounterTest extends TestCase {
 		assertNotNull(a);
 		assertNotNull(z);
 
-		int a_idx = obs.signalMap().idxForOutput(a, 0);
-		int z_idx = obs.signalMap().idxForOutput(z, 0);
+		int a_idx = g.accessSignalMap().idxForOutput(a, 0);
+		int z_idx = g.accessSignalMap().idxForOutput(z, 0);
 
 		assertEquals(61, obs.getSA0ObsCount(a_idx));
 		assertEquals(3, obs.getSA1ObsCount(a_idx));
