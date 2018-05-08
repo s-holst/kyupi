@@ -10,7 +10,7 @@
 package org.kyupi.sim;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
 import org.kyupi.sim.Simulator.State;
@@ -22,7 +22,7 @@ public class QBPlainSim extends QBSource {
 	private QBSource source;
 	private State state;
 
-	public QBPlainSim(Graph circuit, QBSource source) {
+	public QBPlainSim(MutableCircuit circuit, QBSource source) {
 		super(source.length());
 		if (circuit.accessInterface().length > source.length()) {
 			throw new IllegalArgumentException("insufficient data width for the interface of the netlist.");

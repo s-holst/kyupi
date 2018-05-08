@@ -14,12 +14,12 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.item.QVector;
@@ -35,19 +35,19 @@ public class QBPlainSimTest extends TestCase {
 
 	@Test
 	public void testIntf() {
-		Graph g = new Graph(new Library());
-		Node pos0out = g.new Node("p0out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		MutableCircuit g = new MutableCircuit(new Library());
+		MutableCell pos0out = g.new MutableCell("p0out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos0out.setIntfPosition(0);
-		Node pos1out = g.new Node("p1out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		MutableCell pos1out = g.new MutableCell("p1out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos1out.setIntfPosition(1);
-		Node pos2in = g.new Node("p2in", Library.TYPE_BUF | Library.FLAG_INPUT);
+		MutableCell pos2in = g.new MutableCell("p2in", Library.TYPE_BUF | Library.FLAG_INPUT);
 		pos2in.setIntfPosition(2);
 
-		Node buf = g.new Node("buf", Library.TYPE_BUF);
+		MutableCell buf = g.new MutableCell("buf", Library.TYPE_BUF);
 
-		Node pos3out = g.new Node("p3out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		MutableCell pos3out = g.new MutableCell("p3out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos3out.setIntfPosition(3);
-		Node pos4out = g.new Node("p4out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		MutableCell pos4out = g.new MutableCell("p4out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		pos4out.setIntfPosition(4);
 		g.connect(pos2in, -1, buf, 0);
 		g.connect(buf, -1, pos1out, 0);
@@ -64,21 +64,21 @@ public class QBPlainSimTest extends TestCase {
 	}
 
 	public void testOAI21() {
-		Graph g = new Graph(new LibrarySAED());
-		Node i0 = g.new Node("i0", Library.TYPE_BUF | Library.FLAG_INPUT);
-		Node i1 = g.new Node("i1", Library.TYPE_BUF | Library.FLAG_INPUT);
-		Node i2 = g.new Node("i2", Library.TYPE_BUF | Library.FLAG_INPUT);
-		Node o0 = g.new Node("o0", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+		MutableCircuit g = new MutableCircuit(new LibrarySAED());
+		MutableCell i0 = g.new MutableCell("i0", Library.TYPE_BUF | Library.FLAG_INPUT);
+		MutableCell i1 = g.new MutableCell("i1", Library.TYPE_BUF | Library.FLAG_INPUT);
+		MutableCell i2 = g.new MutableCell("i2", Library.TYPE_BUF | Library.FLAG_INPUT);
+		MutableCell o0 = g.new MutableCell("o0", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 		i0.setIntfPosition(0);
 		i1.setIntfPosition(1);
 		i2.setIntfPosition(2);
 		o0.setIntfPosition(3);
-		Node n = g.new Node("n", LibrarySAED.TYPE_OAI21);
+		MutableCell n = g.new MutableCell("n", LibrarySAED.TYPE_OAI21);
 		g.connect(i0, -1, n, 0);
 		g.connect(i1, -1, n, 1);
 		g.connect(i2, -1, n, 2);
 		g.connect(n, -1, o0, 0);
-		Graph g2 = GraphTools.benchToGraph("input(i0) input(i1) input(i2) output(o0) s0=OR(i0,i1) o0=NAND(i2,s0)");
+		MutableCircuit g2 = CircuitTools.parseBench("input(i0) input(i1) input(i2) output(o0) s0=OR(i0,i1) o0=NAND(i2,s0)");
 
 		QVSource pat = QVSource.from(QBSource.random(4, 42));
 		QVSource tst = QVSource.from(new QBPlainSim(g, QBSource.random(4, 42)));
@@ -92,7 +92,7 @@ public class QBPlainSimTest extends TestCase {
 
 	@Test
 	public void testNorInv() {
-		Graph g = GraphTools.benchToGraph("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
+		MutableCircuit g = CircuitTools.parseBench("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
 		int length = g.accessInterface().length;
 
 		QVSource pat = QVSource.from(QBSource.random(length, 42));
@@ -149,12 +149,12 @@ public class QBPlainSimTest extends TestCase {
 	@Test
 	public void testS27() throws Exception {
 		Library l = new LibrarySAED();
-		Graph g = GraphTools.loadGraph(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
+		MutableCircuit g = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
 		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", g);
 		QVSource tests = p.getStimuliSource();
 		QVSource resp = p.getResponsesSource();
 
-		for (Node n : g.accessInterface()) {
+		for (MutableCell n : g.accessInterface()) {
 			if (n == null)
 				continue;
 			StringBuffer buf = new StringBuffer();
@@ -188,39 +188,39 @@ public class QBPlainSimTest extends TestCase {
 
 	@Test
 	public void testC17Nangate() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"),
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"),
 				new LibraryNangate());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testC17Saed90() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
 				new LibrarySAED());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testAllSaed90() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
 				new LibrarySAED());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
 				new LibrarySAED());
-		GraphTools.splitMultiOutputCells(g_test);
+		CircuitTools.splitMultiOutputCells(g_test);
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testB13Transition() throws Exception {
-		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v"),
+		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v"),
 				new LibrarySAED());
 		FormatStil stil = new FormatStil(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13_trans.stil"), graph);
 		ArrayList<QVector> stimuli = stil.getStimuliArray();
 		ArrayList<QVector> responses = stil.getResponsesArray();
 
-		Node[] intf = graph.accessInterface();
+		MutableCell[] intf = graph.accessInterface();
 
 		// transition patterns: simulate each scan load for two clock cycles.
 		QBSource launch = new QBPlainSim(graph, QBSource.from(intf.length, stimuli));
@@ -252,7 +252,7 @@ public class QBPlainSimTest extends TestCase {
 		assertEquals(0, errors);
 	}
 
-	private void assertEqualsByRandomSimulation(Graph g_ref, Graph g_test) {
+	private void assertEqualsByRandomSimulation(MutableCircuit g_ref, MutableCircuit g_test) {
 		int length = g_ref.accessInterface().length;
 		assertEquals(length, g_test.accessInterface().length);
 
@@ -266,7 +266,7 @@ public class QBPlainSimTest extends TestCase {
 		}
 	}
 
-	private void assertEqualsReport(QVector expected, QVector actual, QVector inp, int pindex, Node[] intf) {
+	private void assertEqualsReport(QVector expected, QVector actual, QVector inp, int pindex, MutableCell[] intf) {
 		if (!expected.equals(actual)) {
 			int l = expected.length();
 			StringBuffer buf = new StringBuffer();

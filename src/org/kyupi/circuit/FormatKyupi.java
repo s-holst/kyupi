@@ -13,18 +13,18 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 
 public class FormatKyupi {
 
 	protected static Logger log = Logger.getLogger(FormatKyupi.class);
 
-	public static void save(OutputStream os, Graph graph, String name) {
+	public static void save(OutputStream os, MutableCircuit graph, String name) {
 		PrintWriter op = new PrintWriter(os);
 		op.println("# Kyupi Graph Dump 1");
 		op.println("# Name " + name);
-		Node[] nodes = graph.accessNodes();
-		for (Node node : nodes) {
+		MutableCell[] nodes = graph.accessNodes();
+		for (MutableCell node : nodes) {
 			if (node == null) {
 				continue;
 			}

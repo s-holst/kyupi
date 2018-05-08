@@ -12,11 +12,11 @@ package org.kyupi.sim;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.misc.ArrayTools;
 
@@ -24,7 +24,7 @@ public class CombLogicSim {
 
 	protected static Logger log = Logger.getLogger(CombLogicSim.class);
 
-	private Graph circuit;
+	private MutableCircuit circuit;
 
 	public class State {
 
@@ -56,7 +56,7 @@ public class CombLogicSim {
 			valid_rev = new int[circuit.accessSignalMap().length()];
 			Arrays.fill(valid_rev, 0);
 
-			dirty_rev = GraphTools.allocInt(circuit);
+			dirty_rev = CircuitTools.allocInt(circuit);
 
 			stim_care = new long[circuit.accessInterface().length];
 			stim_value = new long[circuit.accessInterface().length];
@@ -133,7 +133,7 @@ public class CombLogicSim {
 			this.value[signal_idx] = value;
 			this.care[signal_idx] = care;
 			valid_rev[signal_idx] = rev;
-			Node receiver = circuit.accessSignalMap().receiverForIdx(signal_idx);
+			MutableCell receiver = circuit.accessSignalMap().receiverForIdx(signal_idx);
 			dirty_rev[receiver.level()][receiver.levelPosition()] = rev;
 			min_dirty_level = Math.min(min_dirty_level, receiver.level());
 		}
@@ -142,14 +142,14 @@ public class CombLogicSim {
 			this.stim_value[pos] = value;
 			this.stim_care[pos] = care;
 			stim_valid_rev[pos] = rev;
-			Node n = circuit.accessInterface()[pos];
+			MutableCell n = circuit.accessInterface()[pos];
 			dirty_rev[n.level()][n.levelPosition()] = rev;
 			min_dirty_level = 0;
 		}
 
 		public void loadInputsFrom(QBlock b) {
 			int pos = 0;
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n != null && (n.isSequential() || n.isInput()))
 					setStimulus(pos, b.getV(pos), b.getC(pos));
 				pos++;
@@ -158,7 +158,7 @@ public class CombLogicSim {
 
 		public void storeOutputsTo(QBlock b) {
 			int pos = 0;
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n != null && (n.isOutput() || n.isSequential()))
 					b.set(pos, getResponseV(pos), getResponseC(pos));
 				pos++;
@@ -175,7 +175,7 @@ public class CombLogicSim {
 
 		public void reapply() {
 			clear();
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n == null)
 					continue;
 				int pos = n.intfPosition();
@@ -213,7 +213,7 @@ public class CombLogicSim {
 
 	}
 
-	public CombLogicSim(Graph circuit) {
+	public CombLogicSim(MutableCircuit circuit) {
 		this.circuit = circuit;
 	}
 
@@ -226,9 +226,9 @@ public class CombLogicSim {
 	private void propagate_state(State state) {
 		int level_count = circuit.levels();
 		for (int level_idx = state.min_dirty_level; level_idx < level_count; level_idx++) {
-			Node[] level = circuit.accessLevel(level_idx);
+			MutableCell[] level = circuit.accessLevel(level_idx);
 			for (int pos = 0; pos < level.length; pos++) {
-				Node n = level[pos];
+				MutableCell n = level[pos];
 				if (n == null || n.maxOut() < 0)
 					continue;
 				int output_count = n.maxOut() + 1;
@@ -269,7 +269,7 @@ public class CombLogicSim {
 				}
 			}
 		}
-		for (Node n : circuit.accessInterface()) {
+		for (MutableCell n : circuit.accessInterface()) {
 			if (n == null || !state.isDirty(n.level(), n.levelPosition()))
 				continue;
 			if (n.isSequential() || n.isOutput()) {

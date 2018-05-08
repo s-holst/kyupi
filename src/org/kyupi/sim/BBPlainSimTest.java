@@ -13,12 +13,12 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.item.BVector;
 import org.kyupi.data.source.BBSource;
@@ -33,7 +33,7 @@ public class BBPlainSimTest extends TestCase {
 
 	@Test
 	public void testNorInv() {
-		Graph g = GraphTools.benchToGraph("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
+		MutableCircuit g = CircuitTools.parseBench("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
 		int length = g.accessInterface().length;
 
 		BVSource sim = BVSource.from(new BBPlainSim(g, BBSource.random(length, 42)));
@@ -60,27 +60,27 @@ public class BBPlainSimTest extends TestCase {
 
 	@Test
 	public void testC17Nangate() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), new LibraryNangate());
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), new LibraryNangate());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testC17Saed90() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), new LibrarySAED());
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), new LibrarySAED());
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testSAED90cells() throws Exception {
-		Graph g_ref = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED());
-		Graph g_test = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
-		GraphTools.splitMultiOutputCells(g_test);
+		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED());
+		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
+		CircuitTools.splitMultiOutputCells(g_test);
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
-	private void assertEqualsByRandomSimulation(Graph g_ref, Graph g_test) {
+	private void assertEqualsByRandomSimulation(MutableCircuit g_ref, MutableCircuit g_test) {
 		int length = g_ref.accessInterface().length;
 		assertEquals(length, g_test.accessInterface().length);
 
@@ -93,7 +93,7 @@ public class BBPlainSimTest extends TestCase {
 		}
 	}
 
-	private void assertEqualsReport(BVector expected, BVector actual, int pindex, Node[] intf) {
+	private void assertEqualsReport(BVector expected, BVector actual, int pindex, MutableCell[] intf) {
 		if (!expected.equals(actual)) {
 			int l = expected.length();
 			StringBuffer buf = new StringBuffer();

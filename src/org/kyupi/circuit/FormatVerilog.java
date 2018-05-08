@@ -17,19 +17,19 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
-import org.kyupi.graph.parser.Verilog;
-import org.kyupi.graph.parser.VerilogParseTree;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
+import org.kyupi.circuit.parser.Verilog;
+import org.kyupi.circuit.parser.VerilogParseTree;
 
 public class FormatVerilog {
 
 	protected static Logger log = Logger.getLogger(FormatVerilog.class);
 
-	static Graph load(InputStream is, Library library) throws IOException {
+	static MutableCircuit load(InputStream is, Library library) throws IOException {
 		VerilogParseTree tree = Verilog.parse(is);
-		ArrayList<Graph> units = tree.elaborateAll(library);
+		ArrayList<MutableCircuit> units = tree.elaborateAll(library);
 		if (units.size() == 0)
-			return new Graph(library);
+			return new MutableCircuit(library);
 		return units.get(0);
 	}
 	
@@ -46,11 +46,11 @@ public class FormatVerilog {
 	 * @param graph
 	 * @param entity_name
 	 */
-	public static void save(OutputStream os, Graph graph) {
+	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
 		op.println("module " + graph.getName() + " ( ");
 		boolean comma_needed = false;
-		for (Node intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.accessInterface()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isInput() || intf_node.isOutput()) {
@@ -64,7 +64,7 @@ public class FormatVerilog {
 		
 		op.print("input ");
 		comma_needed = false;
-		for (Node intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.accessInterface()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isInput()) {
@@ -78,7 +78,7 @@ public class FormatVerilog {
 
 		op.print("output ");
 		comma_needed = false;
-		for (Node intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.accessInterface()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isOutput()) {
@@ -92,8 +92,8 @@ public class FormatVerilog {
 
 		op.print("wire ");
 		comma_needed = false;
-		Node[] nodes = graph.accessNodes();
-		for (Node node : nodes) {
+		MutableCell[] nodes = graph.accessNodes();
+		for (MutableCell node : nodes) {
 			if (node == null) {
 				continue;
 			}
@@ -106,14 +106,14 @@ public class FormatVerilog {
 		}
 		op.println(";");
 
-		for (Node node : nodes) {
+		for (MutableCell node : nodes) {
 			if (node == null || node.isPseudo() || node.isInput() || node.isOutput()) {
 				continue;
 			}
 			op.print("  " + node.typeName() + " " + s(node.queryName()) + " ( ");
 			int i = -1;
 			comma_needed = false;
-			for (Node n : node.accessInputs()) {
+			for (MutableCell n : node.accessInputs()) {
 				i++;
 				if (n == null)
 					continue;
@@ -123,7 +123,7 @@ public class FormatVerilog {
 				comma_needed = true;
 			}
 			i = -1;
-			for (Node n : node.accessOutputs()) {
+			for (MutableCell n : node.accessOutputs()) {
 				i++;
 				if (n == null)
 					continue;

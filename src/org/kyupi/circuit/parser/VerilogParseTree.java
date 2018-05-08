@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph.parser;
+package org.kyupi.circuit.parser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,9 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 
 public class VerilogParseTree {
 
@@ -119,16 +119,16 @@ public class VerilogParseTree {
 
 	// public methods for generating graphs from parse tree.
 
-	public ArrayList<Graph> elaborateAll(Library l) throws IOException {
-		ArrayList<Graph> graphs = new ArrayList<>();
+	public ArrayList<MutableCircuit> elaborateAll(Library l) throws IOException {
+		ArrayList<MutableCircuit> graphs = new ArrayList<>();
 		for (Module m : modules) {
 			graphs.add(elaborate(m, l));
 		}
 		return graphs;
 	}
 
-	public Graph elaborate(Module m, Library l) throws IOException {
-		Graph g = new Graph(l);
+	public MutableCircuit elaborate(Module m, Library l) throws IOException {
+		MutableCircuit g = new MutableCircuit(l);
 		g.setName(m.moduleName);
 		HashMap<String, Range> inputNames = new HashMap<>();
 		for (RangedVariableList rvl : m.inputDeclarations) {
@@ -173,7 +173,7 @@ public class VerilogParseTree {
 			pl.add(portName);
 			List<String> expanded = expand(pl, r);
 			for (String na : expanded) {
-				Node n = g.new Node(na, type);
+				MutableCell n = g.new MutableCell(na, type);
 				n.setIntfPosition(interfacePos++);
 			}
 		}
@@ -181,12 +181,12 @@ public class VerilogParseTree {
 			findOrDeclareSignal(g, wireName);
 		}
 		for (Assignment assignment : m.assignments) {
-			Node target = findOrDeclareSignal(g, assignment.targetName);
-			Node source = findOrDeclareSignal(g, assignment.sourceName);
+			MutableCell target = findOrDeclareSignal(g, assignment.targetName);
+			MutableCell source = findOrDeclareSignal(g, assignment.sourceName);
 			g.connect(source, -1, target, 0);
 		}
 		for (ModuleInstantiation mi : m.moduleInstantiations) {
-			Node n = g.new Node(mi.instanceName, l.resolve(mi.moduleName));
+			MutableCell n = g.new MutableCell(mi.instanceName, l.resolve(mi.moduleName));
 			if (n.isPort() || n.isSequential())
 				n.setIntfPosition(interfacePos++);
 			for (PortConnection pc : mi.portConnections) {
@@ -196,7 +196,7 @@ public class VerilogParseTree {
 							+ " of type " + n.typeName());
 				}
 				int pdir = l.pinDirection(n.type(), pc.portName);
-				Node other = findOrDeclareSignal(g, pc.variableName);
+				MutableCell other = findOrDeclareSignal(g, pc.variableName);
 				if (pdir == Library.DIR_IN) {
 					g.connect(other, -1, n, pidx);
 				} else {
@@ -212,18 +212,18 @@ public class VerilogParseTree {
 
 	private int unique;
 
-	private Node findOrDeclareSignal(Graph g, String name) {
+	private MutableCell findOrDeclareSignal(MutableCircuit g, String name) {
 		if (name.equals("##CONST0##")) {
-			return g.new Node("const0_gen" + (unique++), Library.TYPE_CONST0);
+			return g.new MutableCell("const0_gen" + (unique++), Library.TYPE_CONST0);
 		}
 		if (name.equals("##CONST1##")) {
-			return g.new Node("const1_gen" + (unique++), Library.TYPE_CONST1);
+			return g.new MutableCell("const1_gen" + (unique++), Library.TYPE_CONST1);
 		}
 
-		Node signal = g.searchNode(name);
+		MutableCell signal = g.searchNode(name);
 		if (signal != null)
 			return signal;
-		return g.new Node(name, Library.TYPE_BUF | Library.FLAG_PSEUDO);
+		return g.new MutableCell(name, Library.TYPE_BUF | Library.FLAG_PSEUDO);
 	}
 
 	private List<String> expand(Collection<String> variableNames, Range range) {

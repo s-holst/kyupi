@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.TextScanner;
 
 class FormatISCAS {
@@ -106,11 +106,11 @@ class FormatISCAS {
 
 	}
 
-	static Graph load(InputStream is) throws IOException {
-		Graph c = new Graph(new Library());
+	static MutableCircuit load(InputStream is) throws IOException {
+		MutableCircuit c = new MutableCircuit(new Library());
 		IscasScanner scanner = new IscasScanner(new InputStreamReader(is));
 
-		HashMap<Integer, Node> address_gate = new HashMap<Integer, Node>();
+		HashMap<Integer, MutableCell> address_gate = new HashMap<Integer, MutableCell>();
 
 		int intf_pos = 0;
 
@@ -154,7 +154,7 @@ class FormatISCAS {
 			scanner.assertNext(IscasScanner.SYM_INTEGER);
 			int fanins = Integer.parseInt(scanner.getString()); // column 5
 			nextAndSkipFaults(scanner);
-			ArrayList<Node> driver = new ArrayList<Node>(); // read all fanins
+			ArrayList<MutableCell> driver = new ArrayList<MutableCell>(); // read all fanins
 			for (int i = 0; i < fanins; i++) {
 				if (scanner.getSymbol() != IscasScanner.SYM_INTEGER)
 					throw new IOException("Expected fanin address at " + scanner.pos());
@@ -164,14 +164,14 @@ class FormatISCAS {
 				driver.add(address_gate.get(address));
 				scanner.next();
 			}
-			Node g = c.new Node(name, type);
-			for (Node drv : driver) {
+			MutableCell g = c.new MutableCell(name, type);
+			for (MutableCell drv : driver) {
 				c.connect(drv, -1, g, -1);
 			}
 			if (g.isInput())
 				g.setIntfPosition(intf_pos++);
 			if (fanouts == 0) { // nodes with no fanout are outputs.
-				Node output = c.new Node(name + "_out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
+				MutableCell output = c.new MutableCell(name + "_out", Library.TYPE_BUF | Library.FLAG_OUTPUT);
 				c.connect(g, -1, output, 0);
 				output.setIntfPosition(intf_pos++);
 			}

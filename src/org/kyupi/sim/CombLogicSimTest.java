@@ -6,36 +6,36 @@ import java.io.File;
 import java.util.Random;
 
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.CombLogicSim.State;
 
 public class CombLogicSimTest {
 
-	private void stateSet(State state, Graph circuit, String node, long value, long care) {
-		Node n = circuit.searchNode(node);
+	private void stateSet(State state, MutableCircuit circuit, String node, long value, long care) {
+		MutableCell n = circuit.searchNode(node);
 		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		state.set(signalIdx, value, care);
 	}
 	
-	private long stateGetV(State state, Graph circuit, String node) {
-		Node n = circuit.searchNode(node);
+	private long stateGetV(State state, MutableCircuit circuit, String node) {
+		MutableCell n = circuit.searchNode(node);
 		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		return state.getV(signalIdx);
 	}
 
-	private long stateGetC(State state, Graph circuit, String node) {
-		Node n = circuit.searchNode(node);
+	private long stateGetC(State state, MutableCircuit circuit, String node) {
+		MutableCell n = circuit.searchNode(node);
 		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
 		return state.getC(signalIdx);
 	}
 	
 	@Test
 	public void testC17() throws Exception {
-		Graph circuit = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit circuit = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 		
@@ -112,7 +112,7 @@ public class CombLogicSimTest {
 	
 	@Test
 	public void testSequential() {
-		Graph circuit = GraphTools.benchToGraph("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
+		MutableCircuit circuit = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 
@@ -152,7 +152,7 @@ public class CombLogicSimTest {
 	
 	@Test
 	public void testGates() {
-		Graph circuit = GraphTools.benchToGraph("INPUT(a) INPUT(b) OUTPUT(nand) OUTPUT(and) nand=NAND(a,b) and=NOT(nand)");
+		MutableCircuit circuit = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(nand) OUTPUT(and) nand=NAND(a,b) and=NOT(nand)");
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 		
@@ -171,7 +171,7 @@ public class CombLogicSimTest {
 
 		state.propagate();
 		
-		Node n = circuit.searchNode("nand_");
+		MutableCell n = circuit.searchNode("nand_");
 		
 		assertNotNull(n);
 		

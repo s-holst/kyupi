@@ -19,16 +19,16 @@ options {
 
 PARSER_BEGIN(VHDL93)
 
-package org.kyupi.graph.parser;
+package org.kyupi.circuit.parser;
 
 import java.util.*;
 import java.io.*;
 
 import org.apache.log4j.Logger;
 
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.Library;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
+import org.kyupi.circuit.Library;
 
 
 @SuppressWarnings("all")
@@ -61,7 +61,7 @@ public class VHDL93 {
 		return sf_;
 	}
     
-	public static ArrayList<Graph> parse (InputStream is, Library library) throws IOException {
+	public static ArrayList<MutableCircuit> parse (InputStream is, Library library) throws IOException {
 	    String sf_ = "foo";
 		Reader reader = new InputStreamReader(is);
 		VHDL93 parser = new VHDL93(reader);
@@ -313,7 +313,7 @@ void library_unit(Context c) :
 
 void primary_unit(Context c) :
 {
-	Graph entity = null;
+	MutableCircuit entity = null;
 }
 {
 	{
@@ -332,7 +332,7 @@ void primary_unit(Context c) :
 void entity_declaration(Context c) :
 {
 	String id;
-	Graph entity = new Graph(library);
+	MutableCircuit entity = new MutableCircuit(library);
 }
 {
 	<ENTITY> id = identifier() <IS>  
@@ -343,7 +343,7 @@ void entity_declaration(Context c) :
 	<END> [ <ENTITY> ] [ identifier() ] ";"  
 }
 
-void entity_header(Graph entity_) :
+void entity_header(MutableCircuit entity_) :
 {}
 {
   [ generic_clause() ]
@@ -538,13 +538,13 @@ void package_declarative_item(Context c):
 }
 
 
-void port_clause(Graph entity_)  :
+void port_clause(MutableCircuit entity_)  :
 {}
 {
 	<PORT> "(" interface_list(entity_) ")" ";"
 }
 
-void interface_list(Graph entity_):
+void interface_list(MutableCircuit entity_):
 {
 }
 {
@@ -552,14 +552,14 @@ void interface_list(Graph entity_):
   ( ";" interface_declaration(entity_) )*
 }
 
-void interface_declaration(Graph entity_):
+void interface_declaration(MutableCircuit entity_):
 {
 }
 {
 	interface_signal_declaration(entity_) 
 }
 
-void interface_signal_declaration(Graph entity_):
+void interface_signal_declaration(MutableCircuit entity_):
 {
 	ArrayList<String> ids;
 	int dir = DIR_LINKAGE;
@@ -573,11 +573,11 @@ void interface_signal_declaration(Graph entity_):
 		for (String id: ids) {
   			if (dir == DIR_IN)  			{
   			  log.trace("input port: " + id);
-  			  Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_INPUT);
+  			  MutableCell n = entity_.new MutableCell(id, Library.TYPE_BUF | Library.FLAG_INPUT);
   			  n.setIntfPosition(posIdx++);
   			} else  			{
   			  log.trace("output port: " + id);
-  			  Node n = entity_.new Node(id, Library.TYPE_BUF | Library.FLAG_OUTPUT);
+  			  MutableCell n = entity_.new MutableCell(id, Library.TYPE_BUF | Library.FLAG_OUTPUT);
   			  n.setIntfPosition(posIdx++);
   			}
 		}
@@ -650,7 +650,7 @@ void architecture_body(Context c) :
 {
 	String id;
 	String entityName;
-	Graph g;
+	MutableCircuit g;
 }
 {
 	<ARCHITECTURE> id = identifier() <OF> entityName = name() <IS> 
@@ -664,14 +664,14 @@ void architecture_body(Context c) :
 	<END> [ <ARCHITECTURE> ] [ identifier() ] ";"
 }
 
-void architecture_declarative_part(Context c, Graph g):
+void architecture_declarative_part(Context c, MutableCircuit g):
 {
 }
 {
 	( block_declarative_item(c, g) )*
 }
 
-void block_declarative_item(Context c, Graph g) :
+void block_declarative_item(Context c, MutableCircuit g) :
 {
 }
 {
@@ -693,14 +693,14 @@ void block_declarative_item(Context c, Graph g) :
 	)
 }
 
-void architecture_statement_part(Graph arch_) :
+void architecture_statement_part(MutableCircuit arch_) :
 {
 }
 {
 	( architecture_statement(arch_) )*
 }
 
-void architecture_statement(Graph g):
+void architecture_statement(MutableCircuit g):
 {
 }
 {
@@ -765,18 +765,18 @@ String instantiated_unit():
 	{	  return id;	}
 }
 
-void component_instantiation_statement(Graph g):
+void component_instantiation_statement(MutableCircuit g):
 {
   String id, compId;
-  Node comp;
+  MutableCell comp;
   HashMap<String,String> map;
 }
 {
-	id=identifier() ":" compId=instantiated_unit()	{	  comp=g.new Node(id,library.resolve(compId));	}
+	id=identifier() ":" compId=instantiated_unit()	{	  comp=g.new MutableCell(id,library.resolve(compId));	}
 		[ generic_map_aspect() ]
 		[ map=port_map_aspect()		{
 		  for (String key: map.keySet())		  {
-		    String value = map.get(key);		    Node sig = g.searchNode(value);
+		    String value = map.get(key);		    MutableCell sig = g.searchNode(value);
 		    if (sig==null)
 		     throw new ParseException("signal name unknown: " + value);
 		    int pidx = library.pinIndex(comp.type(), key);
@@ -987,7 +987,7 @@ void constant_declaration() :
 	[ ":=" expression() ] ";"
 }
 
-void signal_declaration(Graph g) :
+void signal_declaration(MutableCircuit g) :
 {
   ArrayList<String> ids;
 }
@@ -995,7 +995,7 @@ void signal_declaration(Graph g) :
 	<SIGNAL> ids=identifier_list() ":"
 	subtype_indication() [ signal_kind() ] [ ":=" expression() ] ";"	{	  for (String id: ids)	  {
 	    log.trace("new signal node: " + id);
-	    g.new Node(id,Library.FLAG_PSEUDO|Library.TYPE_BUF);	  }	}
+	    g.new MutableCell(id,Library.FLAG_PSEUDO|Library.TYPE_BUF);	  }	}
 }
 
 int signal_kind() :
@@ -1008,7 +1008,7 @@ int signal_kind() :
 
 void component_declaration(Context c) :
 {
-  Graph g = new Graph(library);
+  MutableCircuit g = new MutableCircuit(library);
   String id;
 }
 {

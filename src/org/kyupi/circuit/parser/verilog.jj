@@ -14,12 +14,12 @@ options {
 
 PARSER_BEGIN(Verilog)
 
-package org.kyupi.graph.parser;
+package org.kyupi.circuit.parser;
 
 import java.util.*;
 import java.io.*;
 import org.apache.log4j.Logger;
-import org.kyupi.graph.parser.VerilogParseTree.*;
+import org.kyupi.circuit.parser.VerilogParseTree.*;
 
 @SuppressWarnings("all")
 public class Verilog {

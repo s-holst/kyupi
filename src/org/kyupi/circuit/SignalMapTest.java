@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 
 public class SignalMapTest {
 
@@ -13,7 +13,7 @@ public class SignalMapTest {
 
 	@Test
 	public void test() {
-		Graph g = GraphTools.benchToGraph("INPUT(a) INPUT(b) OUTPUT(c) OUTPUT(d) c=AND(a,b) d=BUF(c)");
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(c) OUTPUT(d) c=AND(a,b) d=BUF(c)");
 		assertEquals(6, g.countNodes());
 		assertEquals(2, g.countInputs());
 		assertEquals(2, g.countOutputs());
@@ -22,10 +22,10 @@ public class SignalMapTest {
 		
 		SignalMap em = new SignalMap(g);
 		assertEquals(5, em.length());
-		Node a = g.searchNode("a");
-		Node c_ = g.searchNode("c_");
-		Node c = g.searchNode("c");
-		Node d_ = g.searchNode("d_");
+		MutableCell a = g.searchNode("a");
+		MutableCell c_ = g.searchNode("c_");
+		MutableCell c = g.searchNode("c");
+		MutableCell d_ = g.searchNode("d_");
 		
 		
 		assertEquals(em.idxForOutput(a, 0), em.idxForInput(c_, 0));

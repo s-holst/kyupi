@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.StringTools;
 
 public class FormatDOT {
@@ -24,7 +24,7 @@ public class FormatDOT {
 	private static final int scaleX = 230;
 	private static final int scaleY = 120;
 	
-		private static String drawNode(Node n) {
+		private static String drawNode(MutableCell n) {
 		String s = "  " + n.id() + " [label=\"{";
 		int num = n.maxIn() + 1;
 		ArrayList<String> inports = new ArrayList<>();
@@ -63,7 +63,7 @@ public class FormatDOT {
 		}
 	}
 
-	public static void save(OutputStream os, Graph graph) {
+	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
 		op.println("#!/usr/local/bin/neato -n -Tpdf -ocircuit.pdf\n");
 		op.println("# x/y arranged: neato -n -Tpdf -ocircuit.pdf circuit.dot");
@@ -72,13 +72,13 @@ public class FormatDOT {
 		op.println("  rankdir=LR;");
 		op.println("  splines=false;");
 		op.println("  node [shape=record];");
-		for (Node n : graph.accessNodes()) {
+		for (MutableCell n : graph.accessNodes()) {
 			if (n == null)
 				continue;
 			op.println(drawNode(n));
 			int num = n.maxIn() + 1;
 			for (int i = 0; i < num; i++) {
-				Node pred = n.in(i);
+				MutableCell pred = n.in(i);
 				if (pred == null)
 					continue;
 				String predPort = ":o" + pred.searchOutIdx(n) + ":e";

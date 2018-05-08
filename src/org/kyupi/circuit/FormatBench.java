@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.TextScanner;
 
 /**
@@ -174,7 +174,7 @@ class FormatBench {
 		int type;
 		String name;
 		ArrayList<String> params = new ArrayList<String>();
-		Node gate;
+		MutableCell gate;
 		int pos;
 
 		GateSpec(int type, String name) {
@@ -182,8 +182,8 @@ class FormatBench {
 			this.name = name;
 		}
 
-		void realizeGate(Graph c) {
-			gate = c.new Node(name, type);
+		void realizeGate(MutableCircuit c) {
+			gate = c.new MutableCell(name, type);
 			gate.setIntfPosition(pos);
 		}
 	}
@@ -200,8 +200,8 @@ class FormatBench {
 		return gs;
 	}
 
-	static Graph load(InputStream is) throws IOException {
-		Graph c = new Graph(new Library());
+	static MutableCircuit load(InputStream is) throws IOException {
+		MutableCircuit c = new MutableCircuit(new Library());
 		BenchScanner scanner = new BenchScanner(new InputStreamReader(is));
 		ArrayList<String> params = new ArrayList<String>();
 		HashMap<String, GateSpec> gates = new HashMap<String, GateSpec>();
@@ -258,7 +258,7 @@ class FormatBench {
 			gs.realizeGate(c);
 		for (GateSpec gs : gates.values()) {
 			for (String name : gs.params) {
-				Node n = c.searchNode(name);
+				MutableCell n = c.searchNode(name);
 				c.connect(n, -1, gs.gate, -1);
 			}
 		}
@@ -289,24 +289,24 @@ class FormatBench {
 	private static String names[] = { "CONST0", "NOR", "AGTB", "NOT", "BGTA", "NOT", "XOR", "NAND", "AND", "XNOR", "BUF", "AGEB", "BUF",
 			"BGEA", "OR", "CONST1" };
 
-	public static void save(OutputStream os, Graph graph) {
+	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
-		for (Node intf : graph.accessInterface()) {
+		for (MutableCell intf : graph.accessInterface()) {
 			if (intf.isPrimary() && intf.isInput())
 				op.println("INPUT(" + intf.queryName() + ")");
 			if (intf.isPrimary() && intf.isInput())
 				op.println("OUTPUT(" + intf.queryName() + ")");
 		}
-		for (Node inp : graph.accessInterface()) {
+		for (MutableCell inp : graph.accessInterface()) {
 			if (inp.isPseudo())
 				op.println(inp.queryName() + " = DFF(" + inp.queryName() + ")"); // FIXME
 		}
 		for (int l = 1; l < graph.levels(); l++) {
-			for (Node node : graph.accessLevel(l)) {
+			for (MutableCell node : graph.accessLevel(l)) {
 				int ninputs = node.maxIn();
 				String s = "";
 				for (int i = 0; i <= ninputs; i++) {
-					Node a = node.in(i);
+					MutableCell a = node.in(i);
 					if (a != null)
 						s += "," + a.queryName();
 					else

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The KyuPI project contributors. See the COPYRIGHT.md file
+ * Copyright 2013-2018 The KyuPI project contributors. See the COPYRIGHT.md file
  * at the top-level directory of this distribution.
  * This file is part of the KyuPI project. It is subject to the license terms
  * in the LICENSE.md file found in the top-level directory of this distribution.
@@ -19,11 +19,8 @@ import org.kyupi.misc.ArrayTools;
 import org.kyupi.misc.Namespace;
 
 /**
- * is a directed, cycle-free, node-annotated graph.
+ * is the main data structure to represent and manipulate logic circuits.
  * 
- * Use this data structure to represent logic circuits or other graph-based
- * information.
- * <p/>
  * 
  * Edges in this graph are represented by references of a node to its neighbors.
  * Usually, a pair of references defines an edge (e.g. a signal) between two
@@ -78,13 +75,13 @@ import org.kyupi.misc.Namespace;
  * @author stefan
  * 
  */
-public class Graph {
+public class MutableCircuit {
 
 	/**
 	 * is a vertex in the graph containing references to its neighbors and
 	 * payload data.
 	 */
-	public class Node {
+	public class MutableCell {
 
 		private final int id;
 
@@ -96,17 +93,17 @@ public class Graph {
 
 		private int intfPosition;
 
-		private Node inputs[] = new Node[0];
+		private MutableCell inputs[] = new MutableCell[0];
 
-		private Node outputs[] = new Node[0];
+		private MutableCell outputs[] = new MutableCell[0];
 
-		public Node(String name, int type) {
+		public MutableCell(String name, int type) {
 			this.id = namespace.idFor(name);
 			this.type = type;
 			register(this);
 		}
 		
-		public Node(Node n) {
+		public MutableCell(MutableCell n) {
 			this.id = namespace.idFor(n.queryName());
 			this.type = n.type;
 			this.intfPosition = n.intfPosition;
@@ -151,8 +148,8 @@ public class Graph {
 		}
 
 		public boolean equals(Object other) {
-			if (other instanceof Node) {
-				Node n = (Node) other;
+			if (other instanceof MutableCell) {
+				MutableCell n = (MutableCell) other;
 				if (n.type != type)
 					return false;
 				if (!n.queryName().equals(queryName()))
@@ -237,22 +234,22 @@ public class Graph {
 			return ArrayTools.maxIndex(outputs);
 		}
 
-		public Node in(int idx) {
-			return (Node) ArrayTools.safeGet(inputs, idx);
+		public MutableCell in(int idx) {
+			return (MutableCell) ArrayTools.safeGet(inputs, idx);
 		}
 
-		public Node out(int idx) {
-			return (Node) ArrayTools.safeGet(outputs, idx);
+		public MutableCell out(int idx) {
+			return (MutableCell) ArrayTools.safeGet(outputs, idx);
 		}
 
-		public int searchOutIdx(Node succ) {
+		public int searchOutIdx(MutableCell succ) {
 			int i = ArrayTools.linearSearchReference(outputs, succ);
 			if (i < 0)
 				throw new IllegalArgumentException("given node is not a successor");
 			return i;
 		}
 
-		public int searchInIdx(Node pred) {
+		public int searchInIdx(MutableCell pred) {
 			int i = ArrayTools.linearSearchReference(inputs, pred);
 			if (i < 0)
 				throw new IllegalArgumentException(
@@ -260,11 +257,11 @@ public class Graph {
 			return i;
 		}
 
-		public Node[] accessInputs() {
+		public MutableCell[] accessInputs() {
 			return inputs;
 		}
 
-		public Node[] accessOutputs() {
+		public MutableCell[] accessOutputs() {
 			return outputs;
 		}
 
@@ -283,12 +280,12 @@ public class Graph {
 		 *            existing reference.
 		 * @return the node itself.
 		 */
-		public Node setIn(int idx, Node pred) {
+		public MutableCell setIn(int idx, MutableCell pred) {
 			invalidateLevels();
 			if (idx < 0) {
 				idx = maxIn() + 1;
 			}
-			inputs = (Node[]) ArrayTools.grow(inputs, Node.class, idx + 1);
+			inputs = (MutableCell[]) ArrayTools.grow(inputs, MutableCell.class, idx + 1);
 			inputs[idx] = pred;
 			return this;
 		}
@@ -304,12 +301,12 @@ public class Graph {
 		 *            reference.
 		 * @return the node itself.
 		 */
-		public Node setOut(int idx, Node succ) {
+		public MutableCell setOut(int idx, MutableCell succ) {
 			invalidateLevels();
 			if (idx < 0) {
 				idx = maxOut() + 1;
 			}
-			outputs = (Node[]) ArrayTools.grow(outputs, Node.class, idx + 1);
+			outputs = (MutableCell[]) ArrayTools.grow(outputs, MutableCell.class, idx + 1);
 			outputs[idx] = succ;
 			return this;
 		}
@@ -322,7 +319,7 @@ public class Graph {
 		 * @param replacement
 		 * @return the node itself.
 		 */
-		public Node replaceIns(Node current, Node replacement) {
+		public MutableCell replaceIns(MutableCell current, MutableCell replacement) {
 			ArrayTools.replaceAll(inputs, current, replacement);
 			return this;
 		}
@@ -335,7 +332,7 @@ public class Graph {
 		 * @param replacement
 		 * @return the node itself.
 		 */
-		public Node replaceOuts(Node current, Node replacement) {
+		public MutableCell replaceOuts(MutableCell current, MutableCell replacement) {
 			ArrayTools.replaceAll(outputs, current, replacement);
 			return this;
 		}
@@ -346,7 +343,7 @@ public class Graph {
 		 * 
 		 * @return the node itself.
 		 */
-		public Node compressIns() {
+		public MutableCell compressIns() {
 			ArrayTools.moveToFront(inputs);
 			return this;
 		}
@@ -357,7 +354,7 @@ public class Graph {
 		 * 
 		 * @return the node itself.
 		 */
-		public Node compressOuts() {
+		public MutableCell compressOuts() {
 			ArrayTools.moveToFront(outputs);
 			return this;
 		}
@@ -367,7 +364,7 @@ public class Graph {
 		 */
 		public void remove() {
 			for (int i = maxIn(); i >= 0; i--) {
-				Node pred = in(i);
+				MutableCell pred = in(i);
 				if (pred == null)
 					continue;
 				setIn(i, null);
@@ -378,7 +375,7 @@ public class Graph {
 			}
 
 			for (int i = maxOut(); i >= 0; i--) {
-				Node succ = out(i);
+				MutableCell succ = out(i);
 				if (succ == null)
 					continue;
 				succ.replaceIns(this, null);
@@ -393,9 +390,9 @@ public class Graph {
 
 		public void strip() {
 			if (outputs != null)
-				outputs = (Node[]) ArrayTools.strip(outputs);
+				outputs = (MutableCell[]) ArrayTools.strip(outputs);
 			if (inputs != null)
-				inputs = (Node[]) ArrayTools.strip(inputs);
+				inputs = (MutableCell[]) ArrayTools.strip(inputs);
 		}
 
 		public String toString() {
@@ -427,47 +424,47 @@ public class Graph {
 
 	}
 	
-	protected static Logger log = Logger.getLogger(Graph.class);
+	protected static Logger log = Logger.getLogger(MutableCircuit.class);
 
 	private Namespace namespace = new Namespace();
 
 	private final Library library;
 
-	private Node[] nodes = new Node[0];
+	private MutableCell[] nodes = new MutableCell[0];
 
-	private Node levels[][];
+	private MutableCell levels[][];
 
-	private Node intf[];
+	private MutableCell intf[];
 
 	private String name;
 
 	private SignalMap signalMap;
 
-	public Graph(Library lib) {
+	public MutableCircuit(Library lib) {
 		library = lib;
 	}
 	
-	public Graph(Graph g) {
+	public MutableCircuit(MutableCircuit g) {
 		library = g.library;
 		name = g.name;
 		for (int idx = 0; idx < g.nodes.length; idx++) {
-			Node n = g.nodes[idx];
+			MutableCell n = g.nodes[idx];
 			if (n != null)
-				new Node(n);
+				new MutableCell(n);
 		}
 		for (int idx = 0; idx < g.nodes.length; idx++) {
-			Node n = g.nodes[idx];
+			MutableCell n = g.nodes[idx];
 			if (n == null)
 				continue;
 			int outCount = n.maxOut() + 1;
 			for (int i = 0; i < outCount; i++) {
-				Node succ = n.out(i);
+				MutableCell succ = n.out(i);
 				if (succ != null)
 					nodes[idx].setOut(i, nodes[succ.id]);
 			}
 			int inCount = n.maxIn() + 1;
 			for (int i = 0; i < inCount; i++) {
-				Node pred = n.in(i);
+				MutableCell pred = n.in(i);
 				if (pred != null)
 					nodes[idx].setIn(i, nodes[pred.id]);
 			}
@@ -478,7 +475,7 @@ public class Graph {
 		return library;
 	}
 
-	public Node searchNode(String name) {
+	public MutableCell searchNode(String name) {
 		if (!namespace.contains(name)) {
 			return null;
 		}
@@ -486,11 +483,11 @@ public class Graph {
 	}
 
 	public int countInputs() {
-		Node n[] = nodes;
+		MutableCell n[] = nodes;
 		if (intf != null)
 			n = intf;
 		int count = 0;
-		for (Node g : n) {
+		for (MutableCell g : n) {
 			if (g != null && g.isInput())
 				count++;
 		}
@@ -498,11 +495,11 @@ public class Graph {
 	}
 
 	public int countOutputs() {
-		Node n[] = nodes;
+		MutableCell n[] = nodes;
 		if (intf != null)
 			n = intf;
 		int count = 0;
-		for (Node g : n) {
+		for (MutableCell g : n) {
 			if (g != null && g.isOutput())
 				count++;
 		}
@@ -510,11 +507,11 @@ public class Graph {
 	}
 
 	public int countSequentials() {
-		Node n[] = nodes;
+		MutableCell n[] = nodes;
 		if (levels != null)
 			n = levels[0];
 		int count = 0;
-		for (Node g : n) {
+		for (MutableCell g : n) {
 			if (g != null && g.isSequential())
 				count++;
 		}
@@ -523,7 +520,7 @@ public class Graph {
 
 	public int countNodes() {
 		int count = 0;
-		for (Node g : nodes) {
+		for (MutableCell g : nodes) {
 			if (g != null)
 				count++;
 		}
@@ -532,7 +529,7 @@ public class Graph {
 	
 	public int countNonPseudoNodes() {
 		int count = 0;
-		for (Node g : nodes) {
+		for (MutableCell g : nodes) {
 			if (g != null && !g.isPseudo())
 				count++;
 		}
@@ -558,7 +555,7 @@ public class Graph {
 	 * @param l
 	 * @return
 	 */
-	public Node[] accessLevel(int l) {
+	public MutableCell[] accessLevel(int l) {
 		ensureLevels();
 		return levels[l];
 	}
@@ -574,7 +571,7 @@ public class Graph {
 	 * 
 	 * @return
 	 */
-	public Node[] accessInterface() {
+	public MutableCell[] accessInterface() {
 		ensureLevels();
 		return intf;
 	}
@@ -588,7 +585,7 @@ public class Graph {
 	 * 
 	 * @return
 	 */
-	public Node[] accessNodes() {
+	public MutableCell[] accessNodes() {
 		return nodes;
 	}
 	
@@ -597,12 +594,12 @@ public class Graph {
 		return signalMap;
 	}
 
-	public void connect(Node driver, int out_idx, Node receiver, int in_idx) {
+	public void connect(MutableCell driver, int out_idx, MutableCell receiver, int in_idx) {
 		driver.setOut(out_idx, receiver);
 		receiver.setIn(in_idx, driver);
 	}
 
-	public void disconnect(Node driver, int out_idx, Node receiver, int in_idx) {
+	public void disconnect(MutableCell driver, int out_idx, MutableCell receiver, int in_idx) {
 		if (driver.out(out_idx) != receiver)
 			throw new IllegalArgumentException("specified driver output does not point to receiver.");
 		if (receiver.in(in_idx) != driver)
@@ -612,8 +609,8 @@ public class Graph {
 	}
 
 	public void strip() {
-		nodes = (Node[]) ArrayTools.strip(nodes);
-		for (Node g : nodes) {
+		nodes = (MutableCell[]) ArrayTools.strip(nodes);
+		for (MutableCell g : nodes) {
 			if (g != null)
 				g.strip();
 		}
@@ -623,10 +620,10 @@ public class Graph {
 		ensureLevels();
 		StringBuilder b = new StringBuilder();
 		int level_idx = 0;
-		for (Node level[] : levels) {
+		for (MutableCell level[] : levels) {
 			int node_idx = 0;
 			b.append("" + level_idx + "[ ");
-			for (Node node : level) {
+			for (MutableCell node : level) {
 				b.append("" + node_idx + "(");
 				b.append(node);
 				b.append(") ");
@@ -638,16 +635,16 @@ public class Graph {
 		return b.toString();
 	}
 
-	private void register(Node g) {
+	private void register(MutableCell g) {
 		invalidateLevels();
 		if (nodes.length > g.id && nodes[g.id] != null) {
 			throw new IllegalArgumentException("Gate already exists: " + namespace.nameFor(g.id));
 		}
-		nodes = (Node[]) ArrayTools.grow(nodes, Node.class, g.id + 1);
+		nodes = (MutableCell[]) ArrayTools.grow(nodes, MutableCell.class, g.id + 1);
 		nodes[g.id] = g;
 	}
 
-	private void unregister(Node g) {
+	private void unregister(MutableCell g) {
 		invalidateLevels();
 		if (nodes.length > g.id && nodes[g.id] == g) {
 			nodes[g.id] = null;
@@ -666,14 +663,14 @@ public class Graph {
 		// log.debug("levelizing\n\t" +
 		// StringTools.join(Thread.currentThread().getStackTrace(), "\n\t"));
 
-		LinkedList<Node> queue = new LinkedList<Node>();
+		LinkedList<MutableCell> queue = new LinkedList<MutableCell>();
 		int level_fills[] = new int[1];
 		int maxlevel = 0;
 
 		// Reset level and position of all nodes. Construct interface array.
 		// Add all appropriate nodes to queue for level 0.
 		intf = null;
-		for (Node g : nodes) {
+		for (MutableCell g : nodes) {
 			if (g == null)
 				continue;
 			g.level = -1;
@@ -683,7 +680,7 @@ public class Graph {
 			// - primary output ports
 			// - sequential nodes (flip-flops)
 			if (g.isPort() || g.isSequential()) {
-				intf = (Node[]) ArrayTools.grow(intf, Node.class, g.intfPosition + 1, 0.5f);
+				intf = (MutableCell[]) ArrayTools.grow(intf, MutableCell.class, g.intfPosition + 1, 0.5f);
 				if (intf[g.intfPosition] != null) {
 					log.error("Nodes must not share same intfPosition: " + g.queryName() + ", "
 							+ intf[g.intfPosition].queryName() + " (intfPosition: " + g.intfPosition + ")");
@@ -698,20 +695,20 @@ public class Graph {
 				queue.add(g);
 			}
 		}
-		intf = (Node[]) ArrayTools.strip(intf);
+		intf = (MutableCell[]) ArrayTools.strip(intf);
 
 		level_fills[0] = 0;
 
 		// set levels and levelPositions of all nodes.
 		while (!queue.isEmpty()) {
-			Node g = queue.poll();
+			MutableCell g = queue.poll();
 			if (g.level != -1) {
 				throw new RuntimeException("Detected combinational loop at gate: " + g.queryName());
 			}
 			g.level = 0;
 			if (!g.isSequential() && !g.isInput()) {
 				for (int i = g.maxIn(); i >= 0; i--) {
-					Node d = g.in(i);
+					MutableCell d = g.in(i);
 					if (d != null)
 						g.level = Math.max(g.level, d.level + 1);
 				}
@@ -722,7 +719,7 @@ public class Graph {
 			// log.debug("node " + g + " is level " + g.level);
 			if (g.countOuts() == 0)
 				continue;
-			for (Node succ : g.accessOutputs()) {
+			for (MutableCell succ : g.accessOutputs()) {
 				if (succ != null && !succ.isSequential() && !succ.isInput()) {
 					succ.levelPosition++; // re-use levelPosition to count
 											// number of predecessors placed.
@@ -733,10 +730,10 @@ public class Graph {
 		}
 
 		// allocate levels and add nodes.
-		levels = new Node[maxlevel + 1][];
+		levels = new MutableCell[maxlevel + 1][];
 		for (int i = 0; i <= maxlevel; i++)
-			levels[i] = new Node[level_fills[i]];
-		for (Node g : nodes) {
+			levels[i] = new MutableCell[level_fills[i]];
+		for (MutableCell g : nodes) {
 			if (g == null)
 				continue;
 			if (g.level == -1)
@@ -761,7 +758,7 @@ public class Graph {
 		int nodes = 0;
 		int signals = 0;
 		int seq = 0;
-		for (Node n : accessNodes()) {
+		for (MutableCell n : accessNodes()) {
 			if (n == null)
 				continue;
 			String type = n.typeName();
@@ -826,14 +823,14 @@ public class Graph {
 	}
 	
 	public boolean equals(Object other) {
-		if (other instanceof Graph) {
-			Graph g = (Graph) other;
+		if (other instanceof MutableCircuit) {
+			MutableCircuit g = (MutableCircuit) other;
 			if (g.countNodes() != countNodes())
 				return false;
-			for (Node n : accessNodes()) {
+			for (MutableCell n : accessNodes()) {
 				if (n == null)
 					continue;
-				Node other_n = g.searchNode(n.queryName());
+				MutableCell other_n = g.searchNode(n.queryName());
 				if (other_n == null)
 					return false;
 				if (!n.equals(other_n))
@@ -841,8 +838,8 @@ public class Graph {
 				if (n.maxIn() != other_n.maxIn())
 					return false;
 				for (int i = 0; i <= n.maxIn(); i++) {
-					Node neighbor = n.in(i);
-					Node other_neighbor = other_n.in(i);
+					MutableCell neighbor = n.in(i);
+					MutableCell other_neighbor = other_n.in(i);
 					if (neighbor == null && other_neighbor != null)
 						return false;
 					if (neighbor != null && other_neighbor == null)
@@ -855,8 +852,8 @@ public class Graph {
 				if (n.maxOut() != other_n.maxOut())
 					return false;
 				for (int i = 0; i <= n.maxOut(); i++) {
-					Node neighbor = n.out(i);
-					Node other_neighbor = other_n.out(i);
+					MutableCell neighbor = n.out(i);
+					MutableCell other_neighbor = other_n.out(i);
 					if (neighbor == null && other_neighbor != null)
 						return false;
 					if (neighbor != null && other_neighbor == null)

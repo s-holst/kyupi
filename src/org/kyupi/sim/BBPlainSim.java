@@ -9,7 +9,7 @@
  */
 package org.kyupi.sim;
 
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.source.BBSource;
 import org.kyupi.data.source.QBSource;
@@ -18,7 +18,7 @@ public class BBPlainSim extends BBSource {
 
 	private BBSource s;
 	
-	public BBPlainSim(Graph netlist, BBSource inputData) {
+	public BBPlainSim(MutableCircuit netlist, BBSource inputData) {
 		super(inputData.length());
 		s = BBSource.from(new QBPlainSim(netlist, QBSource.from(inputData)));
 	}

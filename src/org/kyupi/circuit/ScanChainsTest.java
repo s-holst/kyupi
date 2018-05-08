@@ -5,7 +5,7 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.circuit.ScanChains.ScanChain;
 import org.kyupi.misc.RuntimeTools;
 
@@ -14,7 +14,7 @@ public class ScanChainsTest {
 
 	@Test
 	public void testScanOutMapping() throws Exception {
-		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
+		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(1, chains.size());
 		ScanChain chain = chains.get(0);
@@ -25,9 +25,9 @@ public class ScanChainsTest {
 		assertEquals(4, map.length);
 		assertEquals(graph.accessInterface().length, map[0].length);
 		
-		Node sc0 = chain.cells.get(0).node;
-		Node sc1 = chain.cells.get(1).node;
-		Node sc2 = chain.cells.get(2).node;
+		MutableCell sc0 = chain.cells.get(0).node;
+		MutableCell sc1 = chain.cells.get(1).node;
+		MutableCell sc2 = chain.cells.get(2).node;
 		
 		// fully loaded in the first vector
 		assertEquals(sc0.intfPosition(), map[0][sc0.intfPosition()]);
@@ -56,7 +56,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testScanInMapping() throws Exception {
-		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
+		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(1, chains.size());
 		ScanChain chain = chains.get(0);
@@ -67,9 +67,9 @@ public class ScanChainsTest {
 		assertEquals(4, map.length);
 		assertEquals(graph.accessInterface().length, map[0].length);
 		
-		Node sc0 = chain.cells.get(0).node;
-		Node sc1 = chain.cells.get(1).node;
-		Node sc2 = chain.cells.get(2).node;
+		MutableCell sc0 = chain.cells.get(0).node;
+		MutableCell sc1 = chain.cells.get(1).node;
+		MutableCell sc2 = chain.cells.get(2).node;
 		
 		// fully loaded in the last vector
 		assertEquals(sc0.intfPosition(), map[3][sc0.intfPosition()]);
@@ -108,7 +108,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testMultiChain() throws Exception {
-		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED());
+		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED());
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(2, chains.size());
 		
@@ -125,14 +125,14 @@ public class ScanChainsTest {
 		int[][] map = chains.scanInMapping();
 		//System.out.println(mapToString(map));
 		
-		Node cell000_00 = chain0.cells.get(0).node;
-		Node cell000_01 = chain0.cells.get(1).node;
-		Node cell000_02 = chain0.cells.get(2).node;
-		Node cell001_00 = chain1.cells.get(0).node;
-		Node cell001_01 = chain1.cells.get(1).node;
+		MutableCell cell000_00 = chain0.cells.get(0).node;
+		MutableCell cell000_01 = chain0.cells.get(1).node;
+		MutableCell cell000_02 = chain0.cells.get(2).node;
+		MutableCell cell001_00 = chain1.cells.get(0).node;
+		MutableCell cell001_01 = chain1.cells.get(1).node;
 
-		Node test_si000 = chain0.in.node;
-		Node test_si001 = chain1.in.node;
+		MutableCell test_si000 = chain0.in.node;
+		MutableCell test_si001 = chain1.in.node;
 		
 		assertEquals(cell000_02.intfPosition(), map[0][test_si000.intfPosition()]);
 		assertEquals(-1, map[0][test_si001.intfPosition()]);
@@ -152,7 +152,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testMultiChainMultiClock() throws Exception {
-		Graph graph = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED());
+		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED());
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(2, chains.size());
 		
@@ -173,14 +173,14 @@ public class ScanChainsTest {
 		int[][] map = chains.scanInMapping(clocking);
 		System.out.println(mapToString(map));
 		
-		Node cell000_00 = chain0.cells.get(0).node;
-		Node cell000_01 = chain0.cells.get(1).node;
-		Node cell000_02 = chain0.cells.get(2).node;
-		Node cell001_00 = chain1.cells.get(0).node;
-		Node cell001_01 = chain1.cells.get(1).node;
+		MutableCell cell000_00 = chain0.cells.get(0).node;
+		MutableCell cell000_01 = chain0.cells.get(1).node;
+		MutableCell cell000_02 = chain0.cells.get(2).node;
+		MutableCell cell001_00 = chain1.cells.get(0).node;
+		MutableCell cell001_01 = chain1.cells.get(1).node;
 
-		Node test_si000 = chain0.in.node;
-		Node test_si001 = chain1.in.node;
+		MutableCell test_si000 = chain0.in.node;
+		MutableCell test_si001 = chain1.in.node;
 		
 		assertEquals(cell000_02.intfPosition(), map[0][test_si000.intfPosition()]);
 		assertEquals(-1, map[0][test_si001.intfPosition()]);

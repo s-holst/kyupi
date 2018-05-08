@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 
 /**
  * is a library of the most common cell types.
@@ -337,9 +337,9 @@ public class Library {
 		return typeNames;
 	}
 
-	public Node buildPredecessorTree(Graph g, ArrayList<Node> gates, String name, int type) {
+	public MutableCell buildPredecessorTree(MutableCircuit g, ArrayList<MutableCell> gates, String name, int type) {
 
-		LinkedList<Node> q = new LinkedList<Node>(gates);
+		LinkedList<MutableCell> q = new LinkedList<MutableCell>(gates);
 		int itype = type & MASK_FUNCTION;
 
 		if (isInput(type) || itype == Library.TYPE_CONST0 || itype == Library.TYPE_CONST1) {
@@ -350,7 +350,7 @@ public class Library {
 		if (itype == Library.TYPE_BUF || itype == Library.TYPE_NOT) {
 			if (q.size() != 1)
 				throw new IllegalArgumentException("Exactly one input expected for gate of type: " + itype);
-			Node n = g.new Node(name, type);
+			MutableCell n = g.new MutableCell(name, type);
 			g.connect(q.poll(), -1, n, 0);
 			return n;
 		}
@@ -370,13 +370,13 @@ public class Library {
 		}
 		int todo = q.size();
 		while (todo > 2) {
-			Node n = g.new Node(name + "_" + todo, itype);
+			MutableCell n = g.new MutableCell(name + "_" + todo, itype);
 			g.connect(q.poll(), -1, n, 0);
 			g.connect(q.poll(), -1, n, 1);
 			q.add(n);
 			todo--;
 		}
-		Node n = g.new Node(name, type);
+		MutableCell n = g.new MutableCell(name, type);
 		g.connect(q.poll(), -1, n, 0);
 		g.connect(q.poll(), -1, n, 1);
 		return n;

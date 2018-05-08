@@ -15,29 +15,29 @@ import java.io.File;
 import java.util.Random;
 
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.Simulator.State;
 
 public class SimulatorTest {
 
-	private void stateSet(State state, Graph circuit, String node, long value, long care) {
+	private void stateSet(State state, MutableCircuit circuit, String node, long value, long care) {
 		state.set(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition(), value, care);
 	}
 	
-	private long stateGetV(State state, Graph circuit, String node) {
+	private long stateGetV(State state, MutableCircuit circuit, String node) {
 		return state.getV(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition());
 	}
 
-	private long stateGetC(State state, Graph circuit, String node) {
+	private long stateGetC(State state, MutableCircuit circuit, String node) {
 		return state.getC(circuit.searchNode(node).level(), circuit.searchNode(node).levelPosition());
 	}
 	
 	@Test
 	public void test() throws Exception {
-		Graph circuit = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit circuit = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
 		Simulator sim = new Simulator(circuit);
 		State state = sim.new State();
 		
@@ -97,7 +97,7 @@ public class SimulatorTest {
 	
 	@Test
 	public void testSequential() {
-		Graph circuit = GraphTools.benchToGraph("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
+		MutableCircuit circuit = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
 		Simulator sim = new Simulator(circuit);
 		State state = sim.new State();
 		

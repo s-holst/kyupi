@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.ArrayTools;
 
 public class ScanChains {
@@ -23,11 +23,11 @@ public class ScanChains {
 	private static Logger log = Logger.getLogger(ScanChains.class);
 
 	public class ScanCell {
-		public ScanCell(Node n) {
+		public ScanCell(MutableCell n) {
 			node = n;
 		}
 
-		public Node node;
+		public MutableCell node;
 		int pos = -1;
 		ScanChain chain;
 		ScanCell next;
@@ -50,32 +50,32 @@ public class ScanChains {
 
 	private Library lib;
 
-	private Graph graph;
+	private MutableCircuit graph;
 
-	private HashMap<Node, ScanCell> node_to_scancell = new HashMap<>();
+	private HashMap<MutableCell, ScanCell> node_to_scancell = new HashMap<>();
 
-	private HashMap<Node, ScanCell> node_to_scanin = new HashMap<>();
+	private HashMap<MutableCell, ScanCell> node_to_scanin = new HashMap<>();
 
 	// private HashMap<Node, ScanCell> node_to_scanout = new HashMap<>();
 
 	private ArrayList<ScanChain> chains = new ArrayList<>();
 
-	public ScanChains(Graph scanned_netlist) {
+	public ScanChains(MutableCircuit scanned_netlist) {
 		graph = scanned_netlist;
 		lib = graph.library();
 
 		// collect all scan cells into a HashMap.
-		Node[] intf = graph.accessInterface();
-		for (Node n : intf) {
+		MutableCell[] intf = graph.accessInterface();
+		for (MutableCell n : intf) {
 			if (n != null && lib.isScanCell(n.type())) {
 				node_to_scancell.put(n, new ScanCell(n));
 			}
 		}
 
 		// connect each scan cell to its neighbors.
-		for (Node n : node_to_scancell.keySet()) {
+		for (MutableCell n : node_to_scancell.keySet()) {
 			ScanCell cell = node_to_scancell.get(n);
-			Node prev = backtraceToIntf(n.in(lib.getScanInPin(n.type())));
+			MutableCell prev = backtraceToIntf(n.in(lib.getScanInPin(n.type())));
 			if (prev.isInput()) {
 				// log.info("Scan-in port: " + prev.queryName());
 				ScanCell sc = new ScanCell(prev);
@@ -137,13 +137,13 @@ public class ScanChains {
 		// }
 
 		// check, if all scan cells are connected into chains.
-		for (Node n : node_to_scancell.keySet()) {
+		for (MutableCell n : node_to_scancell.keySet()) {
 			if (node_to_scancell.get(n).pos < 0)
 				log.warn("Unconnected ScanCell: " + n);
 		}
 	}
 
-	private Node backtraceToIntf(Node node) {
+	private MutableCell backtraceToIntf(MutableCell node) {
 		if (node.level() > 0) {
 			if (node.countIns() != 1)
 				log.warn("Encountered multi-input gate on scan path: " + node);
@@ -188,7 +188,7 @@ public class ScanChains {
 		int port_count = graph.accessInterface().length;
 		int max_chain_length = maxChainLength();
 		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
-		Node[] intf = graph.accessInterface();
+		MutableCell[] intf = graph.accessInterface();
 
 		// inputs and scan state of the last vector in expanded set is identical
 		// to the source vector.
@@ -262,7 +262,7 @@ public class ScanChains {
 		int port_count = graph.accessInterface().length;
 		int max_chain_length = maxChainLength();
 		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
-		Node[] intf = graph.accessInterface();
+		MutableCell[] intf = graph.accessInterface();
 
 		// outputs and scan state of the first vector in expanded set is
 		// identical to the source vector.

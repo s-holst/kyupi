@@ -22,8 +22,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
 import org.kyupi.circuit.LibrarySAED;
@@ -137,14 +137,14 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		return dflt;
 	}
 
-	protected Graph loadCircuitFromArgs() throws IOException {
+	protected MutableCircuit loadCircuitFromArgs() throws IOException {
 		ensureArgsParsed();
 		if (argsParsed.hasOption(OPT_DESIGN)) {
 			String c_spec = argsParsed.getOptionValue(OPT_DESIGN);
 			File f = new File(c_spec).getAbsoluteFile();
 			ensureLib();
 			log.info("LoadingCircuit " + f.getAbsolutePath());
-			return GraphTools.loadGraph(f, lib);
+			return CircuitTools.loadCircuit(f, lib);
 		} else {
 			log.error("Expected a design to load, please specify a circuit with -d ...");
 			printOptionHelp();
@@ -154,7 +154,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 
 	private FormatStil patterns;
 
-	private void ensurePatternsLoaded(Graph circuit) throws IOException {
+	private void ensurePatternsLoaded(MutableCircuit circuit) throws IOException {
 		if (patterns == null) {
 			ensureArgsParsed();
 			if (argsParsed.hasOption(OPT_TESTS)) {
@@ -164,12 +164,12 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		}
 	}
 
-	protected ArrayList<QVector> loadStimuliFromArgs(Graph circuit) throws IOException {
+	protected ArrayList<QVector> loadStimuliFromArgs(MutableCircuit circuit) throws IOException {
 		ensurePatternsLoaded(circuit);
 		return patterns.getStimuliArray();
 	}
 
-	protected ArrayList<QVector> loadResponsesFromArgs(Graph circuit) throws IOException {
+	protected ArrayList<QVector> loadResponsesFromArgs(MutableCircuit circuit) throws IOException {
 		ensurePatternsLoaded(circuit);
 		return patterns.getResponsesArray();
 	}

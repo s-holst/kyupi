@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.BVector;
 import org.kyupi.data.source.QBSource;
@@ -33,7 +33,7 @@ public class QBObservabilityCounterTest extends TestCase {
 	@Test
 	public void testS27() throws Exception {
 		Library l = new LibrarySAED();
-		Graph g = GraphTools.loadGraph(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
+		MutableCircuit g = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
 		//log.info("Graph=\n" + g);
 		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", g);
 		QVSource t = p.getStimuliSource();
@@ -44,7 +44,7 @@ public class QBObservabilityCounterTest extends TestCase {
 	
 	@Test
 	public void test() {
-		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
 		//log.info("Graph=\n" + g);
 		ArrayList<BVector> patterns = new ArrayList<BVector>();
 		patterns.add(new BVector("000"));
@@ -54,8 +54,8 @@ public class QBObservabilityCounterTest extends TestCase {
 		patterns.add(new BVector("101"));
 		QBObservabilityCounter obs = new QBObservabilityCounter(g, QBSource.from(3, patterns));
 		obs.next();
-		Node a = g.searchNode("a");
-		Node z = g.searchNode("z_");
+		MutableCell a = g.searchNode("a");
+		MutableCell z = g.searchNode("z_");
 		
 		assertNotNull(a);
 		assertNotNull(z);

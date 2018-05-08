@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.parser.Stil;
 import org.kyupi.data.parser.Stil.Operation;
@@ -36,7 +36,7 @@ public class FormatStil {
 	
 	private int[][] scan2intf;
 
-	public FormatStil(File stil_file, Graph g) throws IOException {
+	public FormatStil(File stil_file, MutableCircuit g) throws IOException {
 		InputStream is = FileTools.fileOpen(stil_file);
 		Stil data = Stil.load(is, stil_file);
 
@@ -64,7 +64,7 @@ public class FormatStil {
 		// cross-reference to circuit interface
 		HashMap<String, Integer> intf = new HashMap<>();
 		//ArrayList<Node> intf_names = new ArrayList<>();
-		for (Node inode : g.accessInterface()) {
+		for (MutableCell inode : g.accessInterface()) {
 			//intf_names.add(inode);
 			if (inode != null) {
 				intf.put(inode.queryName(), inode.intfPosition());
@@ -124,7 +124,7 @@ public class FormatStil {
 
 	}
 
-	public FormatStil(String string, Graph g) throws IOException {
+	public FormatStil(String string, MutableCircuit g) throws IOException {
 		this(new File(string), g);
 	}
 

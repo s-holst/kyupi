@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 
 /**
  * loads from the Kyutech E322 file format.
@@ -83,8 +83,8 @@ class FormatKDB {
 		return nnarr;
 	}
 	
-	static Graph load(InputStream is) throws IOException {
-		Graph c = new Graph(new Library());
+	static MutableCircuit load(InputStream is) throws IOException {
+		MutableCircuit c = new MutableCircuit(new Library());
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader bfr = new BufferedReader(isr);
 		int[] data;
@@ -99,7 +99,7 @@ class FormatKDB {
 		int inputCount = data[2];
 		int fanIOCount = data[3];
 		
-		Node[] nodes = new Node[signalCount+1];
+		MutableCell[] nodes = new MutableCell[signalCount+1];
 		int[] faninCount = new int[signalCount+1];
 		int[] faninPtr = new int[signalCount+1];
 		int[] fanoutCount = new int[signalCount+1];
@@ -124,7 +124,7 @@ class FormatKDB {
 			if (!map.containsKey(type)) {
 				throw new IOException("Line " + line + " : Unknown gate type " + type);
 			}
-			nodes[signal] = c.new Node("id"+signal, map.get(type));
+			nodes[signal] = c.new MutableCell("id"+signal, map.get(type));
 			if (c.library().isPrimary(nodes[signal].type())) {
 				nodes[signal].setIntfPosition(intfIdx++);
 			}
@@ -149,7 +149,7 @@ class FormatKDB {
 		}
 		
 		for (int i = 0; i < signalCount; i++) {
-			Node n = nodes[i];
+			MutableCell n = nodes[i];
 			if (fanoutCount[i] == 1) {
 				c.connect(n, -1, nodes[fanoutPtr[i]], -1);
 			} else {
@@ -159,7 +159,7 @@ class FormatKDB {
 			}
 		}
 
-		for (Node n :  c.accessLevel(0)) {
+		for (MutableCell n :  c.accessLevel(0)) {
 			log.info("LEVEL0 node: " + n);
 		}
 		c.strip();

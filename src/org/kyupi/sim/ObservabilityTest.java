@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
@@ -20,7 +20,7 @@ public class ObservabilityTest {
 
 	@Test
 	public void test() {
-		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
 		//log.info("Graph=\n" + g);
 		Observability obs = new Observability(g);
 		
@@ -36,8 +36,8 @@ public class ObservabilityTest {
 
 		obs.loadInputsFrom(blk);
 		
-		Node a = g.searchNode("a");
-		Node z = g.searchNode("z_");
+		MutableCell a = g.searchNode("a");
+		MutableCell z = g.searchNode("z_");
 		assertNotNull(a);
 		assertNotNull(z);
 		

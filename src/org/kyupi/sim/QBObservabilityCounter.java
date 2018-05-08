@@ -2,7 +2,7 @@ package org.kyupi.sim;
 
 import java.util.Arrays;
 
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
 
@@ -14,7 +14,7 @@ public class QBObservabilityCounter extends QBSource {
 	private int[] obsCount1;
 	private int dropThreshold = Integer.MAX_VALUE;
 
-	public QBObservabilityCounter(Graph circuit, QBSource source) {
+	public QBObservabilityCounter(MutableCircuit circuit, QBSource source) {
 		super(source.length());
 		this.source = source;
 		this.obscalc = new Observability(circuit);

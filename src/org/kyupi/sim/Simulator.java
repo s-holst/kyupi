@@ -12,9 +12,9 @@ package org.kyupi.sim;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTools;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.misc.ArrayTools;
 
@@ -44,10 +44,10 @@ public class Simulator {
 
 		public State(State parent) {
 			this.parent = parent;
-			care = GraphTools.allocLong(circuit);
-			value = GraphTools.allocLong(circuit);
-			valid_rev = GraphTools.allocInt(circuit);
-			dirty_rev = GraphTools.allocInt(circuit);
+			care = CircuitTools.allocLong(circuit);
+			value = CircuitTools.allocLong(circuit);
+			valid_rev = CircuitTools.allocInt(circuit);
+			dirty_rev = CircuitTools.allocInt(circuit);
 			stim_care = new long[circuit.accessInterface().length];
 			stim_value = new long[circuit.accessInterface().length];
 			stim_valid_rev = new int[circuit.accessInterface().length];
@@ -129,9 +129,9 @@ public class Simulator {
 		public void setSuccessorsDirty(int level, int pos) {
 			valid_rev[level][pos] = rev;
 			dirty_rev[level][pos] = rev - 1;
-			Node[] outs = circuit.accessLevel(level)[pos].accessOutputs();
+			MutableCell[] outs = circuit.accessLevel(level)[pos].accessOutputs();
 			if (outs != null)
-				for (Node succ : outs) {
+				for (MutableCell succ : outs) {
 					if (succ == null)
 						continue;
 					if (valid_rev[succ.level()][succ.levelPosition()] == rev)
@@ -145,7 +145,7 @@ public class Simulator {
 			this.stim_value[pos] = value;
 			this.stim_care[pos] = care;
 			stim_valid_rev[pos] = rev;
-			Node n = circuit.accessInterface()[pos];
+			MutableCell n = circuit.accessInterface()[pos];
 			circuit.library().propagate(n.type(), stim_value, stim_care, pos, 1, this.value[n.level()],
 					this.care[n.level()], n.levelPosition(), 1);
 			// log.debug("intf prop " + pos + " " +
@@ -155,13 +155,13 @@ public class Simulator {
 
 		public void loadInputsFrom(QBlock b) {
 			int pos = 0;
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n != null && n.isSequential())
 					setStimulus(pos, b.getV(pos), b.getC(pos));
 				pos++;
 			}
 			pos = 0;
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n != null && n.isInput())
 					setStimulus(pos, b.getV(pos), b.getC(pos));
 				pos++;
@@ -170,7 +170,7 @@ public class Simulator {
 
 		public void storeOutputsTo(QBlock b) {
 			int pos = 0;
-			for (Node n : circuit.accessInterface()) {
+			for (MutableCell n : circuit.accessInterface()) {
 				if (n != null && (n.isOutput() || n.isSequential()))
 					b.set(pos, getResponseV(pos), getResponseC(pos));
 				pos++;
@@ -196,9 +196,9 @@ public class Simulator {
 
 	}
 
-	private Graph circuit;
+	private MutableCircuit circuit;
 
-	public Simulator(Graph circuit) {
+	public Simulator(MutableCircuit circuit) {
 		this.circuit = circuit;
 	}
 
@@ -207,7 +207,7 @@ public class Simulator {
 			int level = l;
 			for (int i = 0; i < state.value[level].length; i++) {
 				int pos = i;
-				Node n = circuit.accessLevel(level)[pos];
+				MutableCell n = circuit.accessLevel(level)[pos];
 				if (n == null || n.isSequential() || n.isInput())
 					continue;
 				if (state.isDirty(level, pos)) {
@@ -215,7 +215,7 @@ public class Simulator {
 				}
 			}
 		}
-		for (Node n : circuit.accessInterface()) {
+		for (MutableCell n : circuit.accessInterface()) {
 			if (n == null || n.isInput())
 				continue;
 			if (n.isSequential()) { // && state.isDirty(n.level(), n.levelPosition())) {
@@ -231,7 +231,7 @@ public class Simulator {
 	}
 
 	private void capture_state(State state) {
-		for (Node n : circuit.accessInterface()) {
+		for (MutableCell n : circuit.accessInterface()) {
 			if (n == null || n.isInput())
 				continue;
 			state.setStimulus(n.intfPosition(), state.getResponseV(n.intfPosition()),
@@ -243,12 +243,12 @@ public class Simulator {
 	private long[] dataC;
 	private long[] cv;
 
-	private void simNode(State s, Node n, long[] value, long[] care, int pos) {
+	private void simNode(State s, MutableCell n, long[] value, long[] care, int pos) {
 		int input_count = n.maxIn() + 1;
 		dataV = ArrayTools.grow(dataV, input_count, 4, 0L);
 		dataC = ArrayTools.grow(dataC, input_count, 4, 0L);
 		for (int i = 0; i < input_count; i++) {
-			Node pred = n.in(i);
+			MutableCell pred = n.in(i);
 			if (pred == null) {
 				dataV[i] = 0L;
 				dataC[i] = 0L;

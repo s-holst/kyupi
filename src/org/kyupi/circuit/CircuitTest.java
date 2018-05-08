@@ -24,20 +24,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.RuntimeTools;
 
-public class GraphTest {
+public class CircuitTest {
 
 	//private static Logger log = Logger.getLogger(GraphTest.class);
 
 	@Test
 	public void testGate() {
-		Graph c = new Graph(new Library());
-		Node input_port = c.new Node("in", Library.TYPE_BUF | Library.FLAG_INPUT);
+		MutableCircuit c = new MutableCircuit(new Library());
+		MutableCell input_port = c.new MutableCell("in", Library.TYPE_BUF | Library.FLAG_INPUT);
 		assertEquals(0, input_port.countIns());
 		assertEquals(0, input_port.countOuts());
-		Node and_gate = c.new Node("and", Library.TYPE_AND);
+		MutableCell and_gate = c.new MutableCell("and", Library.TYPE_AND);
 		assertEquals(-1, and_gate.maxIn());
 		c.connect(input_port, -1, and_gate, 0);
 		assertEquals(0, input_port.countIns());
@@ -60,9 +60,9 @@ public class GraphTest {
 
 	@Test
 	public void testFlags() {
-		Graph g = GraphTools.benchToGraph("INPUT(a) OUTPUT(z) z=DFF(a)");
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
 		//log.debug("Graph=\n" + g);
-		Node intf[] = g.accessInterface();
+		MutableCell intf[] = g.accessInterface();
 
 		assertTrue(intf[0].isInput());
 		assertFalse(intf[1].isInput());
@@ -87,7 +87,7 @@ public class GraphTest {
 
 		Library lib = new Library();
 
-		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), lib);
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), lib);
 		assertEquals(13, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
@@ -95,13 +95,13 @@ public class GraphTest {
 
 		lib = new LibraryNangate();
 
-		c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.vhdl"), lib);
+		c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.vhdl"), lib);
 		assertEquals(15, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
 		FormatDOT.save(os, c);
 
-		c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), lib);
+		c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), lib);
 		assertEquals(15, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
@@ -109,7 +109,7 @@ public class GraphTest {
 
 		lib = new LibrarySAED();
 
-		c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), lib);
+		c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), lib);
 		assertEquals(11, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
@@ -118,7 +118,7 @@ public class GraphTest {
 
 	@Test
 	public void testLoadS27Saed90() throws Exception {
-		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
 		assertEquals(39, c.countNodes());
 		assertEquals(8, c.countInputs());
 		assertEquals(2, c.countOutputs());
@@ -126,7 +126,7 @@ public class GraphTest {
 
 	@Test
 	public void testLoadSAED90cells() throws Exception {
-		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
 		assertEquals(257, c.countNodes());
 		assertEquals(15, c.countInputs());
 		assertEquals(126, c.countOutputs());
@@ -135,14 +135,14 @@ public class GraphTest {
 
 	@Test
 	public void testLoadB01Scan() throws Exception {
-		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
 		c.levels();
 	}
 	
 	@Test
 	public void testCopy() throws Exception {
-		Graph c = GraphTools.loadGraph(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
-		Graph c2 = new Graph(c);
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
+		MutableCircuit c2 = new MutableCircuit(c);
 		assertTrue(c.equals(c2));
 	}
 	
@@ -163,7 +163,7 @@ public class GraphTest {
 			LibrarySAED lib = new LibrarySAED();
 			for (Path pth : cont) {
 				//log.debug("load: " + pth.toString());
-				GraphTools.loadGraph(pth.toFile(), lib);
+				CircuitTools.loadCircuit(pth.toFile(), lib);
 			}
 		}
 	}

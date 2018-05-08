@@ -9,7 +9,7 @@
  */
 package org.kyupi.circuit;
 
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.ArrayTools;
 
 /**
@@ -31,18 +31,18 @@ public class SignalMap {
 	
 	private int edge_count;
 	
-	private Node drivers[];
-	private Node receivers[];
+	private MutableCell drivers[];
+	private MutableCell receivers[];
 	
 
-	public SignalMap(Graph g) {
+	public SignalMap(MutableCircuit g) {
 		
-		output_map_offset = GraphTools.allocInt(g, -1);
-		input_map_offset = GraphTools.allocInt(g, -1);
+		output_map_offset = CircuitTools.allocInt(g, -1);
+		input_map_offset = CircuitTools.allocInt(g, -1);
 		int output_map_idx = 0;
 		int next_input_map_offset = 0;
 		
-		for (Node n: g.accessNodes()) {
+		for (MutableCell n: g.accessNodes()) {
 			if (n == null || n.maxOut() < 0)
 				continue;
 			int out_count = n.maxOut() + 1;
@@ -52,7 +52,7 @@ public class SignalMap {
 			output_map_offset[n.level()][n.levelPosition()] = output_map_idx;
 									
 			for (int succ_idx = 0; succ_idx < out_count; succ_idx++) {
-				Node succ = n.out(succ_idx);
+				MutableCell succ = n.out(succ_idx);
 				// skip unconnected outputs
 				if (succ == null) {
 					output_map_idx++;
@@ -71,21 +71,21 @@ public class SignalMap {
 		}
 		edge_count = output_map_idx;
 		
-		drivers = new Node[edge_count];
-		receivers = new Node[edge_count];
-		for (Node n: g.accessNodes()) {
+		drivers = new MutableCell[edge_count];
+		receivers = new MutableCell[edge_count];
+		for (MutableCell n: g.accessNodes()) {
 			if (n == null)
 				continue;
 			int out_count = n.maxOut() + 1;
 			for (int i = 0; i < out_count; i++) {
-				Node succ = n.out(i);
+				MutableCell succ = n.out(i);
 				if (succ != null) {
 					drivers[idxForOutput(n, i)] = n;
 				}
 			}
 			int in_count = n.maxIn() + 1;
 			for (int i = 0; i < in_count; i++) {
-				Node pred = n.in(i);
+				MutableCell pred = n.in(i);
 				if (pred != null) {
 					receivers[idxForInput(n, i)] = n;
 				}
@@ -93,7 +93,7 @@ public class SignalMap {
 		}
 	}
 	
-	public int idxForInput(Node n, int in_idx) {
+	public int idxForInput(MutableCell n, int in_idx) {
 		return idxForInput(n.level(), n.levelPosition(), in_idx);
 	}
 
@@ -101,7 +101,7 @@ public class SignalMap {
 		return input_map[input_map_offset[level][pos] + in_idx];
 	}
 
-	public int idxForOutput(Node n, int out_idx) {
+	public int idxForOutput(MutableCell n, int out_idx) {
 		return idxForOutput(n.level(), n.levelPosition(), out_idx);
 	}
 		
@@ -109,11 +109,11 @@ public class SignalMap {
 		return output_map_offset[level][pos] + out_idx;
 	}
 	
-	public Node driverForIdx(int idx) {
+	public MutableCell driverForIdx(int idx) {
 		return drivers[idx];
 	}
 	
-	public Node receiverForIdx(int idx) {
+	public MutableCell receiverForIdx(int idx) {
 		return receivers[idx];
 	}
 	

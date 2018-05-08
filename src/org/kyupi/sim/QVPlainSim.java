@@ -9,7 +9,7 @@
  */
 package org.kyupi.sim;
 
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
 import org.kyupi.data.source.QVSource;
@@ -18,7 +18,7 @@ public class QVPlainSim extends QVSource {
 
 	private QVSource s;
 	
-	public QVPlainSim(Graph netlist, QVSource inputData) {
+	public QVPlainSim(MutableCircuit netlist, QVSource inputData) {
 		super(inputData.length());
 		s = QVSource.from(new QBPlainSim(netlist, QBSource.from(inputData)));
 	}

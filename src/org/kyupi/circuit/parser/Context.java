@@ -7,33 +7,33 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph.parser;
+package org.kyupi.circuit.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.MutableCircuit;
 
 public class Context {
 
 	
-	private HashMap<String,Graph> entities = new HashMap<>();
+	private HashMap<String,MutableCircuit> entities = new HashMap<>();
 	
-	private ArrayList<Graph> units = new ArrayList<>();
+	private ArrayList<MutableCircuit> units = new ArrayList<>();
 	
-	public void addAsEntity(String id, Graph g) {
+	public void addAsEntity(String id, MutableCircuit g) {
 		entities.put(id, g);
 	}
 	
-	public Graph getEntity(String id) {
+	public MutableCircuit getEntity(String id) {
 		return entities.get(id);
 	}
 	
-	public void markImplemented(Graph g) {
+	public void markImplemented(MutableCircuit g) {
 		units.add(g);
 	}
 	
-	public ArrayList<Graph> getUnits() {
+	public ArrayList<MutableCircuit> getUnits() {
 		return units;
 	}
 }

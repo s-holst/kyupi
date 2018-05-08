@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.kyupi.circuit.Graph;
-import org.kyupi.circuit.GraphTest;
-import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.CircuitTest;
+import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.ScanChainsTest;
 import org.kyupi.data.QVExpanderTest;
 import org.kyupi.data.item.BBlockTest;
@@ -43,7 +43,7 @@ public class Main extends KyupiApp {
 
 	private static Class<?> ALL_TEST_CLASSES[] = { BBlockTest.class, BVectorTest.class, QBlockTest.class,
 			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class,
-			GraphTest.class, ScanChainsTest.class, ProcessManagerTest.class,
+			CircuitTest.class, ScanChainsTest.class, ProcessManagerTest.class,
 			BBPlainSimTest.class, QBPlainSimTest.class, QVPlainSimTest.class, QBObservabilityCounterTest.class,
 			ObservabilityTest.class, SimulatorTest.class, QVExpanderTest.class, Main.class };
 
@@ -63,7 +63,7 @@ public class Main extends KyupiApp {
 		if (argsParsed().hasOption("d")) {
 			long free = RuntimeTools.garbageCollect();
 
-			Graph graph = loadCircuitFromArgs();
+			MutableCircuit graph = loadCircuitFromArgs();
 
 			long memory = (free - RuntimeTools.garbageCollect());
 
@@ -73,7 +73,7 @@ public class Main extends KyupiApp {
 
 			ArrayList<File> files = outputFilesFromArgs();
 			if (files.size() > 0) {
-				GraphTools.saveGraph(graph, files.get(0), argsParsed().hasOption("f"));
+				CircuitTools.saveGraph(graph, files.get(0), argsParsed().hasOption("f"));
 				log.info("Written " + files.get(0));
 			}
 
@@ -110,7 +110,7 @@ public class Main extends KyupiApp {
 
 	public void testC17() throws Exception {
 		setArgs("-d", RuntimeTools.KYUPI_HOME + "/testdata/c17.isc");
-		Graph g = loadCircuitFromArgs();
+		MutableCircuit g = loadCircuitFromArgs();
 		assertEquals(13, g.countNodes());
 		assertEquals(5, g.countInputs());
 		assertEquals(2, g.countOutputs());

@@ -17,15 +17,15 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
-import org.kyupi.graph.parser.VHDL93;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
+import org.kyupi.circuit.parser.VHDL93;
 
 public class FormatVHDL {
 
 	protected static Logger log = Logger.getLogger(FormatVHDL.class);
 
-	static Graph load(InputStream is, Library library) throws IOException {
-		ArrayList<Graph> units = VHDL93.parse(is, library);
+	static MutableCircuit load(InputStream is, Library library) throws IOException {
+		ArrayList<MutableCircuit> units = VHDL93.parse(is, library);
 		if (units.size() > 0)
 			return units.get(0);
 		else
@@ -38,13 +38,13 @@ public class FormatVHDL {
 		return raw;
 	}
 
-	public static void save(OutputStream os, Graph graph, String entity_name) {
+	public static void save(OutputStream os, MutableCircuit graph, String entity_name) {
 		PrintWriter op = new PrintWriter(os);
 		op.println("library IEEE;");
 		op.println("use IEEE.std_logic_1164.all;");
 		op.println("entity " + entity_name + " is ");
 		op.println("  port(");
-		for (Node intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.accessInterface()) {
 			if (intf_node.isPrimary() && intf_node.isInput())
 				op.println("    " + s(intf_node.queryName()) + ": in std_logic;");
 			if (intf_node.isPrimary() && intf_node.isOutput())
@@ -54,8 +54,8 @@ public class FormatVHDL {
 		op.println("end " + entity_name + ";");
 		op.println("architecture NL of " + entity_name + " is");
 
-		Node[] nodes = graph.accessNodes();
-		for (Node node : nodes) {
+		MutableCell[] nodes = graph.accessNodes();
+		for (MutableCell node : nodes) {
 			if (node == null) {
 				continue;
 			}
@@ -63,7 +63,7 @@ public class FormatVHDL {
 				op.println("  signal " + s(node.queryName()) + ": std_logic;");
 		}
 		op.println("begin");
-		for (Node node : nodes) {
+		for (MutableCell node : nodes) {
 			if (node == null) {
 				continue;
 			}

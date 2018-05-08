@@ -131,11 +131,11 @@ Library Design Overview
 This overview should give you some initial orientation on the design choices made
 in the library and an idea of the functionality currently available.
 
-*org.kyupi.graph:* Importing, exporting and manipulating circuits.
+*org.kyupi.circuit:* Importing, exporting and manipulating circuits.
 
-The class Graph is the main data structure for holding circuit netlists in memory.
-A Graph is associated with a Library that defines the available cells.
-Each cell is represented in the graph as an instance of Graph.Node.
+The class MutableCircuit is the main data structure for holding circuit netlists in memory.
+A MutableCircuit is associated with a Library that defines the available cells.
+Each cell is represented in the graph as an instance of MutableCircuit.MutableCell.
 The graph can be traversed in two ways. (1) follow the references in individual
 nodes to their neighbors. (2) directly access arrays containing all nodes in
 topological order. The graph is ordered automatically on-demand. Whenever the graph

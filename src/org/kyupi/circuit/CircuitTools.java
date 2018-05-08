@@ -20,17 +20,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.FileTools;
 
-public class GraphTools {
+public class CircuitTools {
 
-	protected static Logger log = Logger.getLogger(GraphTools.class);
+	protected static Logger log = Logger.getLogger(CircuitTools.class);
 
-	private GraphTools() {
+	private CircuitTools() {
 	}
 
-	public static Graph loadGraph(File f, Library l) throws IOException {
+	public static MutableCircuit loadCircuit(File f, Library l) throws IOException {
 		switch (FileTools.fileType(f)) {
 		case FileTools.FILE_TYPE_ISCAS:
 			return FormatISCAS.load(FileTools.fileOpen(f));
@@ -47,11 +47,11 @@ public class GraphTools {
 		throw new IOException("unsupported import file type: " + FileTools.fileType(f));
 	}
 
-	public static Graph loadGraph(String file_name, Library l) throws IOException {
-		return loadGraph(new File(file_name), l);
+	public static MutableCircuit loadCircuit(String file_name, Library l) throws IOException {
+		return loadCircuit(new File(file_name), l);
 	}
 
-	public static void saveGraph(Graph g, File f, boolean allowOverwrite) throws IOException {
+	public static void saveGraph(MutableCircuit g, File f, boolean allowOverwrite) throws IOException {
 		switch (FileTools.fileType(f)) {
 		case FileTools.FILE_TYPE_BENCH:
 			FormatBench.save(FileTools.fileCreate(f, allowOverwrite), g);
@@ -67,7 +67,7 @@ public class GraphTools {
 		}
 	}
 
-	public static Graph benchToGraph(String bench) {
+	public static MutableCircuit parseBench(String bench) {
 		InputStream is;
 		try {
 			is = new ByteArrayInputStream(bench.getBytes("UTF-8"));
@@ -77,12 +77,12 @@ public class GraphTools {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new Graph(new Library());
+		return new MutableCircuit(new Library());
 	}
 
-	public static void removeDanglingNodes(Graph g) {
+	public static void removeDanglingNodes(MutableCircuit g) {
 		LinkedList<Integer> ll = new LinkedList<>();
-		for (Node n : g.accessNodes()) {
+		for (MutableCell n : g.accessNodes()) {
 			if (n == null)
 				continue;
 			if (n.isOutput())
@@ -94,17 +94,17 @@ public class GraphTools {
 
 		while (!ll.isEmpty()) {
 			int node_id = ll.poll();
-			Node n = g.accessNodes()[node_id];
+			MutableCell n = g.accessNodes()[node_id];
 			if (n == null)
 				continue;
 			if (n.countOuts() > 0)
 				continue;
 
 			for (int ii = n.maxIn(); ii >= 0; ii--) {
-				Node pred = n.in(ii);
+				MutableCell pred = n.in(ii);
 				if (pred != null) {
 					boolean retain = false;
-					for (Node ps: pred.accessOutputs()) {
+					for (MutableCell ps: pred.accessOutputs()) {
 						if (ps == null)
 							continue;
 						if (!ps.equals(n)) {
@@ -120,31 +120,31 @@ public class GraphTools {
 		}
 	}
 	
-	public static void moveOutputOutgoingEdges(Graph g) {
+	public static void moveOutputOutgoingEdges(MutableCircuit g) {
 		// some output ports may drive other nodes in the graph.
 		// re-wire them.
 
-		Node intf[] = g.accessInterface();
+		MutableCell intf[] = g.accessInterface();
 
 		boolean doIterate = true;
 
 		while (doIterate) {
 			doIterate = false;
-			for (Node output : intf) {
+			for (MutableCell output : intf) {
 				if (output == null || !output.isOutput())
 					continue;
 				for (int oidx = output.maxOut(); oidx >= 0; oidx--) {
 					doIterate = true;
-					Node successor = output.out(oidx);
+					MutableCell successor = output.out(oidx);
 					if (successor != null) {
-						Node predecessor = output.in(0);
+						MutableCell predecessor = output.in(0);
 						if (predecessor == null) {
 							log.error("rewire failed: output " + output.queryName() + " has no driver");
 							doIterate = false;
 							break;
 						}
 						if (predecessor.isMultiOutput()) {
-							Node signal = g.new Node(output.queryName() + "_net", Library.TYPE_BUF | Library.FLAG_PSEUDO);
+							MutableCell signal = g.new MutableCell(output.queryName() + "_net", Library.TYPE_BUF | Library.FLAG_PSEUDO);
 							int opin = predecessor.searchOutIdx(output);
 							g.connect(predecessor, opin, signal, -1);
 							g.connect(signal, -1, output, 0);
@@ -159,24 +159,24 @@ public class GraphTools {
 		}
 	}
 
-	public static void removeSignalNodes(Graph g) {
-		for (Node signal : g.accessNodes()) {
+	public static void removeSignalNodes(MutableCircuit g) {
+		for (MutableCell signal : g.accessNodes()) {
 			if (signal == null)
 				continue;
 			if (!signal.isPseudo())
 				continue;
 			if (!signal.isType(Library.TYPE_BUF))
 				continue;
-			Node pred = signal.in(0);
+			MutableCell pred = signal.in(0);
 			if (pred.isMultiOutput()) {
 				log.info("Not removing because predecessor is MultiOutput: " + signal);
 				continue;
 			}
 			
-			LinkedList<Node> succs = new LinkedList<>();
-			HashMap<Node,Integer> succport = new HashMap<>();
+			LinkedList<MutableCell> succs = new LinkedList<>();
+			HashMap<MutableCell,Integer> succport = new HashMap<>();
 			//log.info("signal " + signal.queryName());
-			for (Node r : signal.accessOutputs()) {
+			for (MutableCell r : signal.accessOutputs()) {
 				if (r != null) {
 					succs.add(r);
 					succport.put(r, r.searchInIdx(signal));
@@ -184,21 +184,21 @@ public class GraphTools {
 			}
 			signal.remove();
 			pred.compressOuts();
-			for (Node r: succs) {
+			for (MutableCell r: succs) {
 				g.connect(pred, pred.maxOut()+1, r, succport.get(r));
 			}
 		}
 	}
 	
-	public static HashSet<Node> collectCombinationalOutputCone(Node head) {
-		HashSet<Node> result = new HashSet<>();
+	public static HashSet<MutableCell> collectCombinationalOutputCone(MutableCell head) {
+		HashSet<MutableCell> result = new HashSet<>();
 		
-		LinkedList<Node> frontier = new LinkedList<>();
+		LinkedList<MutableCell> frontier = new LinkedList<>();
 		frontier.add(head);
 		
 		while (!frontier.isEmpty()) {
-			Node n = frontier.removeFirst();
-			for (Node successor: n.accessOutputs()) {
+			MutableCell n = frontier.removeFirst();
+			for (MutableCell successor: n.accessOutputs()) {
 				if (successor == null || successor.isSequential())
 					continue;
 				if (!result.contains(successor)) {
@@ -211,33 +211,33 @@ public class GraphTools {
 		return result;
 	}
 
-	public static void splitMultiOutputCells(Graph g) {
+	public static void splitMultiOutputCells(MutableCircuit g) {
 		Library lib = g.library();
 
-		LinkedList<Node> todo = new LinkedList<>();
+		LinkedList<MutableCell> todo = new LinkedList<>();
 
 		// ensure, that all the predecessors of a multi-output node get split
 		// first.
 		for (int l = 1; l < g.levels(); l++) {
-			for (Node cell : g.accessLevel(l)) {
+			for (MutableCell cell : g.accessLevel(l)) {
 				if (cell == null || !cell.isMultiOutput())
 					continue;
 				todo.add(cell);
 			}
 		}
 
-		for (Node cell : todo) {
+		for (MutableCell cell : todo) {
 			for (int out_idx = cell.maxOut(); out_idx >= 0; out_idx--) {
-				Node succ = cell.out(out_idx);
+				MutableCell succ = cell.out(out_idx);
 				if (succ == null)
 					continue;
 				int succ_in_idx = succ.searchInIdx(cell);
-				Node subcell = g.new Node(cell.queryName() + "_" + lib.outputPinName(cell.type(), out_idx), lib.getSubCell(cell.type(),
+				MutableCell subcell = g.new MutableCell(cell.queryName() + "_" + lib.outputPinName(cell.type(), out_idx), lib.getSubCell(cell.type(),
 						out_idx));
 				g.disconnect(cell, out_idx, succ, succ_in_idx);
 				g.connect(subcell, -1, succ, succ_in_idx);
 				for (int in_idx = cell.maxIn(); in_idx >= 0; in_idx--) {
-					Node pred = cell.in(in_idx);
+					MutableCell pred = cell.in(in_idx);
 					if (pred == null)
 						continue;
 					g.connect(pred, -1, subcell, in_idx);
@@ -247,7 +247,7 @@ public class GraphTools {
 		}
 	}
 	
-	public static long[][] allocLong(Graph circuit) {
+	public static long[][] allocLong(MutableCircuit circuit) {
 		int levels = circuit.levels();
 		long value[][] = new long[levels][];
 		for (int l = 0; l < levels; l++) {
@@ -257,7 +257,7 @@ public class GraphTools {
 		return value;
 	}
 
-	public static int[][] allocInt(Graph circuit, int init_value) {
+	public static int[][] allocInt(MutableCircuit circuit, int init_value) {
 		int levels = circuit.levels();
 		int value[][] = new int[levels][];
 		for (int l = 0; l < levels; l++) {
@@ -267,8 +267,8 @@ public class GraphTools {
 		return value;
 	}
 	
-	public static int[][] allocInt(Graph circuit) {
-		return GraphTools.allocInt(circuit, 0);
+	public static int[][] allocInt(MutableCircuit circuit) {
+		return CircuitTools.allocInt(circuit, 0);
 	}
 
 }

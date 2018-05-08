@@ -9,28 +9,28 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.StringFilter;
 
 public class Placement {
 
 	private static Logger log = Logger.getLogger(Placement.class);
 
-	private Graph graph;
+	private MutableCircuit graph;
 
-	HashMap<Node, Integer> placeX = new HashMap<>();
-	HashMap<Node, Integer> placeY = new HashMap<>();
+	HashMap<MutableCell, Integer> placeX = new HashMap<>();
+	HashMap<MutableCell, Integer> placeY = new HashMap<>();
 	HashSet<Integer> distinctX = new HashSet<>();
 	HashSet<Integer> distinctY = new HashSet<>();
 
-	Node[][] place = new Node[0][0];
+	MutableCell[][] place = new MutableCell[0][0];
 
 	int[] coordX = new int[0];
 	int[] coordY = new int[0];
 	HashMap<Integer, Integer> coordXmap = new HashMap<>();
 	HashMap<Integer, Integer> coordYmap = new HashMap<>();
 
-	public Placement(Graph g) {
+	public Placement(MutableCircuit g) {
 		graph = g;
 	}
 
@@ -60,7 +60,7 @@ public class Placement {
 				Integer posx = Integer.decode(c[placed + 2]);
 				Integer posy = Integer.decode(c[placed + 3]);
 
-				Node n = graph.searchNode(name);
+				MutableCell n = graph.searchNode(name);
 				if (n == null) {
 					log.info("Node not found: " + name);
 				} else {
@@ -100,9 +100,9 @@ public class Placement {
 		for (i = 0; i < coordY.length; i++)
 			coordYmap.put(coordY[i], i);
 
-		place = new Node[coordX.length][coordY.length];
+		place = new MutableCell[coordX.length][coordY.length];
 
-		for (Node n : graph.accessNodes()) {
+		for (MutableCell n : graph.accessNodes()) {
 			if (n == null || n.isPseudo())
 				continue;
 			if (!placeX.containsKey(n)) {
@@ -148,25 +148,25 @@ public class Placement {
 
 	}
 
-	public int getX(Node n) {
+	public int getX(MutableCell n) {
 		Integer x = placeX.get(n);
 		if (x == null)
 			throw new NoSuchElementException(n.toString());
 		return x;
 	}
 
-	public int getY(Node n) {
+	public int getY(MutableCell n) {
 		Integer y = placeY.get(n);
 		if (y == null)
 			throw new NoSuchElementException(n.toString());
 		return y;
 	}
 
-	public boolean containsNode(Node n) {
+	public boolean containsNode(MutableCell n) {
 		return placeX.containsKey(n);
 	}
 
-	public HashSet<Node> getRectangle(int x1, int y1, int x2, int y2) {
+	public HashSet<MutableCell> getRectangle(int x1, int y1, int x2, int y2) {
 
 		// ensure, that x1/y1 are smaller than x2/y2
 		if (x1 > x2) {
@@ -196,7 +196,7 @@ public class Placement {
 				yi2 = i;
 		}
 
-		HashSet<Node> nodes = new HashSet<>();
+		HashSet<MutableCell> nodes = new HashSet<>();
 
 		if (xi2 >= coordX.length || yi2 >= coordY.length) {
 			log.warn("rectangle out of bounds, returning no cells.");
@@ -208,7 +208,7 @@ public class Placement {
 
 		for (int y = yi1; y <= yi2; y++) {
 			for (int x = xi1; x <= xi2; x++) {
-				Node n = place[x][y];
+				MutableCell n = place[x][y];
 				if (n != null)
 					nodes.add(n);
 			}
