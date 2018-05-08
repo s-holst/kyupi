@@ -5,10 +5,9 @@ import java.util.*;
 import java.io.*;
 
 import org.apache.log4j.Logger;
-
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.Library;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.Library;
+import org.kyupi.circuit.Graph.Node;
 
 
 @SuppressWarnings("all")

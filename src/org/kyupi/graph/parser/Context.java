@@ -12,7 +12,7 @@ package org.kyupi.graph.parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.kyupi.graph.Graph;
+import org.kyupi.circuit.Graph;
 
 public class Context {
 

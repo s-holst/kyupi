@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.ArrayTools;
 
 public class ScanChains {

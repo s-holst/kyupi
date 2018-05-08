@@ -1,4 +1,4 @@
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import static org.junit.Assert.*;
 

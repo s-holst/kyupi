@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.RuntimeTools;
 
 public class GraphTest {

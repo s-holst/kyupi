@@ -7,14 +7,14 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.StringTools;
 
 public class FormatDOT {

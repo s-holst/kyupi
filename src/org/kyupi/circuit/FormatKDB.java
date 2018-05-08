@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 
 /**
  * loads from the Kyutech E322 file format.

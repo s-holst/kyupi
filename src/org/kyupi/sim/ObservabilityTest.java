@@ -7,12 +7,12 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.GraphTools;
 
 public class ObservabilityTest {
 

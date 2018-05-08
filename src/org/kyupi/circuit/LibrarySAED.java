@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.util.HashMap;
 

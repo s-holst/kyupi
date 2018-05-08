@@ -3,11 +3,11 @@ package org.kyupi.sim;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.Library;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.item.QBlock;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.Library;
 import org.kyupi.sim.CombLogicSim.State;
 
 public class Observability {

@@ -1,4 +1,4 @@
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.StringFilter;
 
 public class Placement {

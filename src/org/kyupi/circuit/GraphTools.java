@@ -7,7 +7,7 @@
  * propagated, or distributed except according to the terms contained in the
  * LICENSE.md file.
  */
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.FileTools;
 
 public class GraphTools {

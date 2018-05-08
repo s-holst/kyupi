@@ -6,10 +6,10 @@ import java.io.File;
 import java.util.Random;
 
 import org.junit.Test;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.GraphTools;
-import org.kyupi.graph.Library;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.GraphTools;
+import org.kyupi.circuit.Library;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.CombLogicSim.State;
 

@@ -1,12 +1,12 @@
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.kyupi.graph.Graph.Node;
-import org.kyupi.graph.ScanChains.ScanChain;
+import org.kyupi.circuit.Graph.Node;
+import org.kyupi.circuit.ScanChains.ScanChain;
 import org.kyupi.misc.RuntimeTools;
 
 

@@ -9,10 +9,10 @@
  */
 package org.kyupi.sim;
 
+import org.kyupi.circuit.Graph;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
 import org.kyupi.data.source.QVSource;
-import org.kyupi.graph.Graph;
 
 public class QVPlainSim extends QVSource {
 

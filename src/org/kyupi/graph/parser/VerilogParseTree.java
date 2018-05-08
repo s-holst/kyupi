@@ -17,9 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Library;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.Library;
+import org.kyupi.circuit.Graph.Node;
 
 public class VerilogParseTree {
 

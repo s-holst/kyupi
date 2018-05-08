@@ -9,10 +9,10 @@
  */
 package org.kyupi.sim;
 
+import org.kyupi.circuit.Graph;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.source.BBSource;
 import org.kyupi.data.source.QBSource;
-import org.kyupi.graph.Graph;
 
 public class BBPlainSim extends BBSource {
 

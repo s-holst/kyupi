@@ -17,12 +17,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.Graph.Node;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.parser.Stil;
 import org.kyupi.data.parser.Stil.Operation;
 import org.kyupi.data.source.QVSource;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.Graph.Node;
 import org.kyupi.misc.FileTools;
 
 public class FormatStil {

@@ -1,11 +1,11 @@
-package org.kyupi.graph;
+package org.kyupi.circuit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.graph.Graph.Node;
+import org.kyupi.circuit.Graph.Node;
 
 public class SignalMapTest {
 

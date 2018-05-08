@@ -10,9 +10,9 @@
 package org.kyupi.sim;
 
 import org.apache.log4j.Logger;
+import org.kyupi.circuit.Graph;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
-import org.kyupi.graph.Graph;
 import org.kyupi.sim.Simulator.State;
 
 public class QBPlainSim extends QBSource {

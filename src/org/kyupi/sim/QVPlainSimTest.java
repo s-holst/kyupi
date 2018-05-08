@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.kyupi.circuit.Graph;
+import org.kyupi.circuit.GraphTools;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QVSource;
-import org.kyupi.graph.Graph;
-import org.kyupi.graph.GraphTools;
 
 public class QVPlainSimTest {
 

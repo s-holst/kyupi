@@ -2,9 +2,9 @@ package org.kyupi.sim;
 
 import java.util.Arrays;
 
+import org.kyupi.circuit.Graph;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
-import org.kyupi.graph.Graph;
 
 public class QBObservabilityCounter extends QBSource {
 
