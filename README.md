@@ -82,7 +82,7 @@ for succeeding on the mission.
   This documentation stays up-to-date and is a source of inspiration and code
   snippets for implementing algorithms in KyuPI.
 
-* *Test-driven development and maintainance.* Tests and use cases are usually
+* *Test-driven development and maintenance.* Tests and use cases are usually
   written before the actual implementation of the desired functionality. Only
   code with existing and passing unit tests is guaranteed to be maintained.
   Other code will eventually be removed from the project.
@@ -141,13 +141,6 @@ nodes to their neighbors. (2) directly access arrays containing all nodes in
 topological order. The graph is ordered automatically on-demand. Whenever the graph
 structure is changed by adding or removing nodes, the graph is sorted into
 topological order once the direct access arrays are requested.
-
-The very first level in the topological order is special. It is called the
-interface. It contains (and only contains) all primary inputs, all primary outputs,
-and all sequential cells of the circuit. The position of the nodes on this level
-can be defined by the user. This level directly corresponds the bit positions in
-vectors during simulation. Thus, the state of sequential circuits during simulation
-is always stored in a single vector together with all inputs and outputs.
 
 Graphs can contain pseudo-nodes (flag FLAG_PSEUDO is set). Pseudo nodes do not
 represent a physical cell in the design, but encode signal names and branch points.
