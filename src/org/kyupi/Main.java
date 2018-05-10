@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTest;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.ScanChainsTest;
 import org.kyupi.data.QVExpanderTest;
 import org.kyupi.data.item.BBlockTest;
@@ -33,11 +33,11 @@ import org.kyupi.misc.JvmStats;
 import org.kyupi.misc.KyupiApp;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.BBPlainSimTest;
+import org.kyupi.sim.CombLogicSim;
 import org.kyupi.sim.ObservabilityTest;
 import org.kyupi.sim.QBObservabilityCounterTest;
 import org.kyupi.sim.QBPlainSimTest;
 import org.kyupi.sim.QVPlainSimTest;
-import org.kyupi.sim.SimulatorTest;
 
 public class Main extends KyupiApp {
 
@@ -45,7 +45,7 @@ public class Main extends KyupiApp {
 			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class,
 			CircuitTest.class, ScanChainsTest.class, ProcessManagerTest.class,
 			BBPlainSimTest.class, QBPlainSimTest.class, QVPlainSimTest.class, QBObservabilityCounterTest.class,
-			ObservabilityTest.class, SimulatorTest.class, QVExpanderTest.class, Main.class };
+			ObservabilityTest.class, CombLogicSim.class, QVExpanderTest.class, Main.class };
 
 	public static void main(String[] args) throws Exception {
 		new Main().setArgs(args).call();

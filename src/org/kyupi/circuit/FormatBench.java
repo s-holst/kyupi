@@ -301,21 +301,23 @@ class FormatBench {
 			if (inp.isPseudo())
 				op.println(inp.queryName() + " = DFF(" + inp.queryName() + ")"); // FIXME
 		}
-		for (int l = 1; l < graph.levels(); l++) {
-			for (MutableCell node : graph.accessLevel(l)) {
-				int ninputs = node.maxIn();
-				String s = "";
-				for (int i = 0; i <= ninputs; i++) {
-					MutableCell a = node.in(i);
-					if (a != null)
-						s += "," + a.queryName();
-					else
-						log.warn("ignoring null input at cell " + node.queryName());
-				}
-				if (s.length() > 0)
-					s = s.substring(1);
-				op.println(node.queryName() + " = " + names[node.type() & 0xf] + "(" + s + ")");
+		for (MutableCell node : graph.accessNodes()) {
+			if (node == null)
+				continue;
+			if (node.isPort() || node.isSequential())
+				continue;
+			int ninputs = node.maxIn();
+			String s = "";
+			for (int i = 0; i <= ninputs; i++) {
+				MutableCell a = node.in(i);
+				if (a != null)
+					s += "," + a.queryName();
+				else
+					log.warn("ignoring null input at cell " + node.queryName());
 			}
+			if (s.length() > 0)
+				s = s.substring(1);
+			op.println(node.queryName() + " = " + names[node.type() & 0xf] + "(" + s + ")");
 		}
 		op.close();
 	}

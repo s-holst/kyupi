@@ -8,34 +8,36 @@ import java.util.Random;
 import org.junit.Test;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.CombLogicSim.State;
 
 public class CombLogicSimTest {
 
-	private void stateSet(State state, MutableCircuit circuit, String node, long value, long care) {
-		MutableCell n = circuit.searchNode(node);
-		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
+	private void stateSet(State state, LevelizedCircuit circuit, String node, long value, long care) {
+		LevelizedCell n = circuit.searchNode(node);
+		int signalIdx = n.outputLineID(0);
 		state.set(signalIdx, value, care);
 	}
 	
-	private long stateGetV(State state, MutableCircuit circuit, String node) {
-		MutableCell n = circuit.searchNode(node);
-		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
+	private long stateGetV(State state, LevelizedCircuit circuit, String node) {
+		LevelizedCell n = circuit.searchNode(node);
+		int signalIdx = n.outputLineID(0);
 		return state.getV(signalIdx);
 	}
 
-	private long stateGetC(State state, MutableCircuit circuit, String node) {
-		MutableCell n = circuit.searchNode(node);
-		int signalIdx = circuit.accessSignalMap().idxForOutput(n, 0);
+	private long stateGetC(State state, LevelizedCircuit circuit, String node) {
+		LevelizedCell n = circuit.searchNode(node);
+		int signalIdx = n.outputLineID(0);
 		return state.getC(signalIdx);
 	}
 	
 	@Test
 	public void testC17() throws Exception {
-		MutableCircuit circuit = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		MutableCircuit mc = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
+		LevelizedCircuit circuit = new LevelizedCircuit(mc);
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 		
@@ -112,7 +114,8 @@ public class CombLogicSimTest {
 	
 	@Test
 	public void testSequential() {
-		MutableCircuit circuit = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
+		MutableCircuit mc = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
+		LevelizedCircuit circuit = new LevelizedCircuit(mc);
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 
@@ -152,7 +155,8 @@ public class CombLogicSimTest {
 	
 	@Test
 	public void testGates() {
-		MutableCircuit circuit = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(nand) OUTPUT(and) nand=NAND(a,b) and=NOT(nand)");
+		MutableCircuit mc = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(nand) OUTPUT(and) nand=NAND(a,b) and=NOT(nand)");
+		LevelizedCircuit circuit = new LevelizedCircuit(mc);
 		CombLogicSim sim = new CombLogicSim(circuit);
 		State state = sim.new State();
 		
@@ -171,12 +175,12 @@ public class CombLogicSimTest {
 
 		state.propagate();
 		
-		MutableCell n = circuit.searchNode("nand_");
+		LevelizedCell n = circuit.searchNode("nand_");
 		
 		assertNotNull(n);
 		
-		int sigA = circuit.accessSignalMap().idxForInput(n, 0);
-		int sigB = circuit.accessSignalMap().idxForInput(n, 1);
+		int sigA = n.inputLineID(0);
+		int sigB = n.inputLineID(1);
 		
 		assertEquals(0b0101L, state.getV(sigA));
 		assertEquals(-1L, state.getC(sigA));
@@ -184,7 +188,7 @@ public class CombLogicSimTest {
 		assertEquals(0b1100L, state.getV(sigB));
 		assertEquals(-1L, state.getC(sigB));
 
-		int sigZ = circuit.accessSignalMap().idxForOutput(n, 0);
+		int sigZ = n.outputLineID(0);
 
 		assertEquals(~(0b0101L & 0b1100L), state.getV(sigZ));
 		assertEquals(-1L, state.getC(sigZ));

@@ -71,7 +71,9 @@ public class Cell {
 	public static final int TYPE_OAI221 = 0x25 | INPUTS_5;
 	public static final int TYPE_OAI222 = 0x26 | INPUTS_6;
 	public static final int TYPE_OAI22 = 0x27 | INPUTS_4;
+	public static final int TYPE_OAI21_NANGATE = 0x28 | INPUTS_3;
 
+	
 	public static final int TYPE_MUX21 = 0x30 | INPUTS_3;
 	public static final int TYPE_MUX41 = 0x31 | INPUTS_6;
 	public static final int TYPE_CGLPPR = 0x32 | INPUTS_3;

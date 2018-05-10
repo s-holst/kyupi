@@ -14,11 +14,13 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
 import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.QBlock;
@@ -55,11 +57,12 @@ public class QBPlainSimTest extends TestCase {
 		g.connect(buf, -1, pos3out, 0);
 		g.connect(pos3out, -1, pos4out, 0);
 		// log.info("graph " + g);
+		LevelizedCircuit lg = g.levelized();
 		QVector v = new QVector("--1--");
 		ArrayList<QVector> va = new ArrayList<>();
 		va.add(v);
 		QVSource pat = QVSource.from(5, va);
-		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.from(pat)));
+		QVSource sim = QVSource.from(new QBPlainSim(lg, QBSource.from(pat)));
 		assertEquals("11111", sim.next().toString());
 	}
 
@@ -80,20 +83,23 @@ public class QBPlainSimTest extends TestCase {
 		g.connect(n, -1, o0, 0);
 		MutableCircuit g2 = CircuitTools.parseBench("input(i0) input(i1) input(i2) output(o0) s0=OR(i0,i1) o0=NAND(i2,s0)");
 
+		LevelizedCircuit lg = g.levelized();
+		LevelizedCircuit lg2 = g2.levelized();
+		
 		QVSource pat = QVSource.from(QBSource.random(4, 42));
-		QVSource tst = QVSource.from(new QBPlainSim(g, QBSource.random(4, 42)));
-		QVSource ref = QVSource.from(new QBPlainSim(g2, QBSource.random(4, 42)));
+		QVSource tst = QVSource.from(new QBPlainSim(lg, QBSource.random(4, 42)));
+		QVSource ref = QVSource.from(new QBPlainSim(lg2, QBSource.random(4, 42)));
 
 		// simulate 128 random patterns and compare the responses.
 		for (int i = 0; i < 128; i++) {
-			assertEqualsReport(ref.next(), tst.next(), pat.next(), i, g.accessInterface());
+			assertEqualsReport(ref.next(), tst.next(), pat.next(), i, lg);
 		}
 	}
 
 	@Test
 	public void testNorInv() {
-		MutableCircuit g = CircuitTools.parseBench("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)");
-		int length = g.accessInterface().length;
+		LevelizedCircuit g = CircuitTools.parseBench("input(a) input(b) output(nor) output(inv) nor=NOR(a,b) inv=NOT(a)").levelized();
+		int length = g.width();
 
 		QVSource pat = QVSource.from(QBSource.random(length, 42));
 		QVSource sim = QVSource.from(new QBPlainSim(g, QBSource.random(length, 42)));
@@ -142,7 +148,7 @@ public class QBPlainSimTest extends TestCase {
 
 		// simulate 128 random patterns and compare the responses.
 		for (int i = 0; i < 128; i++) {
-			assertEqualsReport(ref.next(), sim.next(), pat.next(), i, g.accessInterface());
+			assertEqualsReport(ref.next(), sim.next(), pat.next(), i, g);
 		}
 	}
 
@@ -171,7 +177,7 @@ public class QBPlainSimTest extends TestCase {
 		ArrayList<QVector> ta = tests.toArrayList();
 		ArrayList<QVector> ra = resp.toArrayList();
 
-		QVSource sim = new QVPlainSim(g, tests);
+		QVSource sim = new QVPlainSim(g.levelized(), tests);
 
 		ArrayList<QVector> sa = sim.toArrayList();
 
@@ -188,27 +194,28 @@ public class QBPlainSimTest extends TestCase {
 
 	@Test
 	public void testC17Nangate() throws Exception {
-		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"),
-				new LibraryNangate());
+		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library()).levelized();
+		LevelizedCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"),
+				new LibraryNangate()).levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testC17Saed90() throws Exception {
-		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library());
-		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
-				new LibrarySAED());
+		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library()).levelized();
+		LevelizedCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
+				new LibrarySAED()).levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testAllSaed90() throws Exception {
-		MutableCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
+		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
+				new LibrarySAED()).levelized();
+		MutableCircuit mg_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
 				new LibrarySAED());
-		MutableCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
-				new LibrarySAED());
-		CircuitTools.splitMultiOutputCells(g_test);
+		CircuitTools.splitMultiOutputCells(mg_test);
+		LevelizedCircuit g_test = mg_test.levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
@@ -220,19 +227,22 @@ public class QBPlainSimTest extends TestCase {
 		ArrayList<QVector> stimuli = stil.getStimuliArray();
 		ArrayList<QVector> responses = stil.getResponsesArray();
 
-		MutableCell[] intf = graph.accessInterface();
-
+		LevelizedCircuit lgraph = graph.levelized();
+		
 		// transition patterns: simulate each scan load for two clock cycles.
-		QBSource launch = new QBPlainSim(graph, QBSource.from(intf.length, stimuli));
-		QVSource capture = QVSource.from(new QBPlainSim(graph, launch));
+		QBSource launch = new QBPlainSim(lgraph, QBSource.from(lgraph.width(), stimuli));
+		QVSource capture = QVSource.from(new QBPlainSim(lgraph, launch));
 
 		// this causes simulation of all vectors:
 		ArrayList<QVector> simresult = capture.toArrayList();
 
 		// only compare scan state as stil files don't contain expects for POs.
-		QVector mask = new QVector(intf.length);
-		for (int i = 0; i < intf.length; i++) {
-			if (intf[i] != null && (intf[i].isSequential()))
+		QVector mask = new QVector(lgraph.width());
+		for (LevelizedCell c : lgraph.intf()) {
+			if (c == null)
+				continue;
+			int i = c.intfPosition();
+			if (c.isSequential())
 				mask.setValue(i, '1');
 		}
 
@@ -252,9 +262,9 @@ public class QBPlainSimTest extends TestCase {
 		assertEquals(0, errors);
 	}
 
-	private void assertEqualsByRandomSimulation(MutableCircuit g_ref, MutableCircuit g_test) {
-		int length = g_ref.accessInterface().length;
-		assertEquals(length, g_test.accessInterface().length);
+	private void assertEqualsByRandomSimulation(LevelizedCircuit g_ref, LevelizedCircuit g_test) {
+		int length = g_ref.width();
+		assertEquals(length, g_test.width());
 
 		QVSource pat = QVSource.from(QBSource.random(length, 42));
 		QVSource ref = QVSource.from(new QBPlainSim(g_ref, QBSource.random(length, 42)));
@@ -262,11 +272,11 @@ public class QBPlainSimTest extends TestCase {
 
 		// simulate 128 random patterns and compare the responses.
 		for (int i = 0; i < 128; i++) {
-			assertEqualsReport(ref.next(), test.next(), pat.next(), i, g_ref.accessInterface());
+			assertEqualsReport(ref.next(), test.next(), pat.next(), i, g_ref);
 		}
 	}
 
-	private void assertEqualsReport(QVector expected, QVector actual, QVector inp, int pindex, MutableCell[] intf) {
+	private void assertEqualsReport(QVector expected, QVector actual, QVector inp, int pindex, LevelizedCircuit lg) {
 		if (!expected.equals(actual)) {
 			int l = expected.length();
 			StringBuffer buf = new StringBuffer();
@@ -274,7 +284,7 @@ public class QBPlainSimTest extends TestCase {
 				char e = expected.getValue(i);
 				char a = actual.getValue(i);
 				if (e != a) {
-					buf.append(" " + intf[i].queryName() + "=" + a + "(exp:" + e + ")");
+					buf.append(" " + lg.intf(i).queryName() + "=" + a + "(exp:" + e + ")");
 				}
 			}
 			fail("Mismatched pattern " + pindex + "(" + inp + "): " + actual + "(exp:" + expected + ")"

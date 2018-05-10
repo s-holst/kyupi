@@ -9,6 +9,8 @@
  */
 package org.kyupi.circuit;
 
+import java.util.Arrays;
+
 import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.ArrayTools;
 
@@ -24,10 +26,10 @@ import org.kyupi.misc.ArrayTools;
 
 public class SignalMap {
 
-	private int input_map_offset[][];
+	private int input_map_offset[];
 	private int input_map[];
 
-	private int output_map_offset[][];
+	private int output_map_offset[];
 	
 	private int edge_count;
 	
@@ -37,8 +39,13 @@ public class SignalMap {
 
 	public SignalMap(MutableCircuit g) {
 		
-		output_map_offset = CircuitTools.allocInt(g, -1);
-		input_map_offset = CircuitTools.allocInt(g, -1);
+		int size = g.accessNodes().length;
+		
+		output_map_offset = new int[size];
+		Arrays.fill(output_map_offset, -1);
+		input_map_offset = new int[size];
+		Arrays.fill(input_map_offset, -1);
+		
 		int output_map_idx = 0;
 		int next_input_map_offset = 0;
 		
@@ -49,7 +56,7 @@ public class SignalMap {
 
 			// Node n has at least one output edge.
 
-			output_map_offset[n.level()][n.levelPosition()] = output_map_idx;
+			output_map_offset[n.id()] = output_map_idx;
 									
 			for (int succ_idx = 0; succ_idx < out_count; succ_idx++) {
 				MutableCell succ = n.out(succ_idx);
@@ -59,13 +66,13 @@ public class SignalMap {
 					continue;
 				}
 
-				if (input_map_offset[succ.level()][succ.levelPosition()] == -1) {
+				if (input_map_offset[succ.id()] == -1) {
 					// allocate input_map for previously unseen successor Node.
-					input_map_offset[succ.level()][succ.levelPosition()] = next_input_map_offset;
+					input_map_offset[succ.id()] = next_input_map_offset;
 					next_input_map_offset += succ.maxIn() + 1;
 					input_map = ArrayTools.grow(input_map, next_input_map_offset, 4096, -1);
 				}
-				input_map[input_map_offset[succ.level()][succ.levelPosition()] + succ.searchInIdx(n)] = output_map_idx;
+				input_map[input_map_offset[succ.id()] + succ.searchInIdx(n)] = output_map_idx;
 				output_map_idx++;
 			}
 		}
@@ -94,19 +101,11 @@ public class SignalMap {
 	}
 	
 	public int idxForInput(MutableCell n, int in_idx) {
-		return idxForInput(n.level(), n.levelPosition(), in_idx);
-	}
-
-	public int idxForInput(int level, int pos, int in_idx) {
-		return input_map[input_map_offset[level][pos] + in_idx];
+		return input_map[input_map_offset[n.id()] + in_idx];
 	}
 
 	public int idxForOutput(MutableCell n, int out_idx) {
-		return idxForOutput(n.level(), n.levelPosition(), out_idx);
-	}
-		
-	public int idxForOutput(int level, int pos, int out_idx) {
-		return output_map_offset[level][pos] + out_idx;
+		return output_map_offset[n.id()] + out_idx;
 	}
 	
 	public MutableCell driverForIdx(int idx) {

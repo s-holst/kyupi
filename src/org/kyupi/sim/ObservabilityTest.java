@@ -7,9 +7,10 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTools;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QBSource;
@@ -21,8 +22,9 @@ public class ObservabilityTest {
 	@Test
 	public void test() {
 		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
+		LevelizedCircuit lc = new LevelizedCircuit(g);
 		//log.info("Graph=\n" + g);
-		Observability obs = new Observability(g);
+		Observability obs = new Observability(lc);
 		
 		ArrayList<QVector> patterns = new ArrayList<QVector>();
 		patterns.add(new QVector("000"));
@@ -36,12 +38,12 @@ public class ObservabilityTest {
 
 		obs.loadInputsFrom(blk);
 		
-		MutableCell a = g.searchNode("a");
-		MutableCell z = g.searchNode("z_");
+		LevelizedCell a = lc.searchNode("a");
+		LevelizedCell z = lc.searchNode("z_");
 		assertNotNull(a);
 		assertNotNull(z);
 		
-		int idx = g.accessSignalMap().idxForOutput(a, 0);
+		int idx = a.outputLineID(0);
 		assertEquals(-1L, obs.getObservability(idx));		
 	}
 

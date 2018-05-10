@@ -13,11 +13,12 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.BVector;
 import org.kyupi.data.source.QBSource;
@@ -33,18 +34,19 @@ public class QBObservabilityCounterTest extends TestCase {
 	@Test
 	public void testS27() throws Exception {
 		Library l = new LibrarySAED();
-		MutableCircuit g = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
+		MutableCircuit mc = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
+		LevelizedCircuit lc = mc.levelized();
 		//log.info("Graph=\n" + g);
-		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", g);
+		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", mc);
 		QVSource t = p.getStimuliSource();
-		QBObservabilityCounter obs = new QBObservabilityCounter(g, QBSource.from(t));
+		QBObservabilityCounter obs = new QBObservabilityCounter(lc, QBSource.from(t));
 		obs.next();
 		// FIXME: assert fault coverage
 	}
 	
 	@Test
 	public void test() {
-		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
+		LevelizedCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)").levelized();
 		//log.info("Graph=\n" + g);
 		ArrayList<BVector> patterns = new ArrayList<BVector>();
 		patterns.add(new BVector("000"));
@@ -54,14 +56,14 @@ public class QBObservabilityCounterTest extends TestCase {
 		patterns.add(new BVector("101"));
 		QBObservabilityCounter obs = new QBObservabilityCounter(g, QBSource.from(3, patterns));
 		obs.next();
-		MutableCell a = g.searchNode("a");
-		MutableCell z = g.searchNode("z_");
+		LevelizedCell a = g.searchNode("a");
+		LevelizedCell z = g.searchNode("z_");
 		
 		assertNotNull(a);
 		assertNotNull(z);
 
-		int a_idx = g.accessSignalMap().idxForOutput(a, 0);
-		int z_idx = g.accessSignalMap().idxForOutput(z, 0);
+		int a_idx = a.outputLineID(0);
+		int z_idx = z.outputLineID(0);
 
 		assertEquals(61, obs.getSA0ObsCount(a_idx));
 		assertEquals(3, obs.getSA1ObsCount(a_idx));

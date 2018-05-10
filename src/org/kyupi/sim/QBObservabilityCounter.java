@@ -2,7 +2,7 @@ package org.kyupi.sim;
 
 import java.util.Arrays;
 
-import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.data.source.QBSource;
 
@@ -14,12 +14,12 @@ public class QBObservabilityCounter extends QBSource {
 	private int[] obsCount1;
 	private int dropThreshold = Integer.MAX_VALUE;
 
-	public QBObservabilityCounter(MutableCircuit circuit, QBSource source) {
+	public QBObservabilityCounter(LevelizedCircuit circuit, QBSource source) {
 		super(source.length());
 		this.source = source;
 		this.obscalc = new Observability(circuit);
-		obsCount0 = new int[circuit.accessSignalMap().length()];
-		obsCount1 = new int[circuit.accessSignalMap().length()];
+		obsCount0 = new int[circuit.lineCount()];
+		obsCount1 = new int[circuit.lineCount()];
 		Arrays.fill(obsCount0, 0);
 		Arrays.fill(obsCount1, 0);
 	}

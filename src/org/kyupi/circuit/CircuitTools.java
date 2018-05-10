@@ -216,15 +216,13 @@ public class CircuitTools {
 
 		LinkedList<MutableCell> todo = new LinkedList<>();
 
-		// ensure, that all the predecessors of a multi-output node get split
+		// TODO: ensure, that all the predecessors of a multi-output node get split
 		// first.
-		for (int l = 1; l < g.levels(); l++) {
-			for (MutableCell cell : g.accessLevel(l)) {
+		for (MutableCell cell : g.accessNodes()) {
 				if (cell == null || !cell.isMultiOutput())
 					continue;
 				todo.add(cell);
 			}
-		}
 
 		for (MutableCell cell : todo) {
 			for (int out_idx = cell.maxOut(); out_idx >= 0; out_idx--) {
@@ -247,28 +245,28 @@ public class CircuitTools {
 		}
 	}
 	
-	public static long[][] allocLong(MutableCircuit circuit) {
-		int levels = circuit.levels();
-		long value[][] = new long[levels][];
-		for (int l = 0; l < levels; l++) {
-			value[l] = new long[circuit.accessLevel(l).length];
-			Arrays.fill(value[l], 0L);
-		}
-		return value;
-	}
-
-	public static int[][] allocInt(MutableCircuit circuit, int init_value) {
-		int levels = circuit.levels();
-		int value[][] = new int[levels][];
-		for (int l = 0; l < levels; l++) {
-			value[l] = new int[circuit.accessLevel(l).length];
-			Arrays.fill(value[l], init_value);
-		}
-		return value;
-	}
-	
-	public static int[][] allocInt(MutableCircuit circuit) {
-		return CircuitTools.allocInt(circuit, 0);
-	}
+//	public static long[][] allocLong(MutableCircuit circuit) {
+//		int levels = circuit.levels();
+//		long value[][] = new long[levels][];
+//		for (int l = 0; l < levels; l++) {
+//			value[l] = new long[circuit.accessLevel(l).length];
+//			Arrays.fill(value[l], 0L);
+//		}
+//		return value;
+//	}
+//
+//	public static int[][] allocInt(MutableCircuit circuit, int init_value) {
+//		int levels = circuit.levels();
+//		int value[][] = new int[levels][];
+//		for (int l = 0; l < levels; l++) {
+//			value[l] = new int[circuit.accessLevel(l).length];
+//			Arrays.fill(value[l], init_value);
+//		}
+//		return value;
+//	}
+//	
+//	public static int[][] allocInt(MutableCircuit circuit) {
+//		return CircuitTools.allocInt(circuit, 0);
+//	}
 
 }

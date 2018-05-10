@@ -555,10 +555,10 @@ public class MutableCircuit {
 	 * @param l
 	 * @return
 	 */
-	public MutableCell[] accessLevel(int l) {
-		ensureLevels();
-		return levels[l];
-	}
+//	public MutableCell[] accessLevel(int l) {
+//		ensureLevels();
+//		return levels[l];
+//	}
 
 	/**
 	 * returns an array containing all interface (port) nodes of the Graph in
@@ -633,6 +633,10 @@ public class MutableCircuit {
 			b.append("]\n");
 		}
 		return b.toString();
+	}
+	
+	public LevelizedCircuit levelized() {
+		return new LevelizedCircuit(this);
 	}
 
 	private void register(MutableCell g) {

@@ -15,7 +15,7 @@ public class LibraryNangate extends Library {
 
 	// re-use Library.TYPE_ where possible.
 	public static final int TYPE_AOI22 = 0x17;
-	public static final int TYPE_OAI21 = 0x24;
+	public static final int TYPE_OAI21 = 0x28;
 
 	String[][] inputPortNameSets = { { "A" }, { "A1", "A2", "A3", "A4" }, { "A1", "A2", "B1", "B2" }, { "A", "B1", "B2" } };
 	String[][] outputPortNameSets = { { "Z" }, { "ZN" } };

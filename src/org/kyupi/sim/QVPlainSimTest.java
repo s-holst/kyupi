@@ -1,12 +1,12 @@
 package org.kyupi.sim;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 
 import org.junit.Test;
-import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.source.QVSource;
 
@@ -14,7 +14,7 @@ public class QVPlainSimTest {
 
 	@Test
 	public void test() {
-		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)");
+		LevelizedCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z1) OUTPUT(z2) z1=DFF(a) z2=DFF(z1)").levelized();
 		//log.info("Graph=\n" + g);
 		ArrayList<QVector> v = new ArrayList<>();
 		v.add(new QVector("1--00"));

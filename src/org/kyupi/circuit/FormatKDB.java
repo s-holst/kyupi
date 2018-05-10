@@ -159,9 +159,6 @@ class FormatKDB {
 			}
 		}
 
-		for (MutableCell n :  c.accessLevel(0)) {
-			log.info("LEVEL0 node: " + n);
-		}
 		c.strip();
 		return c;
 	}

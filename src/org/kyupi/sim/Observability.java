@@ -3,9 +3,9 @@ package org.kyupi.sim;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.sim.CombLogicSim.State;
@@ -16,7 +16,7 @@ public class Observability {
 	
 	private State base;
 	private State delta;
-	private MutableCircuit graph;
+	private LevelizedCircuit graph;
 
 	private long obs[];
 	private int obs_rev[];
@@ -27,15 +27,15 @@ public class Observability {
 	
 	private int rev = 0;
 	
-	public Observability(MutableCircuit g) {
+	public Observability(LevelizedCircuit g) {
 		graph = g;
 		CombLogicSim sim = new CombLogicSim(graph);
 		base = sim.new State();
 		delta = sim.new State(base);
-		obs = new long[graph.accessSignalMap().length()];
+		obs = new long[graph.lineCount()];
 		Arrays.fill(obs, 0L);
-		obs_outputs = new BBlock(graph.accessInterface().length);
-		obs_rev = new int[graph.accessSignalMap().length()];
+		obs_outputs = new BBlock(graph.width());
+		obs_rev = new int[graph.lineCount()];
 		Arrays.fill(obs_rev, 0);
 		obs_outputs_rev = 0;
 	}
@@ -70,11 +70,11 @@ public class Observability {
 			return obs[sig_idx];
 		}
 
-		MutableCell receiver = graph.accessSignalMap().receiverForIdx(sig_idx);
+		LevelizedCell receiver = graph.readerOf(sig_idx);
 		
 		if (receiver == null) {
 			log.error("unable to find receiver for sig_idx " + sig_idx);
-			MutableCell d = graph.accessSignalMap().driverForIdx(sig_idx);
+			LevelizedCell d = graph.driverOf(sig_idx);
 			if (d != null) {
 				log.error("  driver is " + d);
 			} else {
@@ -93,7 +93,7 @@ public class Observability {
 			return obs[sig_idx];
 		}
 
-		if (receiver.maxOut() < 0) { // dead-end node, not observable
+		if (receiver.outputCount() == 0) { // dead-end node, not observable
 			obs[sig_idx] = 0L;
 			obs_rev[sig_idx] = rev;
 			for (int pos = 0; pos < obs_outputs.length(); pos++) {
@@ -104,11 +104,11 @@ public class Observability {
 		}
 		
 
-		if (receiver.maxOut() == 0 && canPropagate(receiver.type())) { // propagate through ffr
-			MutableCell driver = graph.accessSignalMap().driverForIdx(sig_idx);
+		if (receiver.outputCount() == 1 && canPropagate(receiver.type())) { // propagate through ffr
+			LevelizedCell driver = graph.driverOf(sig_idx);
 			int in_idx = receiver.searchInIdx(driver);
 			long s = sensitization(receiver, in_idx);
-			int out_sig_idx = graph.accessSignalMap().idxForOutput(receiver, 0);
+			int out_sig_idx = receiver.outputLineID(0);
 			obs[sig_idx] = s & getObservability(out_sig_idx);
 			obs_rev[sig_idx] = rev;
 			return obs[sig_idx];
@@ -144,8 +144,8 @@ public class Observability {
 		return false;
 	}
 
-	private long sensitization(MutableCell n, int on_path_input_idx) {
-		int in_count = n.maxIn() + 1;
+	private long sensitization(LevelizedCell n, int on_path_input_idx) {
+		int in_count = n.inputCount();
 		long s;
 		switch (n.type() & 0xff) {
 		case Library.TYPE_BUF:
@@ -159,7 +159,7 @@ public class Observability {
 			for (int i = 0; i < in_count; i++) {
 				if (i == on_path_input_idx)
 					continue;
-				int sig_idx = graph.accessSignalMap().idxForInput(n, i);
+				int sig_idx = n.inputLineID(i);
 				if (sig_idx < 0)
 					continue;
 				s = s & (getV(sig_idx) & getC(sig_idx));
@@ -171,7 +171,7 @@ public class Observability {
 			for (int i = 0; i < in_count; i++) {
 				if (i == on_path_input_idx)
 					continue;
-				int sig_idx = graph.accessSignalMap().idxForInput(n, i);
+				int sig_idx = n.inputLineID(i);
 				if (sig_idx < 0)
 					continue;
 				s = s & (~getV(sig_idx) & getC(sig_idx));
@@ -188,7 +188,7 @@ public class Observability {
 		delta.set(sig_idx, ~base.getV(sig_idx), base.getC(sig_idx));
 		delta.propagate();
 		long sig_obs = 0L;
-		for (MutableCell out: graph.accessInterface()) {
+		for (LevelizedCell out: graph.intf()) {
 			if (out == null)
 				continue;
 			int pos = out.intfPosition();

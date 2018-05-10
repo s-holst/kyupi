@@ -12,11 +12,11 @@ package org.kyupi.sim;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.MutableCircuit;
-import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.Cell;
+import org.kyupi.circuit.LevelizedCircuit;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibrarySAED;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.misc.ArrayTools;
 
@@ -24,7 +24,7 @@ public class CombLogicSim {
 
 	protected static Logger log = Logger.getLogger(CombLogicSim.class);
 
-	private MutableCircuit circuit;
+	private LevelizedCircuit circuit;
 
 	public class State {
 
@@ -44,29 +44,29 @@ public class CombLogicSim {
 		private long[] resp_value;
 		private int[] resp_valid_rev;
 
-		private int[][] dirty_rev;
+		private int[] dirty_rev;
 		int min_dirty_level;
 
 		public State(State parent) {
 			this.parent = parent;
-			care = new long[circuit.accessSignalMap().length()];
-			value = new long[circuit.accessSignalMap().length()];
+			care = new long[circuit.lineCount()];
+			value = new long[circuit.lineCount()];
 			Arrays.fill(care, 0L);
 			Arrays.fill(value, 0L);
-			valid_rev = new int[circuit.accessSignalMap().length()];
+			valid_rev = new int[circuit.lineCount()];
 			Arrays.fill(valid_rev, 0);
 
-			dirty_rev = CircuitTools.allocInt(circuit);
+			dirty_rev = new int[circuit.size()];
 
-			stim_care = new long[circuit.accessInterface().length];
-			stim_value = new long[circuit.accessInterface().length];
-			stim_valid_rev = new int[circuit.accessInterface().length];
+			stim_care = new long[circuit.width()];
+			stim_value = new long[circuit.width()];
+			stim_valid_rev = new int[circuit.width()];
 			Arrays.fill(stim_value, 0L);
 			Arrays.fill(stim_care, 0L);
 			Arrays.fill(stim_valid_rev, 0);
-			resp_care = new long[circuit.accessInterface().length];
-			resp_value = new long[circuit.accessInterface().length];
-			resp_valid_rev = new int[circuit.accessInterface().length];
+			resp_care = new long[circuit.width()];
+			resp_value = new long[circuit.width()];
+			resp_valid_rev = new int[circuit.width()];
 			Arrays.fill(resp_value, 0L);
 			Arrays.fill(resp_care, 0L);
 			Arrays.fill(resp_valid_rev, 0);
@@ -133,8 +133,8 @@ public class CombLogicSim {
 			this.value[signal_idx] = value;
 			this.care[signal_idx] = care;
 			valid_rev[signal_idx] = rev;
-			MutableCell receiver = circuit.accessSignalMap().receiverForIdx(signal_idx);
-			dirty_rev[receiver.level()][receiver.levelPosition()] = rev;
+			LevelizedCell receiver = circuit.readerOf(signal_idx);
+			dirty_rev[receiver.id()] = rev;
 			min_dirty_level = Math.min(min_dirty_level, receiver.level());
 		}
 
@@ -142,14 +142,14 @@ public class CombLogicSim {
 			this.stim_value[pos] = value;
 			this.stim_care[pos] = care;
 			stim_valid_rev[pos] = rev;
-			MutableCell n = circuit.accessInterface()[pos];
-			dirty_rev[n.level()][n.levelPosition()] = rev;
+			LevelizedCell n = circuit.intf(pos);
+			dirty_rev[n.id()] = rev;
 			min_dirty_level = 0;
 		}
 
 		public void loadInputsFrom(QBlock b) {
 			int pos = 0;
-			for (MutableCell n : circuit.accessInterface()) {
+			for (LevelizedCell n : circuit.intf()) {
 				if (n != null && (n.isSequential() || n.isInput()))
 					setStimulus(pos, b.getV(pos), b.getC(pos));
 				pos++;
@@ -158,15 +158,15 @@ public class CombLogicSim {
 
 		public void storeOutputsTo(QBlock b) {
 			int pos = 0;
-			for (MutableCell n : circuit.accessInterface()) {
+			for (LevelizedCell n : circuit.intf()) {
 				if (n != null && (n.isOutput() || n.isSequential()))
 					b.set(pos, getResponseV(pos), getResponseC(pos));
 				pos++;
 			}
 		}
 
-		public boolean isDirty(int level, int pos) {
-			return dirty_rev[level][pos] == rev;
+		public boolean isDirty(LevelizedCell n) {
+			return dirty_rev[n.id()] == rev;
 		}
 
 		public void propagate() {
@@ -175,7 +175,7 @@ public class CombLogicSim {
 
 		public void reapply() {
 			clear();
-			for (MutableCell n : circuit.accessInterface()) {
+			for (LevelizedCell n : circuit.intf()) {
 				if (n == null)
 					continue;
 				int pos = n.intfPosition();
@@ -213,7 +213,7 @@ public class CombLogicSim {
 
 	}
 
-	public CombLogicSim(MutableCircuit circuit) {
+	public CombLogicSim(LevelizedCircuit circuit) {
 		this.circuit = circuit;
 	}
 
@@ -224,19 +224,17 @@ public class CombLogicSim {
 	private long[] tmpOC = new long[32];
 
 	private void propagate_state(State state) {
-		int level_count = circuit.levels();
+		int level_count = circuit.depth();
 		for (int level_idx = state.min_dirty_level; level_idx < level_count; level_idx++) {
-			MutableCell[] level = circuit.accessLevel(level_idx);
-			for (int pos = 0; pos < level.length; pos++) {
-				MutableCell n = level[pos];
-				if (n == null || n.maxOut() < 0)
+			for (LevelizedCell n: circuit.level(level_idx)) {
+				int output_count = n.outputCount();
+				int input_count = n.inputCount();
+				if (output_count == 0)
 					continue;
-				int output_count = n.maxOut() + 1;
-				int input_count = n.maxIn() + 1;
 				tmpOV = ArrayTools.grow(tmpOV, output_count, 32, 0);
 				tmpOC = ArrayTools.grow(tmpOC, output_count, 32, 0);
 
-				if (state.isDirty(level_idx, pos)) {
+				if (state.isDirty(n)) {
 					if (n.isInput() || n.isSequential()) {
 						tmpIV[0] = state.getStimulusV(n.intfPosition());
 						tmpIC[0] = state.getStimulusC(n.intfPosition());
@@ -246,7 +244,7 @@ public class CombLogicSim {
 						tmpIV = ArrayTools.grow(tmpIV, input_count, 32, 0);
 						tmpIC = ArrayTools.grow(tmpIC, input_count, 32, 0);
 						for (int i = 0; i < input_count; i++) {
-							int sidx = circuit.accessSignalMap().idxForInput(n, i);
+							int sidx = n.inputLineID(i);
 							if (sidx >= 0) {
 								tmpIV[i] = state.getV(sidx);
 								tmpIC[i] = state.getC(sidx);
@@ -259,7 +257,7 @@ public class CombLogicSim {
 					}
 					
 					for (int o = 0; o < output_count; o++) {
-						int sidx = circuit.accessSignalMap().idxForOutput(n, o);
+						int sidx = n.outputLineID(o);
 						if (sidx >= 0 && state.valid_rev[sidx] != state.rev) {
 							//log.debug("set signal " + n + " " + sidx + " " + tmpOV[o]);
 
@@ -269,13 +267,13 @@ public class CombLogicSim {
 				}
 			}
 		}
-		for (MutableCell n : circuit.accessInterface()) {
-			if (n == null || !state.isDirty(n.level(), n.levelPosition()))
+		for (LevelizedCell n : circuit.intf()) {
+			if (n == null || !state.isDirty(n))
 				continue;
 			if (n.isSequential() || n.isOutput()) {
-				int input_count = n.maxIn() + 1;
+				int input_count = n.inputCount();
 				for (int i = 0; i < input_count; i++) {
-					int sidx = circuit.accessSignalMap().idxForInput(n, i);
+					int sidx = n.inputLineID(i);
 					if (sidx >= 0) {
 						tmpIV[i] = state.getV(sidx);
 						tmpIC[i] = state.getC(sidx);
@@ -1091,6 +1089,43 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			v ^= c;
+			break;
+		case Cell.TYPE_OAI21_NANGATE & 0xff:
+			tmpInC[0] = inC[0];
+			tmpInV[0] = inV[0];
+			
+			for (int i = 1; i < 3; i++){
+				l |= ~inC[i] & inV[i];
+				k |= inC[i] & inV[i];
+				j |= ~inC[i] & ~inV[i];
+			}
+			tmpInC[1] = -1L;
+			tmpInV[1] = 0L;
+			tmpInC[1] &= ~j;
+			tmpInV[1] &= ~j;			
+			tmpInC[1] |= k;
+			tmpInV[1] |= k;			
+			tmpInC[1] &= ~l;
+			tmpInV[1] |= l;
+
+			l = 0L;
+			k = 0L;
+			j = 0L;
+			for (int i = 0; i < 2; i++){
+				l |= ~tmpInC[i] & tmpInV[i];
+				k |= tmpInC[i] & ~tmpInV[i];
+				j |= ~tmpInC[i] & ~tmpInV[i];
+			}
+			c = -1L;
+			v = -1L;
+			c &= ~j;
+			v &= ~j;			
+			c |= k;
+			v &= ~k;			
+			c &= ~l;
+			v |= l;
+			
+			v ^= c; 
 			break;
 		case LibrarySAED.TYPE_OAI221 & 0xff:
 			for (int i = 0; i < 2; i++) {
