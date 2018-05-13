@@ -43,7 +43,7 @@ public class ObservabilityTest {
 		assertNotNull(a);
 		assertNotNull(z);
 		
-		int idx = a.outputLineID(0);
+		int idx = a.outputSignalAt(0);
 		assertEquals(-1L, obs.getObservability(idx));		
 	}
 

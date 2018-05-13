@@ -10,6 +10,7 @@
 package org.kyupi.circuit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -75,37 +76,31 @@ import org.kyupi.misc.Namespace;
  * @author stefan
  * 
  */
-public class MutableCircuit {
+public class MutableCircuit extends Circuit {
 
 	/**
 	 * is a vertex in the graph containing references to its neighbors and
 	 * payload data.
 	 */
-	public class MutableCell {
-
-		private final int id;
-
-		private int type;
+	public class MutableCell extends Cell {
 
 		private int level;
 
 		private int levelPosition;
 
-		private int intfPosition;
+		//private int intfPosition;
 
 		private MutableCell inputs[] = new MutableCell[0];
 
 		private MutableCell outputs[] = new MutableCell[0];
 
 		public MutableCell(String name, int type) {
-			this.id = namespace.idFor(name);
-			this.type = type;
+			super(namespace.idFor(name), type);
 			register(this);
 		}
 		
 		public MutableCell(MutableCell n) {
-			this.id = namespace.idFor(n.queryName());
-			this.type = n.type;
+			super(namespace.idFor(n.queryName()), n.type());
 			this.intfPosition = n.intfPosition;
 			register(this);
 		}
@@ -115,11 +110,7 @@ public class MutableCircuit {
 		 */
 
 		public String queryName() {
-			return namespace.nameFor(id);
-		}
-
-		public int type() {
-			return type;
+			return namespace.nameFor(id());
 		}
 
 		public int level() {
@@ -132,19 +123,11 @@ public class MutableCircuit {
 			return levelPosition;
 		}
 
-		public int intfPosition() {
-			return intfPosition;
-		}
-
 		public void setIntfPosition(int pos) {
 			if (this.intfPosition != pos) {
 				invalidateLevels();
 				this.intfPosition = pos;
 			}
-		}
-
-		public int id() {
-			return id;
 		}
 
 		public boolean equals(Object other) {
@@ -162,30 +145,6 @@ public class MutableCircuit {
 		/*
 		 * type queries (convenience accessors to library)
 		 */
-
-		public boolean isOutput() {
-			return library.isOutput(type);
-		}
-
-		public boolean isInput() {
-			return library.isInput(type);
-		}
-
-		public boolean isSequential() {
-			return library.isSequential(type);
-		}
-
-		public boolean isPort() {
-			return library.isPort(type);
-		}
-
-		public boolean isMultiOutput() {
-			return library.isMultiOutput(type);
-		}
-
-		public boolean isPseudo() {
-			return library.isPseudo(type);
-		}
 
 		public boolean isPrimary() {
 			return library.isPrimary(type);
@@ -234,11 +193,11 @@ public class MutableCircuit {
 			return ArrayTools.maxIndex(outputs);
 		}
 
-		public MutableCell in(int idx) {
+		public MutableCell inputCellAt(int idx) {
 			return (MutableCell) ArrayTools.safeGet(inputs, idx);
 		}
 
-		public MutableCell out(int idx) {
+		public MutableCell outputCellAt(int idx) {
 			return (MutableCell) ArrayTools.safeGet(outputs, idx);
 		}
 
@@ -257,12 +216,12 @@ public class MutableCircuit {
 			return i;
 		}
 
-		public MutableCell[] accessInputs() {
-			return inputs;
+		public Iterable<MutableCell> inputCells() {
+			return Arrays.asList(inputs);
 		}
 
-		public MutableCell[] accessOutputs() {
-			return outputs;
+		public Iterable<MutableCell> outputCells() {
+			return Arrays.asList(outputs);
 		}
 
 		/*
@@ -364,7 +323,7 @@ public class MutableCircuit {
 		 */
 		public void remove() {
 			for (int i = maxIn(); i >= 0; i--) {
-				MutableCell pred = in(i);
+				MutableCell pred = inputCellAt(i);
 				if (pred == null)
 					continue;
 				setIn(i, null);
@@ -375,7 +334,7 @@ public class MutableCircuit {
 			}
 
 			for (int i = maxOut(); i >= 0; i--) {
-				MutableCell succ = out(i);
+				MutableCell succ = outputCellAt(i);
 				if (succ == null)
 					continue;
 				succ.replaceIns(this, null);
@@ -422,6 +381,28 @@ public class MutableCircuit {
 			return b.toString();
 		}
 
+		@Override
+		public int inputCount() {
+			return maxIn() + 1;
+		}
+
+		@Override
+		public int outputCount() {
+			return maxOut() + 1;
+		}
+
+		@Override
+		public int inputSignalAt(int pinIndex) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public int outputSignalAt(int pinIndex) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
 	}
 	
 	protected static Logger log = Logger.getLogger(MutableCircuit.class);
@@ -458,15 +439,15 @@ public class MutableCircuit {
 				continue;
 			int outCount = n.maxOut() + 1;
 			for (int i = 0; i < outCount; i++) {
-				MutableCell succ = n.out(i);
+				MutableCell succ = n.outputCellAt(i);
 				if (succ != null)
-					nodes[idx].setOut(i, nodes[succ.id]);
+					nodes[idx].setOut(i, nodes[succ.id()]);
 			}
 			int inCount = n.maxIn() + 1;
 			for (int i = 0; i < inCount; i++) {
-				MutableCell pred = n.in(i);
+				MutableCell pred = n.inputCellAt(i);
 				if (pred != null)
-					nodes[idx].setIn(i, nodes[pred.id]);
+					nodes[idx].setIn(i, nodes[pred.id()]);
 			}
 		}
 	}
@@ -571,11 +552,20 @@ public class MutableCircuit {
 	 * 
 	 * @return
 	 */
-	public MutableCell[] accessInterface() {
+	public Iterable<MutableCell> intf() {
 		ensureLevels();
-		return intf;
+		return Arrays.asList(intf);
+	}
+	
+	public MutableCell intf(int pos) {
+		ensureLevels();
+		return intf[pos];
 	}
 
+	public int width() {
+		ensureLevels();
+		return ArrayTools.maxIndex(intf) + 1;
+	}
 	/**
 	 * returns an array containing all nodes present in the graph.
 	 * 
@@ -585,8 +575,16 @@ public class MutableCircuit {
 	 * 
 	 * @return
 	 */
-	public MutableCell[] accessNodes() {
-		return nodes;
+	public Iterable<MutableCell> cells() {
+		return Arrays.asList(nodes);
+	}
+	
+	public MutableCell cell(int id) {
+		return nodes[id];
+	}
+	
+	public int size() {
+		return nodes.length;
 	}
 	
 	public SignalMap accessSignalMap() {
@@ -600,9 +598,9 @@ public class MutableCircuit {
 	}
 
 	public void disconnect(MutableCell driver, int out_idx, MutableCell receiver, int in_idx) {
-		if (driver.out(out_idx) != receiver)
+		if (driver.outputCellAt(out_idx) != receiver)
 			throw new IllegalArgumentException("specified driver output does not point to receiver.");
-		if (receiver.in(in_idx) != driver)
+		if (receiver.inputCellAt(in_idx) != driver)
 			throw new IllegalArgumentException("specified receiver input does not point to driver.");
 		driver.setOut(out_idx, null);
 		receiver.setIn(in_idx, null);
@@ -641,19 +639,19 @@ public class MutableCircuit {
 
 	private void register(MutableCell g) {
 		invalidateLevels();
-		if (nodes.length > g.id && nodes[g.id] != null) {
-			throw new IllegalArgumentException("Gate already exists: " + namespace.nameFor(g.id));
+		if (nodes.length > g.id() && nodes[g.id()] != null) {
+			throw new IllegalArgumentException("Gate already exists: " + namespace.nameFor(g.id()));
 		}
-		nodes = (MutableCell[]) ArrayTools.grow(nodes, MutableCell.class, g.id + 1);
-		nodes[g.id] = g;
+		nodes = (MutableCell[]) ArrayTools.grow(nodes, MutableCell.class, g.id() + 1);
+		nodes[g.id()] = g;
 	}
 
 	private void unregister(MutableCell g) {
 		invalidateLevels();
-		if (nodes.length > g.id && nodes[g.id] == g) {
-			nodes[g.id] = null;
+		if (nodes.length > g.id() && nodes[g.id()] == g) {
+			nodes[g.id()] = null;
 		} else
-			throw new IllegalArgumentException("Gate does not exist: " + namespace.nameFor(g.id));
+			throw new IllegalArgumentException("Gate does not exist: " + namespace.nameFor(g.id()));
 	}
 
 	private void invalidateLevels() {
@@ -712,7 +710,7 @@ public class MutableCircuit {
 			g.level = 0;
 			if (!g.isSequential() && !g.isInput()) {
 				for (int i = g.maxIn(); i >= 0; i--) {
-					MutableCell d = g.in(i);
+					MutableCell d = g.inputCellAt(i);
 					if (d != null)
 						g.level = Math.max(g.level, d.level + 1);
 				}
@@ -723,7 +721,7 @@ public class MutableCircuit {
 			// log.debug("node " + g + " is level " + g.level);
 			if (g.countOuts() == 0)
 				continue;
-			for (MutableCell succ : g.accessOutputs()) {
+			for (MutableCell succ : g.outputCells()) {
 				if (succ != null && !succ.isSequential() && !succ.isInput()) {
 					succ.levelPosition++; // re-use levelPosition to count
 											// number of predecessors placed.
@@ -762,7 +760,7 @@ public class MutableCircuit {
 		int nodes = 0;
 		int signals = 0;
 		int seq = 0;
-		for (MutableCell n : accessNodes()) {
+		for (MutableCell n : cells()) {
 			if (n == null)
 				continue;
 			String type = n.typeName();
@@ -831,7 +829,7 @@ public class MutableCircuit {
 			MutableCircuit g = (MutableCircuit) other;
 			if (g.countNodes() != countNodes())
 				return false;
-			for (MutableCell n : accessNodes()) {
+			for (MutableCell n : cells()) {
 				if (n == null)
 					continue;
 				MutableCell other_n = g.searchNode(n.queryName());
@@ -842,8 +840,8 @@ public class MutableCircuit {
 				if (n.maxIn() != other_n.maxIn())
 					return false;
 				for (int i = 0; i <= n.maxIn(); i++) {
-					MutableCell neighbor = n.in(i);
-					MutableCell other_neighbor = other_n.in(i);
+					MutableCell neighbor = n.inputCellAt(i);
+					MutableCell other_neighbor = other_n.inputCellAt(i);
 					if (neighbor == null && other_neighbor != null)
 						return false;
 					if (neighbor != null && other_neighbor == null)
@@ -856,8 +854,8 @@ public class MutableCircuit {
 				if (n.maxOut() != other_n.maxOut())
 					return false;
 				for (int i = 0; i <= n.maxOut(); i++) {
-					MutableCell neighbor = n.out(i);
-					MutableCell other_neighbor = other_n.out(i);
+					MutableCell neighbor = n.outputCellAt(i);
+					MutableCell other_neighbor = other_n.outputCellAt(i);
 					if (neighbor == null && other_neighbor != null)
 						return false;
 					if (neighbor != null && other_neighbor == null)

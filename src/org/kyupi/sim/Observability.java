@@ -108,7 +108,7 @@ public class Observability {
 			LevelizedCell driver = graph.driverOf(sig_idx);
 			int in_idx = receiver.searchInIdx(driver);
 			long s = sensitization(receiver, in_idx);
-			int out_sig_idx = receiver.outputLineID(0);
+			int out_sig_idx = receiver.outputSignalAt(0);
 			obs[sig_idx] = s & getObservability(out_sig_idx);
 			obs_rev[sig_idx] = rev;
 			return obs[sig_idx];
@@ -159,7 +159,7 @@ public class Observability {
 			for (int i = 0; i < in_count; i++) {
 				if (i == on_path_input_idx)
 					continue;
-				int sig_idx = n.inputLineID(i);
+				int sig_idx = n.inputSignalAt(i);
 				if (sig_idx < 0)
 					continue;
 				s = s & (getV(sig_idx) & getC(sig_idx));
@@ -171,7 +171,7 @@ public class Observability {
 			for (int i = 0; i < in_count; i++) {
 				if (i == on_path_input_idx)
 					continue;
-				int sig_idx = n.inputLineID(i);
+				int sig_idx = n.inputSignalAt(i);
 				if (sig_idx < 0)
 					continue;
 				s = s & (~getV(sig_idx) & getC(sig_idx));

@@ -18,19 +18,19 @@ public class CombLogicSimTest {
 
 	private void stateSet(State state, LevelizedCircuit circuit, String node, long value, long care) {
 		LevelizedCell n = circuit.searchNode(node);
-		int signalIdx = n.outputLineID(0);
+		int signalIdx = n.outputSignalAt(0);
 		state.set(signalIdx, value, care);
 	}
 	
 	private long stateGetV(State state, LevelizedCircuit circuit, String node) {
 		LevelizedCell n = circuit.searchNode(node);
-		int signalIdx = n.outputLineID(0);
+		int signalIdx = n.outputSignalAt(0);
 		return state.getV(signalIdx);
 	}
 
 	private long stateGetC(State state, LevelizedCircuit circuit, String node) {
 		LevelizedCell n = circuit.searchNode(node);
-		int signalIdx = n.outputLineID(0);
+		int signalIdx = n.outputSignalAt(0);
 		return state.getC(signalIdx);
 	}
 	
@@ -179,8 +179,8 @@ public class CombLogicSimTest {
 		
 		assertNotNull(n);
 		
-		int sigA = n.inputLineID(0);
-		int sigB = n.inputLineID(1);
+		int sigA = n.inputSignalAt(0);
+		int sigB = n.inputSignalAt(1);
 		
 		assertEquals(0b0101L, state.getV(sigA));
 		assertEquals(-1L, state.getC(sigA));
@@ -188,7 +188,7 @@ public class CombLogicSimTest {
 		assertEquals(0b1100L, state.getV(sigB));
 		assertEquals(-1L, state.getC(sigB));
 
-		int sigZ = n.outputLineID(0);
+		int sigZ = n.outputSignalAt(0);
 
 		assertEquals(~(0b0101L & 0b1100L), state.getV(sigZ));
 		assertEquals(-1L, state.getC(sigZ));

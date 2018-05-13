@@ -39,7 +39,7 @@ public class SignalMap {
 
 	public SignalMap(MutableCircuit g) {
 		
-		int size = g.accessNodes().length;
+		int size = g.size();
 		
 		output_map_offset = new int[size];
 		Arrays.fill(output_map_offset, -1);
@@ -49,7 +49,7 @@ public class SignalMap {
 		int output_map_idx = 0;
 		int next_input_map_offset = 0;
 		
-		for (MutableCell n: g.accessNodes()) {
+		for (MutableCell n: g.cells()) {
 			if (n == null || n.maxOut() < 0)
 				continue;
 			int out_count = n.maxOut() + 1;
@@ -59,7 +59,7 @@ public class SignalMap {
 			output_map_offset[n.id()] = output_map_idx;
 									
 			for (int succ_idx = 0; succ_idx < out_count; succ_idx++) {
-				MutableCell succ = n.out(succ_idx);
+				MutableCell succ = n.outputCellAt(succ_idx);
 				// skip unconnected outputs
 				if (succ == null) {
 					output_map_idx++;
@@ -80,19 +80,19 @@ public class SignalMap {
 		
 		drivers = new MutableCell[edge_count];
 		receivers = new MutableCell[edge_count];
-		for (MutableCell n: g.accessNodes()) {
+		for (MutableCell n: g.cells()) {
 			if (n == null)
 				continue;
 			int out_count = n.maxOut() + 1;
 			for (int i = 0; i < out_count; i++) {
-				MutableCell succ = n.out(i);
+				MutableCell succ = n.outputCellAt(i);
 				if (succ != null) {
 					drivers[idxForOutput(n, i)] = n;
 				}
 			}
 			int in_count = n.maxIn() + 1;
 			for (int i = 0; i < in_count; i++) {
-				MutableCell pred = n.in(i);
+				MutableCell pred = n.inputCellAt(i);
 				if (pred != null) {
 					receivers[idxForInput(n, i)] = n;
 				}

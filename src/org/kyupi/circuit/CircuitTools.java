@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -82,7 +81,7 @@ public class CircuitTools {
 
 	public static void removeDanglingNodes(MutableCircuit g) {
 		LinkedList<Integer> ll = new LinkedList<>();
-		for (MutableCell n : g.accessNodes()) {
+		for (MutableCell n : g.cells()) {
 			if (n == null)
 				continue;
 			if (n.isOutput())
@@ -94,17 +93,17 @@ public class CircuitTools {
 
 		while (!ll.isEmpty()) {
 			int node_id = ll.poll();
-			MutableCell n = g.accessNodes()[node_id];
+			MutableCell n = g.cell(node_id);
 			if (n == null)
 				continue;
 			if (n.countOuts() > 0)
 				continue;
 
 			for (int ii = n.maxIn(); ii >= 0; ii--) {
-				MutableCell pred = n.in(ii);
+				MutableCell pred = n.inputCellAt(ii);
 				if (pred != null) {
 					boolean retain = false;
-					for (MutableCell ps: pred.accessOutputs()) {
+					for (MutableCell ps: pred.outputCells()) {
 						if (ps == null)
 							continue;
 						if (!ps.equals(n)) {
@@ -124,20 +123,18 @@ public class CircuitTools {
 		// some output ports may drive other nodes in the graph.
 		// re-wire them.
 
-		MutableCell intf[] = g.accessInterface();
-
 		boolean doIterate = true;
 
 		while (doIterate) {
 			doIterate = false;
-			for (MutableCell output : intf) {
+			for (MutableCell output : g.intf()) {
 				if (output == null || !output.isOutput())
 					continue;
 				for (int oidx = output.maxOut(); oidx >= 0; oidx--) {
 					doIterate = true;
-					MutableCell successor = output.out(oidx);
+					MutableCell successor = output.outputCellAt(oidx);
 					if (successor != null) {
-						MutableCell predecessor = output.in(0);
+						MutableCell predecessor = output.inputCellAt(0);
 						if (predecessor == null) {
 							log.error("rewire failed: output " + output.queryName() + " has no driver");
 							doIterate = false;
@@ -160,14 +157,14 @@ public class CircuitTools {
 	}
 
 	public static void removeSignalNodes(MutableCircuit g) {
-		for (MutableCell signal : g.accessNodes()) {
+		for (MutableCell signal : g.cells()) {
 			if (signal == null)
 				continue;
 			if (!signal.isPseudo())
 				continue;
 			if (!signal.isType(Library.TYPE_BUF))
 				continue;
-			MutableCell pred = signal.in(0);
+			MutableCell pred = signal.inputCellAt(0);
 			if (pred.isMultiOutput()) {
 				log.info("Not removing because predecessor is MultiOutput: " + signal);
 				continue;
@@ -176,7 +173,7 @@ public class CircuitTools {
 			LinkedList<MutableCell> succs = new LinkedList<>();
 			HashMap<MutableCell,Integer> succport = new HashMap<>();
 			//log.info("signal " + signal.queryName());
-			for (MutableCell r : signal.accessOutputs()) {
+			for (MutableCell r : signal.outputCells()) {
 				if (r != null) {
 					succs.add(r);
 					succport.put(r, r.searchInIdx(signal));
@@ -190,15 +187,15 @@ public class CircuitTools {
 		}
 	}
 	
-	public static HashSet<MutableCell> collectCombinationalOutputCone(MutableCell head) {
-		HashSet<MutableCell> result = new HashSet<>();
+	public static HashSet<Cell> collectCombinationalOutputCone(Cell head) {
+		HashSet<Cell> result = new HashSet<>();
 		
-		LinkedList<MutableCell> frontier = new LinkedList<>();
+		LinkedList<Cell> frontier = new LinkedList<>();
 		frontier.add(head);
 		
 		while (!frontier.isEmpty()) {
-			MutableCell n = frontier.removeFirst();
-			for (MutableCell successor: n.accessOutputs()) {
+			Cell n = frontier.removeFirst();
+			for (Cell successor: n.outputCells()) {
 				if (successor == null || successor.isSequential())
 					continue;
 				if (!result.contains(successor)) {
@@ -218,7 +215,7 @@ public class CircuitTools {
 
 		// TODO: ensure, that all the predecessors of a multi-output node get split
 		// first.
-		for (MutableCell cell : g.accessNodes()) {
+		for (MutableCell cell : g.cells()) {
 				if (cell == null || !cell.isMultiOutput())
 					continue;
 				todo.add(cell);
@@ -226,7 +223,7 @@ public class CircuitTools {
 
 		for (MutableCell cell : todo) {
 			for (int out_idx = cell.maxOut(); out_idx >= 0; out_idx--) {
-				MutableCell succ = cell.out(out_idx);
+				MutableCell succ = cell.outputCellAt(out_idx);
 				if (succ == null)
 					continue;
 				int succ_in_idx = succ.searchInIdx(cell);
@@ -235,7 +232,7 @@ public class CircuitTools {
 				g.disconnect(cell, out_idx, succ, succ_in_idx);
 				g.connect(subcell, -1, succ, succ_in_idx);
 				for (int in_idx = cell.maxIn(); in_idx >= 0; in_idx--) {
-					MutableCell pred = cell.in(in_idx);
+					MutableCell pred = cell.inputCellAt(in_idx);
 					if (pred == null)
 						continue;
 					g.connect(pred, -1, subcell, in_idx);

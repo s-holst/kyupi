@@ -160,7 +160,7 @@ public class QBPlainSimTest extends TestCase {
 		QVSource tests = p.getStimuliSource();
 		QVSource resp = p.getResponsesSource();
 
-		for (MutableCell n : g.accessInterface()) {
+		for (MutableCell n : g.intf()) {
 			if (n == null)
 				continue;
 			StringBuffer buf = new StringBuffer();

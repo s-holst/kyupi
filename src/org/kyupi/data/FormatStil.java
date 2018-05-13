@@ -40,7 +40,7 @@ public class FormatStil {
 		InputStream is = FileTools.fileOpen(stil_file);
 		Stil data = Stil.load(is, stil_file);
 
-		length = g.accessInterface().length;
+		length = g.width();
 
 		// debug output
 		//log.debug("pi: " + data.primary_inputs);
@@ -64,7 +64,7 @@ public class FormatStil {
 		// cross-reference to circuit interface
 		HashMap<String, Integer> intf = new HashMap<>();
 		//ArrayList<Node> intf_names = new ArrayList<>();
-		for (MutableCell inode : g.accessInterface()) {
+		for (MutableCell inode : g.intf()) {
 			//intf_names.add(inode);
 			if (inode != null) {
 				intf.put(inode.queryName(), inode.intfPosition());

@@ -244,7 +244,7 @@ public class CombLogicSim {
 						tmpIV = ArrayTools.grow(tmpIV, input_count, 32, 0);
 						tmpIC = ArrayTools.grow(tmpIC, input_count, 32, 0);
 						for (int i = 0; i < input_count; i++) {
-							int sidx = n.inputLineID(i);
+							int sidx = n.inputSignalAt(i);
 							if (sidx >= 0) {
 								tmpIV[i] = state.getV(sidx);
 								tmpIC[i] = state.getC(sidx);
@@ -257,7 +257,7 @@ public class CombLogicSim {
 					}
 					
 					for (int o = 0; o < output_count; o++) {
-						int sidx = n.outputLineID(o);
+						int sidx = n.outputSignalAt(o);
 						if (sidx >= 0 && state.valid_rev[sidx] != state.rev) {
 							//log.debug("set signal " + n + " " + sidx + " " + tmpOV[o]);
 
@@ -273,7 +273,7 @@ public class CombLogicSim {
 			if (n.isSequential() || n.isOutput()) {
 				int input_count = n.inputCount();
 				for (int i = 0; i < input_count; i++) {
-					int sidx = n.inputLineID(i);
+					int sidx = n.inputSignalAt(i);
 					if (sidx >= 0) {
 						tmpIV[i] = state.getV(sidx);
 						tmpIC[i] = state.getC(sidx);

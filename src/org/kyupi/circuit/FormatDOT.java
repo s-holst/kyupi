@@ -72,13 +72,13 @@ public class FormatDOT {
 		op.println("  rankdir=LR;");
 		op.println("  splines=false;");
 		op.println("  node [shape=record];");
-		for (MutableCell n : graph.accessNodes()) {
+		for (MutableCell n : graph.cells()) {
 			if (n == null)
 				continue;
 			op.println(drawNode(n));
 			int num = n.maxIn() + 1;
 			for (int i = 0; i < num; i++) {
-				MutableCell pred = n.in(i);
+				MutableCell pred = n.inputCellAt(i);
 				if (pred == null)
 					continue;
 				String predPort = ":o" + pred.searchOutIdx(n) + ":e";

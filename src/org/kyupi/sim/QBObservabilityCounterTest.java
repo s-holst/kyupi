@@ -62,8 +62,8 @@ public class QBObservabilityCounterTest extends TestCase {
 		assertNotNull(a);
 		assertNotNull(z);
 
-		int a_idx = a.outputLineID(0);
-		int z_idx = z.outputLineID(0);
+		int a_idx = a.outputSignalAt(0);
+		int z_idx = z.outputSignalAt(0);
 
 		assertEquals(61, obs.getSA0ObsCount(a_idx));
 		assertEquals(3, obs.getSA1ObsCount(a_idx));

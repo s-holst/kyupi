@@ -50,7 +50,7 @@ public class FormatVerilog {
 		PrintWriter op = new PrintWriter(os);
 		op.println("module " + graph.getName() + " ( ");
 		boolean comma_needed = false;
-		for (MutableCell intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.intf()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isInput() || intf_node.isOutput()) {
@@ -64,7 +64,7 @@ public class FormatVerilog {
 		
 		op.print("input ");
 		comma_needed = false;
-		for (MutableCell intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.intf()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isInput()) {
@@ -78,7 +78,7 @@ public class FormatVerilog {
 
 		op.print("output ");
 		comma_needed = false;
-		for (MutableCell intf_node : graph.accessInterface()) {
+		for (MutableCell intf_node : graph.intf()) {
 			if (intf_node == null)
 				continue;
 			if (intf_node.isOutput()) {
@@ -92,8 +92,7 @@ public class FormatVerilog {
 
 		op.print("wire ");
 		comma_needed = false;
-		MutableCell[] nodes = graph.accessNodes();
-		for (MutableCell node : nodes) {
+		for (MutableCell node : graph.cells()) {
 			if (node == null) {
 				continue;
 			}
@@ -106,14 +105,14 @@ public class FormatVerilog {
 		}
 		op.println(";");
 
-		for (MutableCell node : nodes) {
+		for (MutableCell node : graph.cells()) {
 			if (node == null || node.isPseudo() || node.isInput() || node.isOutput()) {
 				continue;
 			}
 			op.print("  " + node.typeName() + " " + s(node.queryName()) + " ( ");
 			int i = -1;
 			comma_needed = false;
-			for (MutableCell n : node.accessInputs()) {
+			for (MutableCell n : node.inputCells()) {
 				i++;
 				if (n == null)
 					continue;
@@ -123,7 +122,7 @@ public class FormatVerilog {
 				comma_needed = true;
 			}
 			i = -1;
-			for (MutableCell n : node.accessOutputs()) {
+			for (MutableCell n : node.outputCells()) {
 				i++;
 				if (n == null)
 					continue;

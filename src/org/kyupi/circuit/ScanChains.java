@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.ArrayTools;
 
 public class ScanChains {
@@ -23,11 +22,11 @@ public class ScanChains {
 	private static Logger log = Logger.getLogger(ScanChains.class);
 
 	public class ScanCell {
-		public ScanCell(MutableCell n) {
+		public ScanCell(Cell n) {
 			node = n;
 		}
 
-		public MutableCell node;
+		public Cell node;
 		int pos = -1;
 		ScanChain chain;
 		ScanCell next;
@@ -50,32 +49,31 @@ public class ScanChains {
 
 	private Library lib;
 
-	private MutableCircuit graph;
+	private Circuit graph;
 
-	private HashMap<MutableCell, ScanCell> node_to_scancell = new HashMap<>();
+	private HashMap<Cell, ScanCell> node_to_scancell = new HashMap<>();
 
-	private HashMap<MutableCell, ScanCell> node_to_scanin = new HashMap<>();
+	private HashMap<Cell, ScanCell> node_to_scanin = new HashMap<>();
 
 	// private HashMap<Node, ScanCell> node_to_scanout = new HashMap<>();
 
 	private ArrayList<ScanChain> chains = new ArrayList<>();
 
-	public ScanChains(MutableCircuit scanned_netlist) {
+	public ScanChains(Circuit scanned_netlist) {
 		graph = scanned_netlist;
 		lib = graph.library();
 
 		// collect all scan cells into a HashMap.
-		MutableCell[] intf = graph.accessInterface();
-		for (MutableCell n : intf) {
+		for (Cell n : graph.intf()) {
 			if (n != null && lib.isScanCell(n.type())) {
 				node_to_scancell.put(n, new ScanCell(n));
 			}
 		}
 
 		// connect each scan cell to its neighbors.
-		for (MutableCell n : node_to_scancell.keySet()) {
+		for (Cell n : node_to_scancell.keySet()) {
 			ScanCell cell = node_to_scancell.get(n);
-			MutableCell prev = backtraceToIntf(n.in(lib.getScanInPin(n.type())));
+			Cell prev = backtraceToIntf(n.inputCellAt(lib.getScanInPin(n.type())));
 			if (prev.isInput()) {
 				// log.info("Scan-in port: " + prev.queryName());
 				ScanCell sc = new ScanCell(prev);
@@ -137,17 +135,17 @@ public class ScanChains {
 		// }
 
 		// check, if all scan cells are connected into chains.
-		for (MutableCell n : node_to_scancell.keySet()) {
+		for (Cell n : node_to_scancell.keySet()) {
 			if (node_to_scancell.get(n).pos < 0)
 				log.warn("Unconnected ScanCell: " + n);
 		}
 	}
 
-	private MutableCell backtraceToIntf(MutableCell node) {
-		if (node.level() > 0) {
-			if (node.countIns() != 1)
+	private Cell backtraceToIntf(Cell node) {
+		if (!node.isInput() && !node.isSequential()) {
+			if (node.inputCount() != 1)
 				log.warn("Encountered multi-input gate on scan path: " + node);
-			return backtraceToIntf(node.in(0));
+			return backtraceToIntf(node.inputCellAt(0));
 		}
 		return node;
 	}
@@ -185,15 +183,14 @@ public class ScanChains {
 	 */
 	public int[][] scanInMapping(int clocking[]) {
 		int clock_count = ArrayTools.max(clocking) + 1;
-		int port_count = graph.accessInterface().length;
+		int port_count = graph.width();
 		int max_chain_length = maxChainLength();
 		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
-		MutableCell[] intf = graph.accessInterface();
 
 		// inputs and scan state of the last vector in expanded set is identical
 		// to the source vector.
 		for (int i = 0; i < port_count; i++) {
-			if (intf[i] == null || intf[i].isOutput()) {
+			if (graph.intf(i) == null || graph.intf(i).isOutput()) {
 				map[max_chain_length * clock_count][i] = -1;
 			} else {
 				map[max_chain_length * clock_count][i] = i;
@@ -206,9 +203,9 @@ public class ScanChains {
 				for (int i = 0; i < port_count; i++) {
 
 					// look up scan cell or scan-in port for current position i
-					ScanCell sc = node_to_scancell.get(intf[i]);
+					ScanCell sc = node_to_scancell.get(graph.intf(i));
 					if (sc == null)
-						sc = node_to_scanin.get(intf[i]);
+						sc = node_to_scanin.get(graph.intf(i));
 
 					if (sc != null && clocking[sc.chainIdx()] == clk) {
 						// found and clocked: copy index from intf pos of
@@ -259,17 +256,16 @@ public class ScanChains {
 	 */
 	public int[][] scanOutMapping(int clocking[]) {
 		int clock_count = ArrayTools.max(clocking) + 1;
-		int port_count = graph.accessInterface().length;
+		int port_count = graph.width();
 		int max_chain_length = maxChainLength();
 		int[][] map = new int[(max_chain_length * clock_count) + 1][port_count];
-		MutableCell[] intf = graph.accessInterface();
-
+		
 		// outputs and scan state of the first vector in expanded set is
 		// identical to the source vector.
-		for (int i = 0; i < port_count; i++) {
-			if (intf[i] == null || intf[i].isInput()) {
-				map[0][i] = -1;
-			} else {
+		Arrays.fill(map[0], -1);
+		for (Cell n: graph.intf()) {
+			if (n != null && !n.isInput()) {
+			    int i = n.intfPosition();
 				map[0][i] = i;
 			}
 		}
@@ -280,7 +276,7 @@ public class ScanChains {
 				for (int i = 0; i < port_count; i++) {
 
 					// look up scan cell for current position i
-					ScanCell sc = node_to_scancell.get(intf[i]);
+					ScanCell sc = node_to_scancell.get(graph.intf(i));
 
 					if (sc != null && clocking[sc.chainIdx()] == clk) {
 						// found and clocked: copy index from intf pos of

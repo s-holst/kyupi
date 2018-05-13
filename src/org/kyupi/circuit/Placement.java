@@ -9,29 +9,28 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.StringFilter;
 
 public class Placement {
 
 	private static Logger log = Logger.getLogger(Placement.class);
 
-	private MutableCircuit graph;
+	private Circuit circuit;
 
-	HashMap<MutableCell, Integer> placeX = new HashMap<>();
-	HashMap<MutableCell, Integer> placeY = new HashMap<>();
+	HashMap<Cell, Integer> placeX = new HashMap<>();
+	HashMap<Cell, Integer> placeY = new HashMap<>();
 	HashSet<Integer> distinctX = new HashSet<>();
 	HashSet<Integer> distinctY = new HashSet<>();
 
-	MutableCell[][] place = new MutableCell[0][0];
+	Cell[][] place = new Cell[0][0];
 
 	int[] coordX = new int[0];
 	int[] coordY = new int[0];
 	HashMap<Integer, Integer> coordXmap = new HashMap<>();
 	HashMap<Integer, Integer> coordYmap = new HashMap<>();
 
-	public Placement(MutableCircuit g) {
-		graph = g;
+	public Placement(Circuit circuit) {
+		this.circuit = circuit;
 	}
 
 	public void parseDefFile(String def_file_name, StringFilter name_filter) throws IOException {
@@ -60,7 +59,7 @@ public class Placement {
 				Integer posx = Integer.decode(c[placed + 2]);
 				Integer posy = Integer.decode(c[placed + 3]);
 
-				MutableCell n = graph.searchNode(name);
+				Cell n = circuit.searchNode(name);
 				if (n == null) {
 					log.info("Node not found: " + name);
 				} else {
@@ -100,9 +99,9 @@ public class Placement {
 		for (i = 0; i < coordY.length; i++)
 			coordYmap.put(coordY[i], i);
 
-		place = new MutableCell[coordX.length][coordY.length];
+		place = new Cell[coordX.length][coordY.length];
 
-		for (MutableCell n : graph.accessNodes()) {
+		for (Cell n : circuit.cells()) {
 			if (n == null || n.isPseudo())
 				continue;
 			if (!placeX.containsKey(n)) {
@@ -148,25 +147,25 @@ public class Placement {
 
 	}
 
-	public int getX(MutableCell n) {
+	public int getX(Cell n) {
 		Integer x = placeX.get(n);
 		if (x == null)
 			throw new NoSuchElementException(n.toString());
 		return x;
 	}
 
-	public int getY(MutableCell n) {
+	public int getY(Cell n) {
 		Integer y = placeY.get(n);
 		if (y == null)
 			throw new NoSuchElementException(n.toString());
 		return y;
 	}
 
-	public boolean containsNode(MutableCell n) {
+	public boolean containsNode(Cell n) {
 		return placeX.containsKey(n);
 	}
 
-	public HashSet<MutableCell> getRectangle(int x1, int y1, int x2, int y2) {
+	public HashSet<Cell> getRectangle(int x1, int y1, int x2, int y2) {
 
 		// ensure, that x1/y1 are smaller than x2/y2
 		if (x1 > x2) {
@@ -196,7 +195,7 @@ public class Placement {
 				yi2 = i;
 		}
 
-		HashSet<MutableCell> nodes = new HashSet<>();
+		HashSet<Cell> nodes = new HashSet<>();
 
 		if (xi2 >= coordX.length || yi2 >= coordY.length) {
 			log.warn("rectangle out of bounds, returning no cells.");
@@ -208,7 +207,7 @@ public class Placement {
 
 		for (int y = yi1; y <= yi2; y++) {
 			for (int x = xi1; x <= xi2; x++) {
-				MutableCell n = place[x][y];
+				Cell n = place[x][y];
 				if (n != null)
 					nodes.add(n);
 			}

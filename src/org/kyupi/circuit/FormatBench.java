@@ -291,17 +291,17 @@ class FormatBench {
 
 	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
-		for (MutableCell intf : graph.accessInterface()) {
+		for (MutableCell intf : graph.intf()) {
 			if (intf.isPrimary() && intf.isInput())
 				op.println("INPUT(" + intf.queryName() + ")");
 			if (intf.isPrimary() && intf.isInput())
 				op.println("OUTPUT(" + intf.queryName() + ")");
 		}
-		for (MutableCell inp : graph.accessInterface()) {
+		for (MutableCell inp : graph.intf()) {
 			if (inp.isPseudo())
 				op.println(inp.queryName() + " = DFF(" + inp.queryName() + ")"); // FIXME
 		}
-		for (MutableCell node : graph.accessNodes()) {
+		for (MutableCell node : graph.cells()) {
 			if (node == null)
 				continue;
 			if (node.isPort() || node.isSequential())
@@ -309,7 +309,7 @@ class FormatBench {
 			int ninputs = node.maxIn();
 			String s = "";
 			for (int i = 0; i <= ninputs; i++) {
-				MutableCell a = node.in(i);
+				MutableCell a = node.inputCellAt(i);
 				if (a != null)
 					s += "," + a.queryName();
 				else

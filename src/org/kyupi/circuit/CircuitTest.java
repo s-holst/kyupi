@@ -62,23 +62,22 @@ public class CircuitTest {
 	public void testFlags() {
 		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(z) z=DFF(a)");
 		//log.debug("Graph=\n" + g);
-		MutableCell intf[] = g.accessInterface();
 
-		assertTrue(intf[0].isInput());
-		assertFalse(intf[1].isInput());
-		//assertTrue(intf[2].isInput());
+		assertTrue(g.intf(0).isInput());
+		assertFalse(g.intf(1).isInput());
+		//assertTrue(g.intf(2).isInput());
 
-		assertFalse(intf[0].isOutput());
-		assertTrue(intf[1].isOutput());
-		//assertTrue(intf[2].isOutput());
+		assertFalse(g.intf(0).isOutput());
+		assertTrue(g.intf(1).isOutput());
+		//assertTrue(g.intf(2).isOutput());
 
-		assertFalse(intf[0].isPseudo());
-		assertFalse(intf[1].isPseudo());
-		//assertTrue(intf[2].isPseudo());
+		assertFalse(g.intf(0).isPseudo());
+		assertFalse(g.intf(1).isPseudo());
+		//assertTrue(g.intf(2).isPseudo());
 
-		assertTrue(intf[0].isPort());
-		assertTrue(intf[1].isPort());
-		//assertFalse(intf[2].isPort());
+		assertTrue(g.intf(0).isPort());
+		assertTrue(g.intf(1).isPort());
+		//assertFalse(g.intf(2).isPort());
 	}
 
 	@Test

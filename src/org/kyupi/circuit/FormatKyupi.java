@@ -23,8 +23,7 @@ public class FormatKyupi {
 		PrintWriter op = new PrintWriter(os);
 		op.println("# Kyupi Graph Dump 1");
 		op.println("# Name " + name);
-		MutableCell[] nodes = graph.accessNodes();
-		for (MutableCell node : nodes) {
+		for (MutableCell node : graph.cells()) {
 			if (node == null) {
 				continue;
 			}
@@ -43,14 +42,14 @@ public class FormatKyupi {
 			}
 			s += " " + node.queryName() + " (";
 			for (int i = 0; i <= node.maxIn(); i++) {
-				if (node.in(i) != null) {
-					s += " " + node.inName(i) + ": " + node.in(i).queryName();
+				if (node.inputCellAt(i) != null) {
+					s += " " + node.inName(i) + ": " + node.inputCellAt(i).queryName();
 				}
 			}
 			s += " ) " + node.typeName() + " (";
 			for (int i = 0; i <= node.maxOut(); i++) {
-				if (node.out(i) != null) {
-					s += " " + node.outName(i) + ": " + node.out(i).queryName();
+				if (node.outputCellAt(i) != null) {
+					s += " " + node.outName(i) + ": " + node.outputCellAt(i).queryName();
 				}
 			}
 			s += " )";

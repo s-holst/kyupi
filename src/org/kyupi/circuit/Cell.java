@@ -1,15 +1,28 @@
 package org.kyupi.circuit;
 
-public class Cell {
+public abstract class Cell {
 
+	private final int id;
+
+	public final int id() {
+		return id;
+	}
+	
 	protected int type;
 	
-	protected Cell(int type) {
+	public final int type() {
+		return type;
+	}
+
+	protected Cell(int id, int type) {
+		this.id = id;
 		this.type = type;
 	}
 	
-	public int type() {
-		return type;
+	protected int intfPosition = -1;
+
+	public final int intfPosition() {
+		return intfPosition;
 	}
 	
 	public static final int FLAG_INPUT = 0x8000_0000;
@@ -94,27 +107,50 @@ public class Cell {
 	public static final int TYPE_INV = TYPE_NOT | INPUTS_1 | VARIANT_3;
 	
 	
-	public boolean isPseudo() {
+	public final boolean isPseudo() {
 		return (type & (FLAG_PSEUDO)) != 0;
 	}
 
-	public boolean isSequential() {
+	public final boolean isSequential() {
 		return (type & (FLAG_SEQUENTIAL)) != 0;
 	}
 
-	public boolean isInput() {
+	public final boolean isInput() {
 		return (type & FLAG_INPUT) != 0;
 	}
 
-	public boolean isOutput() {
+	public final boolean isOutput() {
 		return (type & FLAG_OUTPUT) != 0;
 	}
 
-	public boolean isPort() {
+	public final boolean isPort() {
 		return (isInput() || isOutput());
 	}
 
-	public boolean isMultiOutput() {
+	public final boolean isMultiOutput() {
 		return (type & FLAG_MULTIOUTPUT) != 0;
 	}
+
+	public abstract int inputCount();
+	
+	public abstract int outputCount();
+
+	public abstract Iterable<? extends Cell> inputCells();
+
+	public abstract Iterable<? extends Cell> outputCells();
+	
+	public abstract Cell inputCellAt(int pinIndex);
+	
+	public abstract Cell outputCellAt(int pinIndex);
+	
+	public abstract int inputSignalAt(int pinIndex);
+	
+	public abstract int outputSignalAt(int pinIndex);
+	
+	public abstract String queryName();
+	
+	public abstract String typeName();
+	
+	public abstract boolean isType(int type);
+	
 }
