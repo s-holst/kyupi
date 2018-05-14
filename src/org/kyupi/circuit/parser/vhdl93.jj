@@ -776,7 +776,7 @@ void component_instantiation_statement(MutableCircuit g):
 		[ generic_map_aspect() ]
 		[ map=port_map_aspect()		{
 		  for (String key: map.keySet())		  {
-		    String value = map.get(key);		    MutableCell sig = g.searchNode(value);
+		    String value = map.get(key);		    MutableCell sig = g.searchCellByName(value);
 		    if (sig==null)
 		     throw new ParseException("signal name unknown: " + value);
 		    int pidx = library.pinIndex(comp.type(), key);
