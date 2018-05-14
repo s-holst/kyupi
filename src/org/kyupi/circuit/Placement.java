@@ -59,7 +59,7 @@ public class Placement {
 				Integer posx = Integer.decode(c[placed + 2]);
 				Integer posy = Integer.decode(c[placed + 3]);
 
-				Cell n = circuit.searchNode(name);
+				Cell n = circuit.searchCellByName(name);
 				if (n == null) {
 					log.info("Node not found: " + name);
 				} else {
@@ -105,7 +105,7 @@ public class Placement {
 			if (n == null || n.isPseudo())
 				continue;
 			if (!placeX.containsKey(n)) {
-				log.info("Missing place annotation for " + n.queryName());
+				log.info("Missing place annotation for " + n.name());
 			} else {
 				place[coordXmap.get(placeX.get(n))][coordYmap.get(placeY.get(n))] = n;
 			}

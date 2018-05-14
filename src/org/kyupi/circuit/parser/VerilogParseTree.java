@@ -192,7 +192,7 @@ public class VerilogParseTree {
 			for (PortConnection pc : mi.portConnections) {
 				int pidx = l.pinIndex(n.type(), pc.portName);
 				if (pidx < 0) {
-					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.queryName()
+					throw new IOException("pin name \"" + pc.portName + "\" unknown for cell " + n.name()
 							+ " of type " + n.typeName());
 				}
 				int pdir = l.pinDirection(n.type(), pc.portName);
@@ -220,7 +220,7 @@ public class VerilogParseTree {
 			return g.new MutableCell("const1_gen" + (unique++), Library.TYPE_CONST1);
 		}
 
-		MutableCell signal = g.searchNode(name);
+		MutableCell signal = g.searchCellByName(name);
 		if (signal != null)
 			return signal;
 		return g.new MutableCell(name, Library.TYPE_BUF | Library.FLAG_PSEUDO);

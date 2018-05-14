@@ -48,7 +48,7 @@ public class FormatVerilog {
 	 */
 	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
-		op.println("module " + graph.getName() + " ( ");
+		op.println("module " + graph.name() + " ( ");
 		boolean comma_needed = false;
 		for (MutableCell intf_node : graph.intf()) {
 			if (intf_node == null)
@@ -56,7 +56,7 @@ public class FormatVerilog {
 			if (intf_node.isInput() || intf_node.isOutput()) {
 				if (comma_needed)
 					op.print(",\n");
-				op.print(s(intf_node.queryName()));
+				op.print(s(intf_node.name()));
 				comma_needed = true;
 			}
 		}
@@ -70,7 +70,7 @@ public class FormatVerilog {
 			if (intf_node.isInput()) {
 				if (comma_needed)
 					op.print(",\n");
-				op.print(s(intf_node.queryName()));
+				op.print(s(intf_node.name()));
 				comma_needed = true;
 			}
 		}
@@ -84,7 +84,7 @@ public class FormatVerilog {
 			if (intf_node.isOutput()) {
 				if (comma_needed)
 					op.print(",\n");
-				op.print(s(intf_node.queryName()));
+				op.print(s(intf_node.name()));
 				comma_needed = true;
 			}
 		}
@@ -99,7 +99,7 @@ public class FormatVerilog {
 			if (node.isPseudo()) {
 				if (comma_needed)
 					op.print(",\n");
-				op.print(s(node.queryName()));
+				op.print(s(node.name()));
 				comma_needed = true;
 			}
 		}
@@ -109,7 +109,7 @@ public class FormatVerilog {
 			if (node == null || node.isPseudo() || node.isInput() || node.isOutput()) {
 				continue;
 			}
-			op.print("  " + node.typeName() + " " + s(node.queryName()) + " ( ");
+			op.print("  " + node.typeName() + " " + s(node.name()) + " ( ");
 			int i = -1;
 			comma_needed = false;
 			for (MutableCell n : node.inputCells()) {
@@ -118,7 +118,7 @@ public class FormatVerilog {
 					continue;
 				if (comma_needed)
 					op.print(", ");
-				op.print(" ." + node.inName(i) + "(" + s(n.queryName()) + ") ");
+				op.print(" ." + node.inName(i) + "(" + s(n.name()) + ") ");
 				comma_needed = true;
 			}
 			i = -1;
@@ -128,7 +128,7 @@ public class FormatVerilog {
 					continue;
 				if (comma_needed)
 					op.print(", ");
-				op.print(" ." + node.outName(i) + "(" + s(n.queryName()) + ") ");
+				op.print(" ." + node.outName(i) + "(" + s(n.name()) + ") ");
 				comma_needed = true;
 			}
 			op.println(");");

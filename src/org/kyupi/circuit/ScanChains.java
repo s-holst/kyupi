@@ -115,7 +115,7 @@ public class ScanChains {
 		chains.sort(new Comparator<ScanChain>() {
 			@Override
 			public int compare(ScanChain o1, ScanChain o2) {
-				return o1.in.node.queryName().compareTo(o2.in.node.queryName());
+				return o1.in.node.name().compareTo(o2.in.node.name());
 			}
 		});
 

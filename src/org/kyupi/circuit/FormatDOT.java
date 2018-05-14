@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.StringTools;
 
@@ -24,9 +25,9 @@ public class FormatDOT {
 	private static final int scaleX = 230;
 	private static final int scaleY = 120;
 	
-		private static String drawNode(MutableCell n) {
+		private static String drawNode(LevelizedCell n) {
 		String s = "  " + n.id() + " [label=\"{";
-		int num = n.maxIn() + 1;
+		int num = n.inputCount();
 		ArrayList<String> inports = new ArrayList<>();
 		for (int i = 0; i < num; i++) {
 			inports.add("<" + i + ">" + n.inName(i));
@@ -44,10 +45,10 @@ public class FormatDOT {
 				ioInfo += " \\>";
 		}
 
-		s += n.queryName() + "\\n" + n.typeName() + ioInfo;
+		s += n.name() + "\\n" + n.typeName() + ioInfo;
 		
-		if (n.countOuts() > 0) {
-			num = n.maxOut() + 1;
+		if (n.outputCount() > 0) {
+			num = n.outputCount();
 			ArrayList<String> outports = new ArrayList<>();
 			for (int i = 0; i < num; i++) {
 				outports.add("<o" + i + ">" + n.outName(i));
@@ -55,7 +56,7 @@ public class FormatDOT {
 			s += "|" + "{" + StringTools.join(outports, "|") + "}"; // n.outName(0);
 		}
 		s += "}\" ";
-		s += "pos=\"" + (n.level()*scaleX) + "," + (n.levelPosition()*-scaleY) + "!\" ";
+		s += "pos=\"" + (n.level()*scaleX) + "," + (n.position()*-scaleY) + "!\" ";
 		if (n.isPseudo()) {
 			return s + "shape=Mrecord];";
 		} else {
@@ -63,7 +64,7 @@ public class FormatDOT {
 		}
 	}
 
-	public static void save(OutputStream os, MutableCircuit graph) {
+	public static void save(OutputStream os, LevelizedCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
 		op.println("#!/usr/local/bin/neato -n -Tpdf -ocircuit.pdf\n");
 		op.println("# x/y arranged: neato -n -Tpdf -ocircuit.pdf circuit.dot");
@@ -72,13 +73,13 @@ public class FormatDOT {
 		op.println("  rankdir=LR;");
 		op.println("  splines=false;");
 		op.println("  node [shape=record];");
-		for (MutableCell n : graph.cells()) {
+		for (LevelizedCell n : graph.cells()) {
 			if (n == null)
 				continue;
 			op.println(drawNode(n));
-			int num = n.maxIn() + 1;
+			int num = n.inputCount();
 			for (int i = 0; i < num; i++) {
-				MutableCell pred = n.inputCellAt(i);
+				LevelizedCell pred = n.inputCellAt(i);
 				if (pred == null)
 					continue;
 				String predPort = ":o" + pred.searchOutIdx(n) + ":e";

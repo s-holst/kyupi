@@ -233,19 +233,8 @@ public class Library {
 		}
 	};
 
-	public void checkValid(int type) {
-		// if ((type & FLAG_INPUT) != 0 && (type & FLAG_PPINPUT) != 0)
-		// throw new
-		// IllegalArgumentException("Gate cannot be both primary and
-		// pseudo-primary input.");
-	}
-
 	public boolean isPseudo(int type) {
 		return (type & (FLAG_PSEUDO)) != 0;
-	}
-
-	public boolean isPrimary(int type) {
-		return (type & (FLAG_INPUT | FLAG_OUTPUT)) != 0;
 	}
 
 	public boolean isSequential(int type) {
@@ -256,20 +245,8 @@ public class Library {
 		return (type & FLAG_INPUT) != 0;
 	}
 
-	public boolean isOutput(int type) {
-		return (type & FLAG_OUTPUT) != 0;
-	}
-
-	public boolean isPort(int type) {
-		return (isInput(type) || isOutput(type)) && !isPseudo(type);
-	}
-
 	public boolean isType(int type, int other) {
 		return (type & MASK_FUNCTION) == (other & MASK_FUNCTION);
-	}
-
-	public boolean isMultiOutput(int type) {
-		return (type & FLAG_MULTIOUTPUT) != 0;
 	}
 
 	public String typeName(int type) {

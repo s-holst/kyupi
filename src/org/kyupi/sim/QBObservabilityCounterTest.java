@@ -56,8 +56,8 @@ public class QBObservabilityCounterTest extends TestCase {
 		patterns.add(new BVector("101"));
 		QBObservabilityCounter obs = new QBObservabilityCounter(g, QBSource.from(3, patterns));
 		obs.next();
-		LevelizedCell a = g.searchNode("a");
-		LevelizedCell z = g.searchNode("z_");
+		LevelizedCell a = g.searchCellByName("a");
+		LevelizedCell z = g.searchCellByName("z_");
 		
 		assertNotNull(a);
 		assertNotNull(z);

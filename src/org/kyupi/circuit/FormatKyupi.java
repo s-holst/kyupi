@@ -28,9 +28,6 @@ public class FormatKyupi {
 				continue;
 			}
 			String s = "Node";
-			if (node.isPrimary()) {
-				s += " primary";
-			}
 			if (node.isInput()) {
 				s += " input";				
 			}
@@ -40,16 +37,16 @@ public class FormatKyupi {
 			if (node.isPseudo()) {
 				s += " pseudo";				
 			}
-			s += " " + node.queryName() + " (";
+			s += " " + node.name() + " (";
 			for (int i = 0; i <= node.maxIn(); i++) {
 				if (node.inputCellAt(i) != null) {
-					s += " " + node.inName(i) + ": " + node.inputCellAt(i).queryName();
+					s += " " + node.inName(i) + ": " + node.inputCellAt(i).name();
 				}
 			}
 			s += " ) " + node.typeName() + " (";
 			for (int i = 0; i <= node.maxOut(); i++) {
 				if (node.outputCellAt(i) != null) {
-					s += " " + node.outName(i) + ": " + node.outputCellAt(i).queryName();
+					s += " " + node.outName(i) + ": " + node.outputCellAt(i).name();
 				}
 			}
 			s += " )";

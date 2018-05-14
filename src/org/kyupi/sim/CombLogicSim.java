@@ -49,11 +49,11 @@ public class CombLogicSim {
 
 		public State(State parent) {
 			this.parent = parent;
-			care = new long[circuit.lineCount()];
-			value = new long[circuit.lineCount()];
+			care = new long[circuit.signalCount()];
+			value = new long[circuit.signalCount()];
 			Arrays.fill(care, 0L);
 			Arrays.fill(value, 0L);
-			valid_rev = new int[circuit.lineCount()];
+			valid_rev = new int[circuit.signalCount()];
 			Arrays.fill(valid_rev, 0);
 
 			dirty_rev = new int[circuit.size()];

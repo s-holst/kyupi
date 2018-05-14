@@ -18,8 +18,8 @@ public class QBObservabilityCounter extends QBSource {
 		super(source.length());
 		this.source = source;
 		this.obscalc = new Observability(circuit);
-		obsCount0 = new int[circuit.lineCount()];
-		obsCount1 = new int[circuit.lineCount()];
+		obsCount0 = new int[circuit.signalCount()];
+		obsCount1 = new int[circuit.signalCount()];
 		Arrays.fill(obsCount0, 0);
 		Arrays.fill(obsCount1, 0);
 	}

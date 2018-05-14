@@ -102,7 +102,7 @@ public class BBPlainSimTest extends TestCase {
 				char e = expected.getValue(i);
 				char a = actual.getValue(i);
 				if (e != a) {
-					buf.append(" " + lc.intf(i).queryName() + "=" + a + "(exp:" + e + ")");
+					buf.append(" " + lc.intf(i).name() + "=" + a + "(exp:" + e + ")");
 				}
 			}
 			fail("Mismatched pattern " + pindex + ": " + actual + "(exp:" + expected + ")" + buf.toString());

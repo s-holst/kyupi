@@ -59,7 +59,7 @@ public class CircuitTools {
 			FormatVHDL.save(FileTools.fileCreate(f, allowOverwrite), g, FileTools.fileBasename(f));
 			break;
 		case FileTools.FILE_TYPE_DOT:
-			FormatDOT.save(FileTools.fileCreate(f, allowOverwrite), g);
+			FormatDOT.save(FileTools.fileCreate(f, allowOverwrite), g.levelized());
 			break;
 		default:
 			throw new IOException("unsupported export file type: " + FileTools.fileType(f));
@@ -136,12 +136,12 @@ public class CircuitTools {
 					if (successor != null) {
 						MutableCell predecessor = output.inputCellAt(0);
 						if (predecessor == null) {
-							log.error("rewire failed: output " + output.queryName() + " has no driver");
+							log.error("rewire failed: output " + output.name() + " has no driver");
 							doIterate = false;
 							break;
 						}
 						if (predecessor.isMultiOutput()) {
-							MutableCell signal = g.new MutableCell(output.queryName() + "_net", Library.TYPE_BUF | Library.FLAG_PSEUDO);
+							MutableCell signal = g.new MutableCell(output.name() + "_net", Library.TYPE_BUF | Library.FLAG_PSEUDO);
 							int opin = predecessor.searchOutIdx(output);
 							g.connect(predecessor, opin, signal, -1);
 							g.connect(signal, -1, output, 0);
@@ -149,7 +149,7 @@ public class CircuitTools {
 						}
 						int iidx = successor.searchInIdx(output);
 						g.connect(predecessor, -1, successor, iidx);
-						output.setOut(oidx, null);
+						//output.setOut(oidx, null);
 					}
 				}
 			}
@@ -227,7 +227,7 @@ public class CircuitTools {
 				if (succ == null)
 					continue;
 				int succ_in_idx = succ.searchInIdx(cell);
-				MutableCell subcell = g.new MutableCell(cell.queryName() + "_" + lib.outputPinName(cell.type(), out_idx), lib.getSubCell(cell.type(),
+				MutableCell subcell = g.new MutableCell(cell.name() + "_" + lib.outputPinName(cell.type(), out_idx), lib.getSubCell(cell.type(),
 						out_idx));
 				g.disconnect(cell, out_idx, succ, succ_in_idx);
 				g.connect(subcell, -1, succ, succ_in_idx);

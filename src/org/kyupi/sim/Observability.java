@@ -32,10 +32,10 @@ public class Observability {
 		CombLogicSim sim = new CombLogicSim(graph);
 		base = sim.new State();
 		delta = sim.new State(base);
-		obs = new long[graph.lineCount()];
+		obs = new long[graph.signalCount()];
 		Arrays.fill(obs, 0L);
 		obs_outputs = new BBlock(graph.width());
-		obs_rev = new int[graph.lineCount()];
+		obs_rev = new int[graph.signalCount()];
 		Arrays.fill(obs_rev, 0);
 		obs_outputs_rev = 0;
 	}

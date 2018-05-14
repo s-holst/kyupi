@@ -45,10 +45,10 @@ public class FormatVHDL {
 		op.println("entity " + entity_name + " is ");
 		op.println("  port(");
 		for (MutableCell intf_node : graph.intf()) {
-			if (intf_node.isPrimary() && intf_node.isInput())
-				op.println("    " + s(intf_node.queryName()) + ": in std_logic;");
-			if (intf_node.isPrimary() && intf_node.isOutput())
-				op.println("    " + s(intf_node.queryName()) + ": out std_logic;");
+			if (intf_node.isInput())
+				op.println("    " + s(intf_node.name()) + ": in std_logic;");
+			if (intf_node.isOutput())
+				op.println("    " + s(intf_node.name()) + ": out std_logic;");
 		}
 		op.println("  );");
 		op.println("end " + entity_name + ";");
@@ -59,7 +59,7 @@ public class FormatVHDL {
 				continue;
 			}
 			if (!node.isPort())
-				op.println("  signal " + s(node.queryName()) + ": std_logic;");
+				op.println("  signal " + s(node.name()) + ": std_logic;");
 		}
 		op.println("begin");
 		for (MutableCell node : graph.cells()) {
@@ -67,11 +67,11 @@ public class FormatVHDL {
 				continue;
 			}
 			if (!node.isInput()) {
-				op.print("  " + s(node.queryName()) + " <= ");
+				op.print("  " + s(node.name()) + " <= ");
 				switch (node.type() & Library.MASK_FUNCTION) {
 				case Library.TYPE_NAND:
 					if (node.countIns() == 2) {
-						op.println(s(node.inputCellAt(0).queryName()) + " nand " + s(node.inputCellAt(1).queryName()) + ";");
+						op.println(s(node.inputCellAt(0).name()) + " nand " + s(node.inputCellAt(1).name()) + ";");
 					}
 				}
 			}

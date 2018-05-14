@@ -125,10 +125,10 @@ class FormatKDB {
 				throw new IOException("Line " + line + " : Unknown gate type " + type);
 			}
 			nodes[signal] = c.new MutableCell("id"+signal, map.get(type));
-			if (c.library().isPrimary(nodes[signal].type())) {
+			if (nodes[signal].isPort()) {
 				nodes[signal].setIntfPosition(intfIdx++);
 			}
-			if (c.library().isSequential(nodes[signal].type())) {
+			if (nodes[signal].isSequential()) {
 				nodes[signal].setIntfPosition(intfIdx++);
 			}
 		}

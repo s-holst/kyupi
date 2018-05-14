@@ -13,68 +13,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 import org.kyupi.misc.ArrayTools;
 import org.kyupi.misc.Namespace;
 
 /**
- * is the main data structure to represent and manipulate logic circuits.
+ * represents a circuit that can be changed.
  * 
- * 
- * Edges in this graph are represented by references of a node to its neighbors.
- * Usually, a pair of references defines an edge (e.g. a signal) between two
- * nodes (e.g. logic cells). Each reference has two annotations: The type of
- * connection ('In', 'Out') of the node it originates from (e.g. input pin or
- * output pin of a cell), and a pin index.
- * <p/>
- * 
- * Example: This is a signal between output 0 of cell A and input 2 of cell B:
- * 
- * <pre>
- *       in,2     out,0
- *        ____    ____  
- * node  v    \  /    v
- *   +-----+   \/   +-----+
- *   |  A  |   /\___|2 B  |
- *   |    0|__/     |1    |
- *   |     |        |0    |
- *   +-----+        +-----+
- *       outp      inp
- * </pre>
- * 
- * The annotation for all references originating at a specific node is unique.
- * E.g. there cannot be two references marked 'out,0' at a single node.
- * <p/>
- * 
- * Performance note: Reference annotations are considered to be dense and stored
- * in arrays. Always use the lowest possible index for maximum memory
- * efficiency.
- * <p/>
- * 
- * To add additional annotations to an edge, create nodes the edges can pass
- * through at add annotation to these nodes.
- * <p/>
- * 
- * A graph has a Library of possible node types associated with it.
- * 
- * Nodes are topologically ordered. The first level (level 0) contains all nodes
- * that have either no predecessors (e.g. primary inputs or constants), or are
- * sequential elements (n.isSequential()==true). All remaining nodes are
- * assigned to the lowest possible level for which all of its predecessors are
- * on even lower levels. Outgoing edges always point to a node on a higher
- * level. Each node has a position on a level which is automatically assigned.
- * Each node in the graph can be uniquely addressed using its level and position
- * index.
- * 
- * Performance note: Topological ordering of the graph is done on demand after a
- * structural change in the graph. When making numerous structural changes, be
- * sure not to unnecessarily access level and position information of the nodes,
- * because topological ordering is quite costly.
- * 
- * @author stefan
- * 
+ * @author Stefan
+ *
  */
 public class MutableCircuit extends Circuit {
 
@@ -84,24 +32,22 @@ public class MutableCircuit extends Circuit {
 	 */
 	public class MutableCell extends Cell {
 
-		private int level;
-
-		private int levelPosition;
-
-		//private int intfPosition;
-
 		private MutableCell inputs[] = new MutableCell[0];
 
 		private MutableCell outputs[] = new MutableCell[0];
+		
+		private int inputSignals[] = new int[0];
+		
+		private int outputSignals[] = new int[0];
 
 		public MutableCell(String name, int type) {
 			super(namespace.idFor(name), type);
 			register(this);
 		}
 		
-		public MutableCell(MutableCell n) {
-			super(namespace.idFor(n.queryName()), n.type());
-			this.intfPosition = n.intfPosition;
+		public MutableCell(Cell n) {
+			super(namespace.idFor(n.name()), n.type());
+			setIntfPosition(n.intfPosition());
 			register(this);
 		}
 
@@ -109,24 +55,24 @@ public class MutableCircuit extends Circuit {
 		 * accessors
 		 */
 
-		public String queryName() {
+		public String name() {
 			return namespace.nameFor(id());
 		}
 
-		public int level() {
-			ensureLevels();
-			return level;
-		}
-
-		public int levelPosition() {
-			ensureLevels();
-			return levelPosition;
-		}
-
 		public void setIntfPosition(int pos) {
-			if (this.intfPosition != pos) {
-				invalidateLevels();
+			if (this.intfPosition() != pos) {
+				if (this.intfPosition() != -1) {
+					intf[this.intfPosition()] = null;
+				}
 				this.intfPosition = pos;
+				if (pos >= 0) {
+					intf = (MutableCell[]) ArrayTools.grow(intf, MutableCell.class, pos+1);
+					if (intf[pos] != null) {
+						log.error("Nodes must not share same intfPosition: " + name() + ", "
+								+ intf[pos].name() + " (intfPosition: " + pos + ")");
+					}
+					intf[pos] = this;
+				}
 			}
 		}
 
@@ -135,7 +81,7 @@ public class MutableCircuit extends Circuit {
 				MutableCell n = (MutableCell) other;
 				if (n.type != type)
 					return false;
-				if (!n.queryName().equals(queryName()))
+				if (!n.name().equals(name()))
 					return false;
 				return true;
 			}
@@ -145,10 +91,6 @@ public class MutableCircuit extends Circuit {
 		/*
 		 * type queries (convenience accessors to library)
 		 */
-
-		public boolean isPrimary() {
-			return library.isPrimary(type);
-		}
 
 		public boolean isType(int other) {
 			return library.isType(type, other);
@@ -212,7 +154,7 @@ public class MutableCircuit extends Circuit {
 			int i = ArrayTools.linearSearchReference(inputs, pred);
 			if (i < 0)
 				throw new IllegalArgumentException(
-						"given node " + pred.queryName() + " is not a predecessor of " + queryName());
+						"given node " + pred.name() + " is not a predecessor of " + name());
 			return i;
 		}
 
@@ -239,13 +181,17 @@ public class MutableCircuit extends Circuit {
 		 *            existing reference.
 		 * @return the node itself.
 		 */
-		public MutableCell setIn(int idx, MutableCell pred) {
-			invalidateLevels();
+		private MutableCell setIn(int idx, MutableCell pred, int sid) {
 			if (idx < 0) {
-				idx = maxIn() + 1;
+				idx = inputCount();
 			}
 			inputs = (MutableCell[]) ArrayTools.grow(inputs, MutableCell.class, idx + 1);
 			inputs[idx] = pred;
+			inputSignals = ArrayTools.grow(inputSignals, idx+1, 2, -1);
+			inputSignals[idx] = sid;
+			if (sid >= 0)
+				receivers[sid] = this;
+
 			return this;
 		}
 
@@ -260,13 +206,17 @@ public class MutableCircuit extends Circuit {
 		 *            reference.
 		 * @return the node itself.
 		 */
-		public MutableCell setOut(int idx, MutableCell succ) {
-			invalidateLevels();
+		private MutableCell setOut(int idx, MutableCell succ, int sid) {
 			if (idx < 0) {
-				idx = maxOut() + 1;
+				idx = outputCount();
 			}
 			outputs = (MutableCell[]) ArrayTools.grow(outputs, MutableCell.class, idx + 1);
 			outputs[idx] = succ;
+			outputSignals = ArrayTools.grow(outputSignals, idx+1, 2, -1);
+			outputSignals[idx] = sid;
+			if (sid >= 0)
+				drivers[sid] = this;
+
 			return this;
 		}
 
@@ -326,7 +276,7 @@ public class MutableCircuit extends Circuit {
 				MutableCell pred = inputCellAt(i);
 				if (pred == null)
 					continue;
-				setIn(i, null);
+				setIn(i, null, -1);
 				pred.replaceOuts(this, null);
 				if (!pred.isMultiOutput()) {
 					pred.compressOuts();
@@ -338,7 +288,7 @@ public class MutableCircuit extends Circuit {
 				if (succ == null)
 					continue;
 				succ.replaceIns(this, null);
-				setOut(i, null);
+				setOut(i, null, -1);
 			}
 			unregister(this);
 		}
@@ -361,21 +311,21 @@ public class MutableCircuit extends Circuit {
 			if (isOutput())
 				iosuffix = "O" + intfPosition();
 			StringBuilder b = new StringBuilder(
-					"" + level + "_" + levelPosition + ":" + typeName() + "\"" + queryName() + "\"" + iosuffix);
+					"" + id() + ":" + typeName() + "\"" + name() + "\"" + iosuffix);
 			int m_in = maxIn();
 			int m_out = maxOut();
 			for (int i = 0; i <= m_in; i++) {
 				if (inputs[i] == null) {
 					b.append("<null");
 				} else {
-					b.append(" <" + inputs[i].level + "_" + inputs[i].levelPosition);
+					b.append(" <" + inputs[i].id());
 				}
 			}
 			for (int o = 0; o <= m_out; o++) {
 				if (outputs[o] == null) {
 					b.append(">null");
 				} else {
-					b.append(" >" + outputs[o].level + "_" + outputs[o].levelPosition);
+					b.append(" >" + outputs[o].id());
 				}
 			}
 			return b.toString();
@@ -393,14 +343,12 @@ public class MutableCircuit extends Circuit {
 
 		@Override
 		public int inputSignalAt(int pinIndex) {
-			// TODO Auto-generated method stub
-			return 0;
+			return inputSignals[pinIndex];
 		}
 
 		@Override
 		public int outputSignalAt(int pinIndex) {
-			// TODO Auto-generated method stub
-			return 0;
+			return outputSignals[pinIndex];
 		}
 
 	}
@@ -412,6 +360,10 @@ public class MutableCircuit extends Circuit {
 	private final Library library;
 
 	private MutableCell[] nodes = new MutableCell[0];
+	
+	private MutableCell drivers[] = new MutableCell[0];
+	private MutableCell receivers[] = new MutableCell[0];
+
 
 	private MutableCell levels[][];
 
@@ -419,7 +371,11 @@ public class MutableCircuit extends Circuit {
 
 	private String name;
 
-	private SignalMap signalMap;
+	//private SignalMap signalMap;
+	
+	private int signalCount = 0;
+	
+	private ArrayList<Integer> signalIdRecycle = new ArrayList<>();
 
 	public MutableCircuit(Library lib) {
 		library = lib;
@@ -433,6 +389,7 @@ public class MutableCircuit extends Circuit {
 			if (n != null)
 				new MutableCell(n);
 		}
+		
 		for (int idx = 0; idx < g.nodes.length; idx++) {
 			MutableCell n = g.nodes[idx];
 			if (n == null)
@@ -440,14 +397,23 @@ public class MutableCircuit extends Circuit {
 			int outCount = n.maxOut() + 1;
 			for (int i = 0; i < outCount; i++) {
 				MutableCell succ = n.outputCellAt(i);
-				if (succ != null)
-					nodes[idx].setOut(i, nodes[succ.id()]);
+				if (succ != null) {
+					int sid = newSignalId();
+					nodes[idx].setOut(i, nodes[succ.id()], sid);
+				}
 			}
+		}
+		
+		for (int idx = 0; idx < g.nodes.length; idx++) {
+			MutableCell n = g.nodes[idx];
+			if (n == null)
+				continue;
 			int inCount = n.maxIn() + 1;
 			for (int i = 0; i < inCount; i++) {
 				MutableCell pred = n.inputCellAt(i);
+				int predIdx = pred.searchOutIdx(n);
 				if (pred != null)
-					nodes[idx].setIn(i, nodes[pred.id()]);
+					nodes[idx].setIn(i, nodes[pred.id()], nodes[pred.id()].outputSignals[predIdx]);
 			}
 		}
 	}
@@ -456,7 +422,7 @@ public class MutableCircuit extends Circuit {
 		return library;
 	}
 
-	public MutableCell searchNode(String name) {
+	public MutableCell searchCellByName(String name) {
 		if (!namespace.contains(name)) {
 			return null;
 		}
@@ -518,30 +484,6 @@ public class MutableCircuit extends Circuit {
 	}
 
 	/**
-	 * returns the number of levels in the topologically ordered Graph.
-	 * 
-	 * @return
-	 */
-	public int levels() {
-		ensureLevels();
-		return levels.length;
-	}
-
-	/**
-	 * returns an array with all nodes on the topological level l of the graph.
-	 * 
-	 * The returned array may contain null elements. It is a reference to an
-	 * internal Graph data structure. It must not be changed by the caller.
-	 * 
-	 * @param l
-	 * @return
-	 */
-//	public MutableCell[] accessLevel(int l) {
-//		ensureLevels();
-//		return levels[l];
-//	}
-
-	/**
 	 * returns an array containing all interface (port) nodes of the Graph in
 	 * proper order.
 	 * 
@@ -553,17 +495,14 @@ public class MutableCircuit extends Circuit {
 	 * @return
 	 */
 	public Iterable<MutableCell> intf() {
-		ensureLevels();
 		return Arrays.asList(intf);
 	}
 	
 	public MutableCell intf(int pos) {
-		ensureLevels();
 		return intf[pos];
 	}
 
 	public int width() {
-		ensureLevels();
 		return ArrayTools.maxIndex(intf) + 1;
 	}
 	/**
@@ -586,15 +525,19 @@ public class MutableCircuit extends Circuit {
 	public int size() {
 		return nodes.length;
 	}
-	
-	public SignalMap accessSignalMap() {
-		ensureLevels();
-		return signalMap;
-	}
 
 	public void connect(MutableCell driver, int out_idx, MutableCell receiver, int in_idx) {
-		driver.setOut(out_idx, receiver);
-		receiver.setIn(in_idx, driver);
+		MutableCell c = driver.outputCellAt(out_idx);
+		if (c != null) {
+			disconnect(driver, out_idx, c, c.searchInIdx(driver));
+		}
+		c = receiver.inputCellAt(in_idx);
+		if (c != null) {
+			disconnect(c, c.searchOutIdx(receiver), receiver, in_idx);
+		}
+		int sid = newSignalId();
+		driver.setOut(out_idx, receiver, sid);
+		receiver.setIn(in_idx, driver, sid);
 	}
 
 	public void disconnect(MutableCell driver, int out_idx, MutableCell receiver, int in_idx) {
@@ -602,8 +545,9 @@ public class MutableCircuit extends Circuit {
 			throw new IllegalArgumentException("specified driver output does not point to receiver.");
 		if (receiver.inputCellAt(in_idx) != driver)
 			throw new IllegalArgumentException("specified receiver input does not point to driver.");
-		driver.setOut(out_idx, null);
-		receiver.setIn(in_idx, null);
+		freeSignalId(driver.outputSignals[out_idx]);
+		driver.setOut(out_idx, null, -1);
+		receiver.setIn(in_idx, null, -1);
 	}
 
 	public void strip() {
@@ -615,20 +559,10 @@ public class MutableCircuit extends Circuit {
 	}
 
 	public String toString() {
-		ensureLevels();
 		StringBuilder b = new StringBuilder();
-		int level_idx = 0;
-		for (MutableCell level[] : levels) {
-			int node_idx = 0;
-			b.append("" + level_idx + "[ ");
-			for (MutableCell node : level) {
-				b.append("" + node_idx + "(");
-				b.append(node);
-				b.append(") ");
-				node_idx++;
-			}
-			level_idx++;
-			b.append("]\n");
+		for (MutableCell node : nodes) {
+			b.append(node);
+			b.append("\n");
 		}
 		return b.toString();
 	}
@@ -638,7 +572,7 @@ public class MutableCircuit extends Circuit {
 	}
 
 	private void register(MutableCell g) {
-		invalidateLevels();
+		//log.info("register: " + namespace.nameFor(g.id()) + " " + g.id());
 		if (nodes.length > g.id() && nodes[g.id()] != null) {
 			throw new IllegalArgumentException("Gate already exists: " + namespace.nameFor(g.id()));
 		}
@@ -647,106 +581,12 @@ public class MutableCircuit extends Circuit {
 	}
 
 	private void unregister(MutableCell g) {
-		invalidateLevels();
 		if (nodes.length > g.id() && nodes[g.id()] == g) {
 			nodes[g.id()] = null;
 		} else
 			throw new IllegalArgumentException("Gate does not exist: " + namespace.nameFor(g.id()));
 	}
 
-	private void invalidateLevels() {
-		levels = null;
-		intf = null;
-	}
-
-	private void ensureLevels() {
-		if (levels != null)
-			return;
-		// log.debug("levelizing\n\t" +
-		// StringTools.join(Thread.currentThread().getStackTrace(), "\n\t"));
-
-		LinkedList<MutableCell> queue = new LinkedList<MutableCell>();
-		int level_fills[] = new int[1];
-		int maxlevel = 0;
-
-		// Reset level and position of all nodes. Construct interface array.
-		// Add all appropriate nodes to queue for level 0.
-		intf = null;
-		for (MutableCell g : nodes) {
-			if (g == null)
-				continue;
-			g.level = -1;
-			g.levelPosition = 0;
-			// intf array contains:
-			// - primary input ports
-			// - primary output ports
-			// - sequential nodes (flip-flops)
-			if (g.isPort() || g.isSequential()) {
-				intf = (MutableCell[]) ArrayTools.grow(intf, MutableCell.class, g.intfPosition + 1, 0.5f);
-				if (intf[g.intfPosition] != null) {
-					log.error("Nodes must not share same intfPosition: " + g.queryName() + ", "
-							+ intf[g.intfPosition].queryName() + " (intfPosition: " + g.intfPosition + ")");
-				}
-				intf[g.intfPosition] = g;
-			}
-			// first level (level[0]) contains:
-			// - primary input ports
-			// - other nodes without inputs (such as constants)
-			// - sequential nodes (flip-flops)
-			if (g.maxIn() < 0 || g.isSequential() || g.isInput()) {
-				queue.add(g);
-			}
-		}
-		intf = (MutableCell[]) ArrayTools.strip(intf);
-
-		level_fills[0] = 0;
-
-		// set levels and levelPositions of all nodes.
-		while (!queue.isEmpty()) {
-			MutableCell g = queue.poll();
-			if (g.level != -1) {
-				throw new RuntimeException("Detected combinational loop at gate: " + g.queryName());
-			}
-			g.level = 0;
-			if (!g.isSequential() && !g.isInput()) {
-				for (int i = g.maxIn(); i >= 0; i--) {
-					MutableCell d = g.inputCellAt(i);
-					if (d != null)
-						g.level = Math.max(g.level, d.level + 1);
-				}
-			}
-			level_fills = ArrayTools.grow(level_fills, g.level + 1, 1000, 0);
-			g.levelPosition = level_fills[g.level]++;
-			maxlevel = Math.max(maxlevel, g.level);
-			// log.debug("node " + g + " is level " + g.level);
-			if (g.countOuts() == 0)
-				continue;
-			for (MutableCell succ : g.outputCells()) {
-				if (succ != null && !succ.isSequential() && !succ.isInput()) {
-					succ.levelPosition++; // re-use levelPosition to count
-											// number of predecessors placed.
-					if (succ.levelPosition == succ.countIns())
-						queue.add(succ);
-				}
-			}
-		}
-
-		// allocate levels and add nodes.
-		levels = new MutableCell[maxlevel + 1][];
-		for (int i = 0; i <= maxlevel; i++)
-			levels[i] = new MutableCell[level_fills[i]];
-		for (MutableCell g : nodes) {
-			if (g == null)
-				continue;
-			if (g.level == -1)
-				log.warn("Unconnected gate not levelized: " + g.queryName());
-			else
-				levels[g.level][g.levelPosition] = g;
-		}
-
-		// log.debug("got levels: " + levels.length);
-		signalMap = new SignalMap(this);
-	}
 
 	public void printStats() {
 		HashMap<String, Integer> pseudo = new HashMap<>();
@@ -788,8 +628,8 @@ public class MutableCircuit extends Circuit {
 			gates++;
 			combinational.put(type, combinational.getOrDefault(type, 0) + 1);
 		}
-		log.info("CircuitName " + getName());
-		log.info("Levels " + levels());
+		log.info("CircuitName " + name());
+		//log.info("Levels " + levels());
 		log.info("NodeCount " + nodes);
 		log.info("  PseudoNodeCount " + signals);
 		printGateCounts(pseudo);
@@ -820,7 +660,7 @@ public class MutableCircuit extends Circuit {
 		this.name = name;
 	}
 
-	public String getName() {
+	public String name() {
 		return this.name;
 	}
 	
@@ -832,7 +672,7 @@ public class MutableCircuit extends Circuit {
 			for (MutableCell n : cells()) {
 				if (n == null)
 					continue;
-				MutableCell other_n = g.searchNode(n.queryName());
+				MutableCell other_n = g.searchCellByName(n.name());
 				if (other_n == null)
 					return false;
 				if (!n.equals(other_n))
@@ -870,6 +710,36 @@ public class MutableCircuit extends Circuit {
 			return true;
 		}
 		return false;
+	}
+	
+	public int signalCount() {
+		return signalCount;
+	}
+	
+	public MutableCell driverOf(int signalID) {
+		return drivers[signalID];
+	}
+
+	public MutableCell readerOf(int signalID) {
+		return receivers[signalID];
+	}
+	
+	private int newSignalId() {
+		signalCount++;
+		if (signalIdRecycle.isEmpty()) {
+			drivers = (MutableCell[]) ArrayTools.grow(drivers, MutableCell.class, signalCount);
+			receivers = (MutableCell[]) ArrayTools.grow(receivers, MutableCell.class, signalCount);
+			return signalCount - 1;
+		} else {
+			return signalIdRecycle.remove(signalIdRecycle.size()-1);
+		}
+	}
+	
+	private void freeSignalId(int sid) {
+		drivers[sid] = null;
+		receivers[sid] = null;
+		signalCount--;
+		signalIdRecycle.add(sid);
 	}
 
 }

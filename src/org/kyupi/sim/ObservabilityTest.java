@@ -38,8 +38,8 @@ public class ObservabilityTest {
 
 		obs.loadInputsFrom(blk);
 		
-		LevelizedCell a = lc.searchNode("a");
-		LevelizedCell z = lc.searchNode("z_");
+		LevelizedCell a = lc.searchCellByName("a");
+		LevelizedCell z = lc.searchCellByName("z_");
 		assertNotNull(a);
 		assertNotNull(z);
 		

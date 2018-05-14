@@ -67,7 +67,7 @@ public class FormatStil {
 		for (MutableCell inode : g.intf()) {
 			//intf_names.add(inode);
 			if (inode != null) {
-				intf.put(inode.queryName(), inode.intfPosition());
+				intf.put(inode.name(), inode.intfPosition());
 				//log.debug("intf " + inode.queryName() + " pos " + inode.position());
 			}
 		}

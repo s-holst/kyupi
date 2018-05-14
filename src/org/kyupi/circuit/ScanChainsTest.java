@@ -20,7 +20,7 @@ public class ScanChainsTest {
 		ScanChain chain = chains.get(0);
 		assertNotNull(chain);
 		assertEquals(3, chain.cells.size());
-		assertEquals("Scan_In", chain.in.node.queryName());
+		assertEquals("Scan_In", chain.in.node.name());
 		int[][] map = chains.scanOutMapping();
 		assertEquals(4, map.length);
 		assertEquals(graph.width(), map[0].length);
@@ -62,7 +62,7 @@ public class ScanChainsTest {
 		ScanChain chain = chains.get(0);
 		assertNotNull(chain);
 		assertEquals(3, chain.cells.size());
-		assertEquals("Scan_In", chain.in.node.queryName());
+		assertEquals("Scan_In", chain.in.node.name());
 		int[][] map = chains.scanInMapping();
 		assertEquals(4, map.length);
 		assertEquals(graph.width(), map[0].length);
@@ -115,12 +115,12 @@ public class ScanChainsTest {
 		ScanChain chain0 = chains.get(0);
 		assertNotNull(chain0);
 		assertEquals(3, chain0.cells.size());
-		assertEquals("test_si000", chain0.in.node.queryName());
+		assertEquals("test_si000", chain0.in.node.name());
 		
 		ScanChain chain1 = chains.get(1);
 		assertNotNull(chain1);
 		assertEquals(2, chain1.cells.size());
-		assertEquals("test_si001", chain1.in.node.queryName());
+		assertEquals("test_si001", chain1.in.node.name());
 		
 		int[][] map = chains.scanInMapping();
 		//System.out.println(mapToString(map));
@@ -159,12 +159,12 @@ public class ScanChainsTest {
 		ScanChain chain0 = chains.get(0);
 		assertNotNull(chain0);
 		assertEquals(3, chain0.cells.size());
-		assertEquals("test_si000", chain0.in.node.queryName());
+		assertEquals("test_si000", chain0.in.node.name());
 		
 		ScanChain chain1 = chains.get(1);
 		assertNotNull(chain1);
 		assertEquals(2, chain1.cells.size());
-		assertEquals("test_si001", chain1.in.node.queryName());
+		assertEquals("test_si001", chain1.in.node.name());
 		
 		int[] clocking = new int[2];
 		clocking[0] = 0;

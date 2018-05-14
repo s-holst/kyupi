@@ -17,19 +17,19 @@ import org.kyupi.sim.CombLogicSim.State;
 public class CombLogicSimTest {
 
 	private void stateSet(State state, LevelizedCircuit circuit, String node, long value, long care) {
-		LevelizedCell n = circuit.searchNode(node);
+		LevelizedCell n = circuit.searchCellByName(node);
 		int signalIdx = n.outputSignalAt(0);
 		state.set(signalIdx, value, care);
 	}
 	
 	private long stateGetV(State state, LevelizedCircuit circuit, String node) {
-		LevelizedCell n = circuit.searchNode(node);
+		LevelizedCell n = circuit.searchCellByName(node);
 		int signalIdx = n.outputSignalAt(0);
 		return state.getV(signalIdx);
 	}
 
 	private long stateGetC(State state, LevelizedCircuit circuit, String node) {
-		LevelizedCell n = circuit.searchNode(node);
+		LevelizedCell n = circuit.searchCellByName(node);
 		int signalIdx = n.outputSignalAt(0);
 		return state.getC(signalIdx);
 	}
@@ -175,7 +175,7 @@ public class CombLogicSimTest {
 
 		state.propagate();
 		
-		LevelizedCell n = circuit.searchNode("nand_");
+		LevelizedCell n = circuit.searchCellByName("nand_");
 		
 		assertNotNull(n);
 		

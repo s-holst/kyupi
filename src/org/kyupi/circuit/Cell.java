@@ -147,7 +147,7 @@ public abstract class Cell {
 	
 	public abstract int outputSignalAt(int pinIndex);
 	
-	public abstract String queryName();
+	public abstract String name();
 	
 	public abstract String typeName();
 	

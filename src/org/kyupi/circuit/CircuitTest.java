@@ -11,6 +11,7 @@ package org.kyupi.circuit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -90,7 +91,7 @@ public class CircuitTest {
 		assertEquals(13, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
-		FormatDOT.save(os, c);
+		FormatDOT.save(os, c.levelized());
 
 		lib = new LibraryNangate();
 
@@ -98,13 +99,13 @@ public class CircuitTest {
 		assertEquals(15, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
-		FormatDOT.save(os, c);
+		FormatDOT.save(os, c.levelized());
 
 		c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/Nangate/c17.v"), lib);
 		assertEquals(15, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
-		FormatDOT.save(os, c);
+		FormatDOT.save(os, c.levelized());
 
 		lib = new LibrarySAED();
 
@@ -112,7 +113,7 @@ public class CircuitTest {
 		assertEquals(11, c.countNodes());
 		assertEquals(5, c.countInputs());
 		assertEquals(2, c.countOutputs());
-		FormatDOT.save(os, c);
+		FormatDOT.save(os, c.levelized());
 	}
 
 	@Test
@@ -125,17 +126,17 @@ public class CircuitTest {
 
 	@Test
 	public void testLoadSAED90cells() throws Exception {
-		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
-		assertEquals(257, c.countNodes());
+		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED()).levelized();
+		assertEquals(257, c.size());
 		assertEquals(15, c.countInputs());
 		assertEquals(126, c.countOutputs());
-		c.levels();
+		c.depth();
 	}
 
 	@Test
 	public void testLoadB01Scan() throws Exception {
-		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
-		c.levels();
+		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED()).levelized();
+		c.depth();
 	}
 	
 	@Test
@@ -165,6 +166,29 @@ public class CircuitTest {
 				CircuitTools.loadCircuit(pth.toFile(), lib);
 			}
 		}
+	}
+	
+	public void testSignals() {
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(c) OUTPUT(d) c=AND(a,b) d=BUF(c)");
+		assertEquals(6, g.countNodes());
+		assertEquals(2, g.countInputs());
+		assertEquals(2, g.countOutputs());
+		
+		//log.info("Graph:\n" + g.toString());
+		
+		assertEquals(5, g.signalCount());
+		MutableCell a = g.searchCellByName("a");
+		MutableCell c_ = g.searchCellByName("c_");
+		MutableCell c = g.searchCellByName("c");
+		MutableCell d_ = g.searchCellByName("d_");
+		
+		
+		assertEquals(a.outputSignalAt(0), c_.inputSignalAt(0));
+		assertEquals(c_.outputSignalAt(0), c.inputSignalAt(0));
+		assertEquals(c_.outputSignalAt(1), d_.inputSignalAt(0));
+		
+		assertNotEquals(c_.outputSignalAt(0), d_.inputSignalAt(0));
+		assertNotEquals(c_.outputSignalAt(0), c_.inputSignalAt(0));
 	}
 
 }

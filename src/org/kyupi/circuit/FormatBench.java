@@ -175,7 +175,7 @@ class FormatBench {
 		String name;
 		ArrayList<String> params = new ArrayList<String>();
 		MutableCell gate;
-		int pos;
+		int pos = -1;
 
 		GateSpec(int type, String name) {
 			this.type = type;
@@ -258,7 +258,7 @@ class FormatBench {
 			gs.realizeGate(c);
 		for (GateSpec gs : gates.values()) {
 			for (String name : gs.params) {
-				MutableCell n = c.searchNode(name);
+				MutableCell n = c.searchCellByName(name);
 				c.connect(n, -1, gs.gate, -1);
 			}
 		}
@@ -292,14 +292,14 @@ class FormatBench {
 	public static void save(OutputStream os, MutableCircuit graph) {
 		PrintWriter op = new PrintWriter(os);
 		for (MutableCell intf : graph.intf()) {
-			if (intf.isPrimary() && intf.isInput())
-				op.println("INPUT(" + intf.queryName() + ")");
-			if (intf.isPrimary() && intf.isInput())
-				op.println("OUTPUT(" + intf.queryName() + ")");
+			if (intf.isInput())
+				op.println("INPUT(" + intf.name() + ")");
+			if (intf.isOutput())
+				op.println("OUTPUT(" + intf.name() + ")");
 		}
 		for (MutableCell inp : graph.intf()) {
 			if (inp.isPseudo())
-				op.println(inp.queryName() + " = DFF(" + inp.queryName() + ")"); // FIXME
+				op.println(inp.name() + " = DFF(" + inp.name() + ")"); // FIXME
 		}
 		for (MutableCell node : graph.cells()) {
 			if (node == null)
@@ -311,13 +311,13 @@ class FormatBench {
 			for (int i = 0; i <= ninputs; i++) {
 				MutableCell a = node.inputCellAt(i);
 				if (a != null)
-					s += "," + a.queryName();
+					s += "," + a.name();
 				else
-					log.warn("ignoring null input at cell " + node.queryName());
+					log.warn("ignoring null input at cell " + node.name());
 			}
 			if (s.length() > 0)
 				s = s.substring(1);
-			op.println(node.queryName() + " = " + names[node.type() & 0xf] + "(" + s + ")");
+			op.println(node.name() + " = " + names[node.type() & 0xf] + "(" + s + ")");
 		}
 		op.close();
 	}

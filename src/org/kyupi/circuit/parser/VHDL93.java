@@ -1313,7 +1313,7 @@ public class VHDL93 implements VHDL93Constants {
                   for (String key: map.keySet())
                   {
                     String value = map.get(key);
-                    MutableCell sig = g.searchNode(value);
+                    MutableCell sig = g.searchCellByName(value);
                     if (sig==null)
                      {if (true) throw new ParseException("signal name unknown: " + value);}
                     int pidx = library.pinIndex(comp.type(), key);

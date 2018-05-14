@@ -284,7 +284,7 @@ public class QBPlainSimTest extends TestCase {
 				char e = expected.getValue(i);
 				char a = actual.getValue(i);
 				if (e != a) {
-					buf.append(" " + lg.intf(i).queryName() + "=" + a + "(exp:" + e + ")");
+					buf.append(" " + lg.intf(i).name() + "=" + a + "(exp:" + e + ")");
 				}
 			}
 			fail("Mismatched pattern " + pindex + "(" + inp + "): " + actual + "(exp:" + expected + ")"

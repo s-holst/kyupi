@@ -8,6 +8,25 @@ import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.misc.ArrayTools;
 import org.kyupi.misc.Namespace;
 
+/**
+ * a circuit structure in which all cells are topologically ordered.
+ * 
+ * The circuit represented by this class cannot be changed. It is constructed
+ * from a given MutableCircuit. The given circuit must not contain any combinational
+ * loops. Every cycle in the graph has to contain either a sequential cell
+ * (cell.isSequential()==true) or a primary input cell (cell.isInput()==true).
+ * 
+ * The first level (level 0) contains all nodes
+ * that have either no predecessors (e.g. primary inputs or constants), or are
+ * sequential elements (n.isSequential()==true). All remaining nodes are
+ * assigned to the lowest possible level for which all of its predecessors are
+ * on even lower levels. Outgoing edges always point either to a cell on a higher
+ * level or a primary input / sequential cell on level 0. Each cell has a unique
+ * position() on a level().
+ * 
+ * @author Stefan
+ *
+ */
 public class LevelizedCircuit extends Circuit {
 
 	public class LevelizedCell extends Cell {
@@ -15,9 +34,9 @@ public class LevelizedCircuit extends Circuit {
 		private final int m;
 		private final LevelizedCell[] inputCells;
 		private final LevelizedCell[] outputCells;
-		
+
 		private LevelizedCell(MutableCell cell, int l, int m) {
-			super(namespace.idFor(cell.queryName()), cell.type());
+			super(namespace.idFor(cell.name()), cell.type());
 			//this.cid = ;
 			this.l = l;
 			this.m = m;
@@ -25,15 +44,15 @@ public class LevelizedCircuit extends Circuit {
 			this.inputCells = new LevelizedCell[cell.maxIn() + 1];
 			this.outputCells = new LevelizedCell[cell.maxOut() + 1];
 		}
-		
+
 		public LevelizedCell outputCellAt(int outputIdx) {
 			return (LevelizedCell) ArrayTools.safeGet(outputCells, outputIdx);
 		}
-		
+
 		public LevelizedCell inputCellAt(int inputIdx) {
 			return (LevelizedCell) ArrayTools.safeGet(inputCells, inputIdx);
 		}
-		
+
 		public Iterable<LevelizedCell> inputCells() {
 			return Arrays.asList(inputCells);
 		}
@@ -45,27 +64,27 @@ public class LevelizedCircuit extends Circuit {
 		public int inputCount() {
 			return inputCells.length;
 		}
-		
+
 		public int outputCount() {
 			return outputCells.length;
 		}
-		
+
 		public int inputSignalAt(int inputIdx) {
 			return input_map[input_map_offset[id()] + inputIdx];
 		}
-		
+
 		public int outputSignalAt(int outputIdx) {
 			return output_map_offset[id()] + outputIdx;
 		}
-		
+
 		public int level() {
 			return l;
 		}
-		
+
 		public int position() {
 			return m;
 		}
-		
+
 		public int searchOutIdx(LevelizedCell succ) {
 			int i = ArrayTools.linearSearchReference(outputCells, succ);
 			if (i < 0)
@@ -80,15 +99,15 @@ public class LevelizedCircuit extends Circuit {
 						"given node " + pred.id() + " is not a predecessor of " + id());
 			return i;
 		}
-		
-		public String queryName() {
+
+		public String name() {
 			return namespace.nameFor(id());
 		}
-		
+
 		public String typeName() {
 			return library.typeName(type);
 		}
-		
+
 		public boolean isType(int type) {
 			return library.isType(this.type, type);
 		}
@@ -100,7 +119,7 @@ public class LevelizedCircuit extends Circuit {
 		public String outName(int output_pin) {
 			return library.outputPinName(type, output_pin);
 		}
-		
+
 		public String toString() {
 			String iosuffix = "";
 			if (isInput())
@@ -108,7 +127,7 @@ public class LevelizedCircuit extends Circuit {
 			if (isOutput())
 				iosuffix = "O" + intfPosition();
 			StringBuilder b = new StringBuilder(
-					"" + l + "_" + m + ":" + typeName() + "\"" + queryName() + "\"" + iosuffix);
+					"" + l + "_" + m + ":" + typeName() + "\"" + name() + "\"" + iosuffix);
 			int m_in = inputCount();
 			int m_out = outputCount();
 			for (int i = 0; i < m_in; i++) {
@@ -128,7 +147,7 @@ public class LevelizedCircuit extends Circuit {
 			return b.toString();
 		}
 	}
-	
+
 	protected static Logger log = Logger.getLogger(MutableCircuit.class);
 
 	private Namespace namespace = new Namespace();
@@ -138,7 +157,7 @@ public class LevelizedCircuit extends Circuit {
 	private LevelizedCell levels[][];
 
 	private LevelizedCell intf[];
-	
+
 	private LevelizedCell cells[];
 
 	public final String name;
@@ -150,12 +169,12 @@ public class LevelizedCircuit extends Circuit {
 	private int edge_count;
 	private LevelizedCell drivers[];
 	private LevelizedCell receivers[];
-	
-	
+
+
 	public LevelizedCircuit(MutableCircuit circuit) {
 		library = circuit.library();
-		name = circuit.getName();		
-		
+		name = circuit.name();		
+
 		LinkedList<MutableCell> queue = new LinkedList<MutableCell>();
 		int[] l = new int[circuit.size()];
 		int[] m = new int[circuit.size()];
@@ -164,7 +183,7 @@ public class LevelizedCircuit extends Circuit {
 
 		Arrays.fill(l, -1);
 		Arrays.fill(m, 0);
-		
+
 		// Collect node ids for interface array.
 		// Add all appropriate nodes to queue for level 0.
 		int[] intfIDs = new int[circuit.width()];
@@ -179,8 +198,8 @@ public class LevelizedCircuit extends Circuit {
 			// - sequential nodes (flip-flops)
 			if (cell.isPort() || cell.isSequential()) {
 				if (intfIDs[cell.intfPosition()] != -1) {
-					log.error("Nodes must not share same intfPosition: " + cell.queryName() + ", "
-							+ circuit.cell(intfIDs[cell.intfPosition()]).queryName() + " (intfPosition: " + cell.intfPosition() + ")");
+					log.error("Nodes must not share same intfPosition: " + cell.name() + ", "
+							+ circuit.cell(intfIDs[cell.intfPosition()]).name() + " (intfPosition: " + cell.intfPosition() + ")");
 				}
 				intfIDs[cell.intfPosition()] = cell.id();
 				intfMax = Math.max(intfMax, cell.intfPosition());
@@ -200,7 +219,7 @@ public class LevelizedCircuit extends Circuit {
 		while (!queue.isEmpty()) {
 			MutableCell cell = queue.poll();
 			if (l[cell.id()] != -1) {
-				throw new RuntimeException("Detected combinational loop at gate: " + cell.queryName());
+				throw new RuntimeException("Detected combinational loop at gate: " + cell.name());
 			}
 			l[cell.id()] = 0;
 			if (!cell.isSequential() && !cell.isInput()) {
@@ -219,7 +238,7 @@ public class LevelizedCircuit extends Circuit {
 			for (MutableCell succ : cell.outputCells()) {
 				if (succ != null && !succ.isSequential() && !succ.isInput()) {
 					m[succ.id()]++; // re-use levelPosition to count
-											// number of predecessors placed.
+					// number of predecessors placed.
 					if (m[succ.id()] == succ.countIns())
 						queue.add(succ);
 				}
@@ -238,7 +257,7 @@ public class LevelizedCircuit extends Circuit {
 			if (cell == null)
 				continue;
 			if (l[cell.id()] == -1)
-				log.warn("Unconnected cell not levelized: " + cell.queryName());
+				log.warn("Unconnected cell not levelized: " + cell.name());
 			else {
 				LevelizedCell c = new LevelizedCell(cell, l[cell.id()], m[cell.id()]);
 				levels[l[cell.id()]][m[cell.id()]] = c;
@@ -255,7 +274,7 @@ public class LevelizedCircuit extends Circuit {
 			}
 		}
 
-		
+
 		// connect new cells to each other
 		for (MutableCell cell : circuit.cells()) {
 			if (cell == null)
@@ -277,15 +296,15 @@ public class LevelizedCircuit extends Circuit {
 
 		// log.debug("got levels: " + levels.length);
 		//signalMap = new SignalMap(this);
-		
+
 		output_map_offset = new int[cells.length];
 		input_map_offset = new int[cells.length];
 		Arrays.fill(output_map_offset, -1);
 		Arrays.fill(input_map_offset, -1);
-		
+
 		int output_map_idx = 0;
 		int next_input_map_offset = 0;
-		
+
 		for (LevelizedCell n: cells) {
 			int out_count = n.outputCount();
 			if (out_count == 0)
@@ -294,7 +313,7 @@ public class LevelizedCircuit extends Circuit {
 			// Node n has at least one output edge.
 
 			output_map_offset[n.id()] = output_map_idx;
-									
+
 			for (int succ_idx = 0; succ_idx < out_count; succ_idx++) {
 				LevelizedCell succ = n.outputCellAt(succ_idx);
 				// skip unconnected outputs
@@ -314,7 +333,7 @@ public class LevelizedCircuit extends Circuit {
 			}
 		}
 		edge_count = output_map_idx;
-		
+
 		drivers = new LevelizedCell[edge_count];
 		receivers = new LevelizedCell[edge_count];
 		for (LevelizedCell n: cells) {
@@ -336,62 +355,66 @@ public class LevelizedCircuit extends Circuit {
 			}
 		}
 	}
-	
+
 	public int size() {
 		return cells.length;
 	}
-	
+
 	public int width() {
 		return intf.length;
 	}
-	
+
 	public int depth() {
 		return levels.length;
 	}
-	
+
 	public Iterable<LevelizedCell> cells() {
 		return Arrays.asList(cells);
 	}
 	
+	public LevelizedCell cell(int id) {
+		return cells[id];
+	}
+
 	public Library library() {
 		return library;
 	}
-	
+
 	public Iterable<LevelizedCell> level(int levelIdx) {
 		return Arrays.asList(levels[levelIdx]);
 	}
-	
+
 	public Iterable<LevelizedCell> intf() {
 		return Arrays.asList(intf);
 	}
-	
+
 	public LevelizedCell intf(int intfPosition) {
 		return intf[intfPosition];
 	}
-	
-	public LevelizedCell driverOf(int lineID) {
-		return drivers[lineID];
+
+	public LevelizedCell driverOf(int signalID) {
+		return drivers[signalID];
 	}
-	
-	public LevelizedCell readerOf(int lineID) {
-		return receivers[lineID];
+
+	public LevelizedCell readerOf(int signalID) {
+		return receivers[signalID];
 	}
-	
-	public int lineCount() {
+
+	public int signalCount() {
 		return edge_count;
 	}
-	
-	public LevelizedCell searchNode(String name) {
+
+	public LevelizedCell searchCellByName(String name) {
 		if (!namespace.contains(name)) {
 			return null;
 		}
 		return cells[namespace.idFor(name)];
 	}
-	
-	public String getName() {
+
+	public String name() {
 		return name;
 	}
-	
+
 	public int countInputs() {
 		int count = 0;
 		for (Cell g : intf()) {
@@ -409,7 +432,7 @@ public class LevelizedCircuit extends Circuit {
 		}
 		return count;
 	}
-	
+
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		int level_idx = 0;
