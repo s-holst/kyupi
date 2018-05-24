@@ -17,15 +17,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.kyupi.circuit.Cell;
+import org.kyupi.circuit.Circuit;
 import org.kyupi.circuit.MutableCircuit;
-import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.item.QVector;
 import org.kyupi.data.parser.Stil;
 import org.kyupi.data.parser.Stil.Operation;
 import org.kyupi.data.source.QVSource;
 import org.kyupi.misc.FileTools;
 
-public class FormatStil {
+public class FormatStil implements PatternList {
 
 	protected static Logger log = Logger.getLogger(FormatStil.class);
 
@@ -36,7 +37,7 @@ public class FormatStil {
 	
 	private int[][] scan2intf;
 
-	public FormatStil(File stil_file, MutableCircuit g) throws IOException {
+	public FormatStil(File stil_file, Circuit g) throws IOException {
 		InputStream is = FileTools.fileOpen(stil_file);
 		Stil data = Stil.load(is, stil_file);
 
@@ -64,7 +65,7 @@ public class FormatStil {
 		// cross-reference to circuit interface
 		HashMap<String, Integer> intf = new HashMap<>();
 		//ArrayList<Node> intf_names = new ArrayList<>();
-		for (MutableCell inode : g.intf()) {
+		for (Cell inode : g.intf()) {
 			//intf_names.add(inode);
 			if (inode != null) {
 				intf.put(inode.name(), inode.intfPosition());

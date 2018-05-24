@@ -63,7 +63,7 @@ public class Main extends KyupiApp {
 		if (argsParsed().hasOption("d")) {
 			long free = RuntimeTools.garbageCollect();
 
-			MutableCircuit graph = loadCircuitFromArgs();
+			MutableCircuit graph = loadNextCircuitFromArgs();
 
 			long memory = (free - RuntimeTools.garbageCollect());
 
@@ -110,7 +110,7 @@ public class Main extends KyupiApp {
 
 	public void testC17() throws Exception {
 		setArgs("-d", RuntimeTools.KYUPI_HOME + "/testdata/c17.isc");
-		MutableCircuit g = loadCircuitFromArgs();
+		MutableCircuit g = loadNextCircuitFromArgs();
 		assertEquals(13, g.countNodes());
 		assertEquals(5, g.countInputs());
 		assertEquals(2, g.countOutputs());

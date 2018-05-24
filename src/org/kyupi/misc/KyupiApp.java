@@ -22,12 +22,14 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.kyupi.circuit.MutableCircuit;
+import org.kyupi.circuit.Circuit;
 import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
 import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.FormatStil;
+import org.kyupi.data.PatternList;
 import org.kyupi.data.item.QVector;
 
 import junit.framework.TestCase;
@@ -137,7 +139,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		return dflt;
 	}
 
-	protected MutableCircuit loadCircuitFromArgs() throws IOException {
+	protected MutableCircuit loadNextCircuitFromArgs() throws IOException {
 		ensureArgsParsed();
 		if (argsParsed.hasOption(OPT_DESIGN)) {
 			String c_spec = argsParsed.getOptionValue(OPT_DESIGN);
@@ -154,7 +156,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 
 	private FormatStil patterns;
 
-	private void ensurePatternsLoaded(MutableCircuit circuit) throws IOException {
+	private void ensurePatternsLoaded(Circuit circuit) throws IOException {
 		if (patterns == null) {
 			ensureArgsParsed();
 			if (argsParsed.hasOption(OPT_TESTS)) {
@@ -162,6 +164,11 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 				patterns = new FormatStil(new File(pats), circuit);
 			}
 		}
+	}
+	
+	protected PatternList loadNextPatternListFromArgs(Circuit c) throws IOException {
+		ensurePatternsLoaded(c);
+		return patterns;
 	}
 
 	protected ArrayList<QVector> loadStimuliFromArgs(MutableCircuit circuit) throws IOException {

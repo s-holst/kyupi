@@ -28,9 +28,9 @@ Quick Start
    failures, follow the hints in the output to resolve them. If you have 
    imported the project into Eclipse, run all JUnit tests from there as well.
 
-4. Take a look at org/kyupi/misc/KyupiApp.java to learn how to make your first
-   Kyupi application. All public APIs include JavaDoc comments and the JUnit tests
-   also serve as programmatic behavioral description of the APIs.
+4. All public APIs include JavaDoc comments and the JUnit tests also serve as
+   programmatic behavioral description of the APIs. Take a look at the "Guided
+   KyuPI Library Tour" below to learn how to make your first KyuPI application. 
 
 5. We'd love to hear your feedback: info@kyupi.org
 
@@ -125,30 +125,121 @@ github, which makes it easy for anyone to fork, experiment with the code,
 generate patches and propose pull-requests. 
 
 
-Library Design Overview
------------------------
 
-This overview should give you some initial orientation on the design choices made
-in the library and an idea of the functionality currently available.
+Guided KyuPI Library Tour
+-------------------------
+
+To make a KyuPI based application, subclass KyupiApp in this way:
+
+```
+public class MyApp extends KyupiApp {
+ 	public static void main(String[] args) throws Exception {
+ 		new MyApp().setArgs(args).call();
+ 	}
+ 	
+ 	public MyApp() {
+ 		options.addOption("opt1", true, "a new command line option with argument");
+ 		options.addOption("opt2", false, "a new command line option without argument");
+ 		// TODO: add more options as needed
+ 	}
+ 
+ 	public Void call() throws Exception {
+ 		printWelcome();
+ 		if (argsParsed().hasOption("opt1")) {
+ 			log.info("Got option 'opt1' with argument: " + argsParsed().getOptionValue("opt1"));
+ 		} else {
+ 			throw new IllegalArgumentException("opt1 is mandatory.");
+ 		}
+ 		if (argsParsed().hasOption("opt2")) {
+ 			log.info("Got opt2");
+ 		}
+ 		
+ 		// TODO: Your code goes here
+ 		
+ 		printGoodbye();
+ 		return null;
+ 	}
+ 	
+ 	@Test
+ 	public void testSomething() {
+ 		// provide use-cases for MyApp.
+ 		setArgs("-opt1", "arg1", "-opt2");
+ 		try {
+			call();
+			// TODO: Assert some results of the call.
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+ 	}
+ }
+```
+
+This subclass serves both as an entry point for a Java application and a JUnit test class.
+In addition, KyupiApp has several convenience methods to process command-line arguments as
+demonstrated above.
+
+The most common first step in a Kyupi application is to load circuits and test data specified
+on the command line. This is done by adding the following lines to the call() method:
+
+```
+Circuit circuit = loadNextCircuitFromArgs();
+PatternList p = loadNextPatternListFromArgs(circuit);
+```
+
+Which parses the first circuit file and first pattern file specified on the command line.
+For circuits, import from structural VHDL, structural verilog, ISCAS and Bench is available.
+The supported technology libraries are currently the basic gate primitives used in ISCAS and Bench
+benchmark sets and SAED90.
+
+For pattern lists, the only format currently supported is STIL. The pattern parser will
+cross-reference the pattern descriptions with the interface of the specified circuit.
 
 *org.kyupi.circuit:* Importing, exporting and manipulating circuits.
 
-The class MutableCircuit is the main data structure for holding circuit netlists in memory.
-A MutableCircuit is associated with a Library that defines the available cells.
-Each cell is represented in the graph as an instance of MutableCircuit.MutableCell.
-The graph can be traversed in two ways. (1) follow the references in individual
-nodes to their neighbors. (2) directly access arrays containing all nodes in
-topological order. The graph is ordered automatically on-demand. Whenever the graph
-structure is changed by adding or removing nodes, the graph is sorted into
-topological order once the direct access arrays are requested.
+The class Circuit is the primary interface for interacting with circuit structures. A Circuit
+is a directed graph in which the vertices are the (standard-)cells in the circuit and the edges are signals
+between the cells. A cell can have arbitrary many incoming and outgoing signals, yet one
+signal has always exactly one driving cell and one reading cell. Fan-outs (branching points) are modeled as cells
+in the graph. Cells are represented by instances of the class Cell. Each cell is a member of exactly one
+graph (instance of class Circuit). The number of cells in the circuit is its size (circuit.size()).
+To access all cells in a circuit, use cells() to access an Iterable:
 
-Graphs can contain pseudo-nodes (flag FLAG_PSEUDO is set). Pseudo nodes do not
-represent a physical cell in the design, but encode signal names and branch points.
+```
+for(Cell c : circuit.cells()) {
+	// do something with c
+}
+```
 
-By default, each node in the graph also contains a branching point. I.e. all
+The order of the cells in the circuit is undefined. The iteration may contain null elements or unconnected
+cells if the circuit structure was edited previously. The interface of a circuit is a special subset of cells
+that serve as primary inputs, primary outputs or sequential elements in the circuit. These cells are handled
+specially during simulation. All cycles in the directed graph should contain at least one of these interface
+cells. To access the cells of the interface, use:
+
+```
+for(Cell c : circuit.intf()) {
+	// do something with c
+}
+```
+
+The loop iterates over all interface cells in order of their position in the interface.
+Null elements are present if an interface position is not occupied by a cell. Interface cells at a specific position
+is accessed with circuit.intf(position). The number of interface cells and their position defines the "width" of
+the circuit (circuit.width()). The maximum valid interface position is circuit.width()-1.
+
+Each cell in a circuit is a unique id (c.id()), which is a positive integer value. Specific cells can be accessed
+by a given id (Cell c = circuit.cell(id)). Furthermore, each cell has a unique name, cells can be looked up by
+name as well (Cell c = circuit.searchCellByName("BUF123")).
+
+
+The graph can be traversed by following the references in individual
+cell to their neighbors.
+
+By default, each cell in the graph also contains a branching point. I.e. all
 outgoing signal connections to the successor nodes are considered branches of the
 same signal. This default behavior can be turned off by setting the flag
-FLAG_MULTIOUTPUT on a node. Outputs of nodes with this flag are considered different
+FLAG_MULTIOUTPUT on a cell. Outputs of nodes with this flag are considered different
 and explicit pseudo nodes have to be added to fan-out from each of the distinct
 outputs.
 
