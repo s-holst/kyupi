@@ -1,7 +1,6 @@
 package org.kyupi.circuit;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -74,56 +73,8 @@ public class LevelizedCircuit extends Circuit {
 			return input_map[input_map_offset[id()] + inputIdx];
 		}
 		
-		class SignalIterator implements Iterator<Integer> {
-
-			private boolean forInput;
-			private int index;
-
-			public SignalIterator(boolean forInput) {
-				this.forInput = forInput;
-				index = 0;
-			}
-			@Override
-			public boolean hasNext() {
-				if (forInput) {
-					return index < inputCount();
-				} else {
-					return index < outputCount();
-				}
-			}
-
-			@Override
-			public Integer next() {
-				index++;
-				if (forInput) {
-					return inputSignalAt(index-1);
-				} else {
-					return outputSignalAt(index-1);
-				}
-			}
-			
-		}
-		class SignalIterable implements Iterable<Integer> {
-			private boolean forInput;
-			public SignalIterable(boolean forInput) {
-				this.forInput = forInput;
-			}
-			@Override
-			public Iterator<Integer> iterator() {
-				return new SignalIterator(forInput);
-			}
-			
-		}
-		public Iterable<Integer> inputSignals() {
-			return new SignalIterable(true);
-		}
-
 		public int outputSignalAt(int outputIdx) {
 			return output_map_offset[id()] + outputIdx;
-		}
-
-		public Iterable<Integer> outputSignals() {
-			return new SignalIterable(false);
 		}
 
 		public int level() {

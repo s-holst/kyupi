@@ -131,7 +131,7 @@ Guided KyuPI Library Tour
 
 To make a KyuPI based application, subclass KyupiApp in this way:
 
-```
+```java
 public class MyApp extends KyupiApp {
  	public static void main(String[] args) throws Exception {
  		new MyApp().setArgs(args).call();
@@ -182,7 +182,7 @@ demonstrated above.
 The most common first step in a Kyupi application is to load circuits and test data specified
 on the command line. This is done by adding the following lines to the call() method:
 
-```
+```java
 Circuit circuit = loadNextCircuitFromArgs();
 PatternList p = loadNextPatternListFromArgs(circuit);
 ```
@@ -195,17 +195,17 @@ benchmark sets and SAED90.
 For pattern lists, the only format currently supported is STIL. The pattern parser will
 cross-reference the pattern descriptions with the interface of the specified circuit.
 
-*org.kyupi.circuit:* Importing, exporting and manipulating circuits.
+** *org.kyupi.circuit:* Importing, Exporting and Manipulating Circuits.**
 
 The class Circuit is the primary interface for interacting with circuit structures. A Circuit
 is a directed graph in which the vertices are the (standard-)cells in the circuit and the edges are signals
 between the cells. A cell can have arbitrary many incoming and outgoing signals, yet one
 signal has always exactly one driving cell and one reading cell. Fan-outs (branching points) are modeled as cells
 in the graph. Cells are represented by instances of the class Cell. Each cell is a member of exactly one
-graph (instance of class Circuit). The number of cells in the circuit is its size (circuit.size()).
-To access all cells in a circuit, use cells() to access an Iterable:
+graph (instance of class Circuit). The number of cells in the circuit is its size (`circuit.size()`).
+To access all cells in a circuit, use `cells()` to access an Iterable:
 
-```
+```java
 for(Cell c : circuit.cells()) {
 	// do something with c
 }
@@ -217,7 +217,7 @@ that serve as primary inputs, primary outputs or sequential elements in the circ
 specially during simulation. All cycles in the directed graph should contain at least one of these interface
 cells. To access the cells of the interface, use:
 
-```
+```java
 for(Cell c : circuit.intf()) {
 	// do something with c
 }
@@ -225,76 +225,98 @@ for(Cell c : circuit.intf()) {
 
 The loop iterates over all interface cells in order of their position in the interface.
 Null elements are present if an interface position is not occupied by a cell. Interface cells at a specific position
-is accessed with circuit.intf(position). The number of interface cells and their position defines the "width" of
-the circuit (circuit.width()). The maximum valid interface position is circuit.width()-1.
+is accessed with `circuit.intf(position)`. The number of interface cells and their position defines the "width" of
+the circuit (`circuit.width()`). The maximum valid interface position is `circuit.width()-1`.
 
-Each cell in a circuit is a unique id (c.id()), which is a positive integer value. Specific cells can be accessed
-by a given id (Cell c = circuit.cell(id)). Furthermore, each cell has a unique name, cells can be looked up by
-name as well (Cell c = circuit.searchCellByName("BUF123")).
+Each cell in a circuit is a unique ID, which is a positive and usually consecutive integer value.
+The IDs are designed to be used as array indices for external payload storage.
+Specific cells can be accessed by a given id (`Cell c = circuit.cell(id)`).
+Furthermore, each cell has a unique name, cells can be looked up by name as well (`Cell c = circuit.searchCellByName("BUF123")`).
+Cells are member of exactly one circuit, they cannot be contained in multiple circuits.
+Their IDs are unique only in the context of the circuit they belong to. 
+
+An instance of a cell provides access to its `c.id()`, `c.name()`, `c.type()`, and `c.typeName()`.
+The type is an integer describing the nature of the cell (e.g. logic function).
+The type name is a string description of the cell type.
+If the cell is part of the interface of its circuit, `c.intfPosition()` returns its position in the interface.
+
+A cell can have arbitrary many neighbors (other cells directly connected to the cell).
+A neighbor may be connected to a cell input or a cell output.
+The number of inputs (outputs) to a cell is `c.inputCount()` (`c.outputCount()`).
+To access specific inputs, use `c.inputCellAt(int pinIndex)`. 
+To iterate over all the input cells, use:
+
+```java
+for(Cell driver : c.inputCells()) {
+	// do something with driver
+}
+```
+
+Same goes for the outputs by using the respective output accessors.
+
+Each connection (signal) between two cells in a circuit has an id as well.
+Same as with the cell IDs, it is a positive integer designed to be used as an array index for external payload data storage (e.g. logic values in a simulator.
+Different than cells, signals do not have a explicit representation in form of objects.
+To access specific signal IDs, use `c.inputSignalAt(int pinIndex)` or `c.outputSignalAt(int pinIndex)`, each of which returns a positive integer if there is something connected to the specified pin, or -1, otherwise.
+To loop over the signal IDs, use:
+
+```java
+for(int signalID : c.inputSignals()) {
+	// do something with signalID
+}
+```
+
+Signals at the outputs are accessed with `c.outputSignals()`.
+
+Each signal has exactly one driving cell and one receiving cell.
+To access these cells of a given signal, use the following methods provided by the circuit object: `circuit.driverOf(int signalID)`, `circuit.readerOf(int signalID)`.
+
+Two concrete implementations of `Circuit` and `Cell` are currently available.
+`MutableCircuit` allows manipulating the circuit structure by adding and removing cells and changing connections between cells.
+`LevelizedCircuit` is immutable, but provides a topological sorting of the graph structure useful for simulation.
+The circuit classes use instances of `MutableCell` and `LevelizedCell`, respectively.
 
 
-The graph can be traversed by following the references in individual
-cell to their neighbors.
+** *org.kyupi.data:* Handling Vector Data and Data Flows**
 
-By default, each cell in the graph also contains a branching point. I.e. all
-outgoing signal connections to the successor nodes are considered branches of the
-same signal. This default behavior can be turned off by setting the flag
-FLAG_MULTIOUTPUT on a cell. Outputs of nodes with this flag are considered different
-and explicit pseudo nodes have to be added to fan-out from each of the distinct
-outputs.
+A piece of a chunk of logic values (e.g. a test pattern, a vector) are instances of the abstract
+base class `DataItem`.
+There are 4 concrete implementations of `DataItem` based on the nature of the data stored.
 
-Basic import/export support is available for VHDL, verilog, ISCAS, Bench, dot.
+Data can either be 2-valued or 4-valued.
+2-valued data items are prefixed with B for 'binary': `BVector`, `BBlock`.
+4-valued data items are prefixed with Q for 'quaternary': `QVector`, `QBlock`.
 
-*org.kyupi.data.item:* Data structures for 2-valued and 4-valued vector data both
-for individual processing and bit-parallel processing.
-
-The 2-valued data items are prefixed with B for 'binary': BVector, BBlock.
-
-The 4-valued data items are prefixed with Q for 'quaternary': QVector, QBlock.
-
-BVector and QVector classes represent a single vector of data stored internally
-with one or two BitSets.
-BBlock and QBlock classes represent a set of at most 64 vectors. These vectors
-are stored using one or two long for each bit position.
+Furthermore, a data item can either hold a single vector or a set of 64 vectors for bit-parallel processing.
+`BVector` and `QVector` classes represent a single vector of data stored internally with one or two BitSets.
+`BBlock` and `QBlock` classes represent a set of at most 64 vectors.
+These vectors are stored using one or two long for each bit position.
 
 The width of vectors (number of bit positions) is immutable after creation, but
 the bit data itself is mutable to reduce object creation overhead. 
 
 
-*org.kyupi.data.source:* Streaming-based test data processing.
+Sets or lists of vector data is organized in streams of data items.
+Each stream is created by specifying one or more source streams and some operation.
+KyuPI encourages lazy evaluation by having a pull-based streaming setup.
+I.e. a simulator is set up by declaring `resp = sim(tests)` and later run by pulling vectors from the resp stream `v = resp.next();`.
 
-Sets of vector data is organized in streams of data items. Each stream is created
-by specifying one or more source streams and some operation. KyuPI encourages
-lazy evaluation by having a pull-based streaming setup. I.e. a simulator is set up
-by declaring 'resp = sim(tests)' and later run by pulling vectors from the resp
-stream 'v = resp.next();'.
+Data items used in streams are re-usable.
+Whenever a data item (vector) is not needed anymore, `item.free()` is called so that the source stream can re-use the data item again.
 
-Data items used in streams are re-usable. Whenever a data item (vector) is not needed
-anymore, item.free() is called so that the source stream can re-use the data item
-again.
+There is a stream class for each of the basic vector formats `BVector`, `QVector`, `BBlock`, `QBlock` called `BVStream`, `QVStream`, `BBStream`, and `QBStream`, respectively.
 
-There is a stream class for each of the basic vector formats BVector, QVector,
-BBlock, QBlock called (BV|QV|BB|QB)Stream.
+Data streams can be plugged together in arbitrary complex ways for advanced data processing.
+The basic source classes support easy conversion between the four vector data formats by using the static method `.from(stream)`.
 
-Data streams can be plugged together in arbitrary complex ways for advanced data
-processing. The basic source classes support easy conversion between the four
-vector data formats by using the static method '.from(stream)'.
-
-Streams implement the Iterable and Iterator interfaces. Thus they can be used
-easily in for loops 'for(QVector v: stream) {...}'. Be aware, that there is only one
-iterator state per stream. Nested loops on a single stream will not work. Also,
-a second for loop will cause the stream (and all of its sources) to reset, which
-repeats all the processing again. If a single stream is used multiple times, its data
-should be stored first e.g. in an ArrayList by using 'toArrayList()'. Then, multiple
-new streams can be created from the array: 's2 = QVStream.from(width,array)'.
-
-Basic import of some STIL files.
+Streams implement the Iterable and Iterator interfaces.
+Thus they can be used easily in for loops `for(QVector v: stream) {...}`.
+Be aware, that there is only one iterator state per stream.
+Nested loops on a single stream will not work.
+Also, a second for loop will cause the stream (and all of its sources) to reset, which repeats all the processing again.
+If a single stream is used multiple times, its data should be stored first e.g. in an ArrayList by using `toArrayList()`.
+Then, multiple new streams can be created from the array: `s2 = QVStream.from(width,array)`.
 
 *org.kyupi.sim:* Plain logic simulation and fault simulation.
 
-*org.kyupi.faults:* Stuck-at fault sets and fault collapsing.
-
 *org.kyupi.ipc:* Shared-memory based inter-process communication support.
-
-*org.kyupi.misc:* Various helpers and tools used globally.
-

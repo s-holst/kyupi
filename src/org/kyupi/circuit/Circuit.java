@@ -45,5 +45,8 @@ public abstract class Circuit {
 
 	public abstract Library library();
 	
+	public abstract Cell driverOf(int signalID);
+
+	public abstract Cell readerOf(int signalID);
 
 }
