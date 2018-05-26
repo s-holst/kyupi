@@ -195,7 +195,7 @@ benchmark sets and SAED90.
 For pattern lists, the only format currently supported is STIL. The pattern parser will
 cross-reference the pattern descriptions with the interface of the specified circuit.
 
-** *org.kyupi.circuit:* Importing, Exporting and Manipulating Circuits.**
+### *org.kyupi.circuit:* Importing, Exporting and Manipulating Circuits
 
 The class Circuit is the primary interface for interacting with circuit structures. A Circuit
 is a directed graph in which the vertices are the (standard-)cells in the circuit and the edges are signals
@@ -277,7 +277,7 @@ Two concrete implementations of `Circuit` and `Cell` are currently available.
 The circuit classes use instances of `MutableCell` and `LevelizedCell`, respectively.
 
 
-** *org.kyupi.data:* Handling Vector Data and Data Flows**
+### *org.kyupi.data:* Handling Vector Data and Data Flows
 
 A piece of a chunk of logic values (e.g. a test pattern, a vector) are instances of the abstract
 base class `DataItem`.
@@ -317,6 +317,6 @@ Also, a second for loop will cause the stream (and all of its sources) to reset,
 If a single stream is used multiple times, its data should be stored first e.g. in an ArrayList by using `toArrayList()`.
 Then, multiple new streams can be created from the array: `s2 = QVStream.from(width,array)`.
 
-*org.kyupi.sim:* Plain logic simulation and fault simulation.
+### *org.kyupi.sim:* Plain logic simulation and fault simulation.
 
-*org.kyupi.ipc:* Shared-memory based inter-process communication support.
+### *org.kyupi.ipc:* Shared-memory based inter-process communication support.
