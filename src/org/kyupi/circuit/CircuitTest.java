@@ -168,6 +168,7 @@ public class CircuitTest {
 		}
 	}
 	
+	@Test
 	public void testSignals() {
 		MutableCircuit g = CircuitTools.parseBench("INPUT(a) INPUT(b) OUTPUT(c) OUTPUT(d) c=AND(a,b) d=BUF(c)");
 		assertEquals(6, g.countNodes());
@@ -189,6 +190,34 @@ public class CircuitTest {
 		
 		assertNotEquals(c_.outputSignalAt(0), d_.inputSignalAt(0));
 		assertNotEquals(c_.outputSignalAt(0), c_.inputSignalAt(0));
+	}
+	
+	@Test
+	public void testSignalsCommonDriver() {
+		MutableCircuit g = CircuitTools.parseBench("INPUT(a) OUTPUT(c) c=AND(a,a)");
+		assertEquals(3, g.countNodes());
+		assertEquals(1, g.countInputs());
+		assertEquals(1, g.countOutputs());
+		
+		//log.info("Graph:\n" + g.toString());
+		
+		assertEquals(3, g.signalCount());
+		MutableCell a = g.searchCellByName("a");
+		MutableCell c_ = g.searchCellByName("c_");
+		MutableCell c = g.searchCellByName("c");
+		
+		assertNotEquals(-1, c_.inputSignalAt(1));
+		assertNotEquals(-1, c_.inputSignalAt(0));
+
+		
+		assertEquals(a.outputSignalAt(0), c_.inputSignalAt(0));
+		assertEquals(a.outputSignalAt(1), c_.inputSignalAt(1));
+		assertEquals(c_.outputSignalAt(0), c.inputSignalAt(0));
+		
+		assertNotEquals(a.outputSignalAt(0), a.outputSignalAt(1));
+		assertNotEquals(a.outputSignalAt(0), c.inputSignalAt(0));
+		
+		g.levelized();
 	}
 
 }

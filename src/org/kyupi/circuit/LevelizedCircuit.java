@@ -328,7 +328,17 @@ public class LevelizedCircuit extends Circuit {
 					next_input_map_offset += succ.inputCount();
 					input_map = ArrayTools.grow(input_map, next_input_map_offset, 4096, -1);
 				}
-				input_map[input_map_offset[succ.id()] + succ.searchInIdx(n)] = output_map_idx;
+				//int input_idx = 0;
+				int input_map_idx = input_map_offset[succ.id()];
+				for (LevelizedCell c: succ.inputCells()) {
+					if (c != null && c.id() == n.id()) {
+						if (input_map[input_map_idx] < 0) {
+							input_map[input_map_idx] = output_map_idx;
+							break;
+						}
+					}
+					input_map_idx++;
+				}
 				output_map_idx++;
 			}
 		}
