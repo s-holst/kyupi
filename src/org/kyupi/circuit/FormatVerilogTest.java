@@ -4,16 +4,18 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.junit.Test;
+import org.kyupi.misc.RuntimeTools;
 
 public class FormatVerilogTest {
 
 	@Test
 	public void test() throws Exception {
-		MutableCircuit c = FormatVerilog.load(new FileInputStream("testdata/SAED90/b13.v"), new LibrarySAED());
+		MutableCircuit c = FormatVerilog.load(new FileInputStream(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v")), new LibrarySAED());
 		assertNotNull(c);
 		c.printStats();
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

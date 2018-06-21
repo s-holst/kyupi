@@ -17,6 +17,8 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.kyupi.circuit.CircuitTest;
 import org.kyupi.circuit.CircuitTools;
+import org.kyupi.circuit.FormatVerilogTest;
+import org.kyupi.circuit.LevelizedCircuitTest;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.ScanChainsTest;
 import org.kyupi.data.QVExpanderTest;
@@ -33,7 +35,7 @@ import org.kyupi.misc.JvmStats;
 import org.kyupi.misc.KyupiApp;
 import org.kyupi.misc.RuntimeTools;
 import org.kyupi.sim.BBPlainSimTest;
-import org.kyupi.sim.CombLogicSim;
+import org.kyupi.sim.CombLogicSimTest;
 import org.kyupi.sim.ObservabilityTest;
 import org.kyupi.sim.QBObservabilityCounterTest;
 import org.kyupi.sim.QBPlainSimTest;
@@ -41,11 +43,28 @@ import org.kyupi.sim.QVPlainSimTest;
 
 public class Main extends KyupiApp {
 
-	private static Class<?> ALL_TEST_CLASSES[] = { BBlockTest.class, BVectorTest.class, QBlockTest.class,
-			QVectorTest.class, BBSourceTest.class, BVSourceTest.class, QBSourceTest.class, QVSourceTest.class,
-			CircuitTest.class, ScanChainsTest.class, ProcessManagerTest.class,
-			BBPlainSimTest.class, QBPlainSimTest.class, QVPlainSimTest.class, QBObservabilityCounterTest.class,
-			ObservabilityTest.class, CombLogicSim.class, QVExpanderTest.class, Main.class };
+	private static Class<?> ALL_TEST_CLASSES[] = { 
+			BBlockTest.class,
+			BBPlainSimTest.class,
+			BBSourceTest.class,
+			BVectorTest.class,
+			BVSourceTest.class,
+			CircuitTest.class,
+			CombLogicSimTest.class,
+			FormatVerilogTest.class,
+			LevelizedCircuitTest.class,
+			ObservabilityTest.class,
+			ProcessManagerTest.class,
+			QBlockTest.class,
+			QBObservabilityCounterTest.class,
+			QBPlainSimTest.class,
+			QBSourceTest.class,
+			QVectorTest.class,
+			QVExpanderTest.class,
+			QVPlainSimTest.class,
+			QVSourceTest.class,
+			ScanChainsTest.class,
+			Main.class };
 
 	public static void main(String[] args) throws Exception {
 		new Main().setArgs(args).call();
