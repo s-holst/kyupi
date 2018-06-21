@@ -134,8 +134,12 @@ public class CombLogicSim {
 			this.care[signal_idx] = care;
 			valid_rev[signal_idx] = rev;
 			LevelizedCell receiver = circuit.readerOf(signal_idx);
-			dirty_rev[receiver.id()] = rev;
-			min_dirty_level = Math.min(min_dirty_level, receiver.level());
+			if (receiver == null) {
+				log.warn("Signal has no receiver: " + signal_idx + " (driven by: " + circuit.driverOf(signal_idx) + ")");
+			} else {
+				dirty_rev[receiver.id()] = rev;
+				min_dirty_level = Math.min(min_dirty_level, receiver.level());
+			}
 		}
 
 		public void setStimulus(int pos, long value, long care) {

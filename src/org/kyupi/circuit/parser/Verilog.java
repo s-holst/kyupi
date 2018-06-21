@@ -58,6 +58,7 @@ public class Verilog implements VerilogConstants {
       case basic_identifier:
       case extended_identifier:
       case 28:
+      case 29:
         ;
         break;
       default:
@@ -97,6 +98,7 @@ public class Verilog implements VerilogConstants {
     case basic_identifier:
     case extended_identifier:
     case 28:
+    case 29:
       module_instantiation(module.newModuleInstantiation());
       break;
     default:
@@ -207,7 +209,9 @@ public class Verilog implements VerilogConstants {
       break;
     case 28:
       t = jj_consume_token(28);
-      jj_consume_token(integer);
+      break;
+    case 29:
+      t = jj_consume_token(29);
       break;
     default:
       jj_la1[7] = jj_gen;
@@ -229,9 +233,9 @@ public class Verilog implements VerilogConstants {
           if (s.startsWith("\u005c\u005c"))
               s = s.substring(1);
           s = s.replace(" ", "").replace("\u005cr", "").replace("\u005cn", "").replace("\u005ct", "");
-          if (s.equals("1"))
+          if (s.equals("1'b1"))
                 s = "##CONST1##";
-          if (s.equals("0"))
+          if (s.equals("1'b0"))
                 s = "##CONST0##";
 
           {if (true) return s;}
@@ -253,7 +257,7 @@ public class Verilog implements VerilogConstants {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x40,0x10061780,0x10061780,0x2000000,0x800000,0x1000000,0x800000,0x10060000,0x2000000,};
+      jj_la1_0 = new int[] {0x40,0x30061780,0x30061780,0x2000000,0x800000,0x1000000,0x800000,0x30060000,0x2000000,};
    }
 
   /** Constructor with InputStream. */
@@ -370,7 +374,7 @@ public class Verilog implements VerilogConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[29];
+    boolean[] la1tokens = new boolean[30];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -384,7 +388,7 @@ public class Verilog implements VerilogConstants {
         }
       }
     }
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < 30; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

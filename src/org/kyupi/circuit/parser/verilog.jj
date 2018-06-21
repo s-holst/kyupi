@@ -135,7 +135,8 @@ String identifier() :
 {  
 	(  t=<basic_identifier>
 	|  t=<extended_identifier>
-	|  t="1'b"< integer >
+	|  t="1'b0"
+	|  t="1'b1"
 	)
 	[ "[" t2=<integer> "]" { suffix = "[" + t2.image + "]"; } ]
 	{
@@ -143,9 +144,9 @@ String identifier() :
 	  if (s.startsWith("\\"))
 	      s = s.substring(1);
 	  s = s.replace(" ", "").replace("\r", "").replace("\n", "").replace("\t", "");
-	  if (s.equals("1"))
+	  if (s.equals("1'b1"))
 	  	s = "##CONST1##";
-	  if (s.equals("0"))
+	  if (s.equals("1'b0"))
 	  	s = "##CONST0##";
 	  	
 	  return s;

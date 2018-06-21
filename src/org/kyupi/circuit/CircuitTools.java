@@ -165,6 +165,10 @@ public class CircuitTools {
 			if (!signal.isType(Library.TYPE_BUF))
 				continue;
 			MutableCell pred = signal.inputCellAt(0);
+			if (pred == null) {
+				log.warn("signal node without inputs: " + signal);
+				continue;
+			}
 			if (pred.isMultiOutput()) {
 				//log.info("Not removing because predecessor is MultiOutput: " + signal);
 				continue;
