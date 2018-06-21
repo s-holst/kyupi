@@ -30,7 +30,7 @@ public class FormatDOT {
 		int num = n.inputCount();
 		ArrayList<String> inports = new ArrayList<>();
 		for (int i = 0; i < num; i++) {
-			inports.add("<" + i + ">" + n.inName(i));
+			inports.add("<" + i + ">" + n.inputName(i));
 		}
 		if (inports.size() > 0) {
 			s += "{" + StringTools.join(inports, "|") + "}|";
@@ -51,7 +51,7 @@ public class FormatDOT {
 			num = n.outputCount();
 			ArrayList<String> outports = new ArrayList<>();
 			for (int i = 0; i < num; i++) {
-				outports.add("<o" + i + ">" + n.outName(i));
+				outports.add("<o" + i + ">" + n.outputName(i));
 			}
 			s += "|" + "{" + StringTools.join(outports, "|") + "}"; // n.outName(0);
 		}

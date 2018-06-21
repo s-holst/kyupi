@@ -156,7 +156,7 @@ public class CircuitTools {
 		}
 	}
 
-	public static void removeSignalNodes(MutableCircuit g) {
+	public static void dissolveRedundantPseudoCells(MutableCircuit g) {
 		for (MutableCell signal : g.cells()) {
 			if (signal == null)
 				continue;
@@ -166,7 +166,7 @@ public class CircuitTools {
 				continue;
 			MutableCell pred = signal.inputCellAt(0);
 			if (pred.isMultiOutput()) {
-				log.info("Not removing because predecessor is MultiOutput: " + signal);
+				//log.info("Not removing because predecessor is MultiOutput: " + signal);
 				continue;
 			}
 			

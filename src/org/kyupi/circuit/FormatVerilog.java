@@ -118,7 +118,7 @@ public class FormatVerilog {
 					continue;
 				if (comma_needed)
 					op.print(", ");
-				op.print(" ." + node.inName(i) + "(" + s(n.name()) + ") ");
+				op.print(" ." + node.inputName(i) + "(" + s(n.name()) + ") ");
 				comma_needed = true;
 			}
 			i = -1;
@@ -128,7 +128,7 @@ public class FormatVerilog {
 					continue;
 				if (comma_needed)
 					op.print(", ");
-				op.print(" ." + node.outName(i) + "(" + s(n.name()) + ") ");
+				op.print(" ." + node.outputName(i) + "(" + s(n.name()) + ") ");
 				comma_needed = true;
 			}
 			op.println(");");

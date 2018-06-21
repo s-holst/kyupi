@@ -40,13 +40,13 @@ public class FormatKyupi {
 			s += " " + node.name() + " (";
 			for (int i = 0; i <= node.maxIn(); i++) {
 				if (node.inputCellAt(i) != null) {
-					s += " " + node.inName(i) + ": " + node.inputCellAt(i).name();
+					s += " " + node.inputName(i) + ": " + node.inputCellAt(i).name();
 				}
 			}
 			s += " ) " + node.typeName() + " (";
 			for (int i = 0; i <= node.maxOut(); i++) {
 				if (node.outputCellAt(i) != null) {
-					s += " " + node.outName(i) + ": " + node.outputCellAt(i).name();
+					s += " " + node.outputName(i) + ": " + node.outputCellAt(i).name();
 				}
 			}
 			s += " )";

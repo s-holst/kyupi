@@ -50,6 +50,8 @@ public abstract class Cell {
 	public static final int VARIANT_2 = 0x2_0000;
 	public static final int VARIANT_3 = 0x3_0000;
 
+	public static final int TYPE_MASK = 0xff;
+
 	public static final int TYPE_CONST0 = 0x0;
 	public static final int TYPE_NOR = 0x1;
 	public static final int TYPE_AGTB = 0x2;
@@ -161,6 +163,10 @@ public abstract class Cell {
 	public abstract String name();
 
 	public abstract String typeName();
+	
+	public abstract String inputName(int pinIndex);
+
+	public abstract String outputName(int pinIndex);
 
 	public abstract boolean isType(int type);
 

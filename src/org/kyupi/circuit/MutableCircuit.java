@@ -11,8 +11,6 @@ package org.kyupi.circuit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.kyupi.misc.ArrayTools;
@@ -100,11 +98,11 @@ public class MutableCircuit extends Circuit {
 			return library.typeName(type);
 		}
 
-		public String inName(int input_pin) {
+		public String inputName(int input_pin) {
 			return library.inputPinName(type, input_pin);
 		}
 
-		public String outName(int output_pin) {
+		public String outputName(int output_pin) {
 			return library.outputPinName(type, output_pin);
 		}
 
@@ -124,7 +122,7 @@ public class MutableCircuit extends Circuit {
 		 * @return the maximum index of an input, or -1 if there are no inputs.
 		 */
 		public int maxIn() {
-			return ArrayTools.maxIndex(inputs);
+			return ArrayTools.maxNonNullIndex(inputs);
 		}
 
 		/**
@@ -132,7 +130,7 @@ public class MutableCircuit extends Circuit {
 		 *         outputs.
 		 */
 		public int maxOut() {
-			return ArrayTools.maxIndex(outputs);
+			return ArrayTools.maxNonNullIndex(outputs);
 		}
 
 		public MutableCell inputCellAt(int idx) {
@@ -189,8 +187,10 @@ public class MutableCircuit extends Circuit {
 			inputs[idx] = pred;
 			inputSignals = ArrayTools.grow(inputSignals, idx+1, 2, -1);
 			inputSignals[idx] = sid;
-			if (sid >= 0)
+			if (sid >= 0) {
 				receivers[sid] = this;
+				receiverPins[sid] = idx;
+			}
 
 			return this;
 		}
@@ -214,8 +214,10 @@ public class MutableCircuit extends Circuit {
 			outputs[idx] = succ;
 			outputSignals = ArrayTools.grow(outputSignals, idx+1, 2, -1);
 			outputSignals[idx] = sid;
-			if (sid >= 0)
+			if (sid >= 0) {
 				drivers[sid] = this;
+				driverPins[sid] = idx;
+			}
 
 			return this;
 		}
@@ -364,6 +366,8 @@ public class MutableCircuit extends Circuit {
 	private MutableCell drivers[] = new MutableCell[0];
 	private MutableCell receivers[] = new MutableCell[0];
 
+	private int driverPins[] = new int[0];
+	private int receiverPins[] = new int[0];
 
 	private MutableCell levels[][];
 
@@ -503,7 +507,7 @@ public class MutableCircuit extends Circuit {
 	}
 
 	public int width() {
-		return ArrayTools.maxIndex(intf) + 1;
+		return ArrayTools.maxNonNullIndex(intf) + 1;
 	}
 	/**
 	 * returns an array containing all nodes present in the graph.
@@ -587,75 +591,6 @@ public class MutableCircuit extends Circuit {
 			throw new IllegalArgumentException("Gate does not exist: " + namespace.nameFor(g.id()));
 	}
 
-
-	public void printStats() {
-		HashMap<String, Integer> pseudo = new HashMap<>();
-		HashMap<String, Integer> combinational = new HashMap<>();
-		HashMap<String, Integer> inputst = new HashMap<>();
-		HashMap<String, Integer> outputst = new HashMap<>();
-		HashMap<String, Integer> sequential = new HashMap<>();
-		int inputs = 0;
-		int outputs = 0;
-		int gates = 0;
-		int nodes = 0;
-		int signals = 0;
-		int seq = 0;
-		for (MutableCell n : cells()) {
-			if (n == null)
-				continue;
-			String type = n.typeName();
-			nodes++;
-			if (n.isPseudo()) {
-				signals++;
-				pseudo.put(type, pseudo.getOrDefault(type, 0) + 1);
-				continue;
-			}
-			if (n.isSequential()) {
-				seq++;
-				sequential.put(type, sequential.getOrDefault(type, 0) + 1);
-				continue;
-			}
-			if (n.isInput()) {
-				inputs++;
-				inputst.put(type, inputst.getOrDefault(type, 0) + 1);
-			}
-			if (n.isOutput()) {
-				outputs++;
-				outputst.put(type, outputst.getOrDefault(type, 0) + 1);
-			}
-			if (n.isInput() || n.isOutput())
-				continue;
-			gates++;
-			combinational.put(type, combinational.getOrDefault(type, 0) + 1);
-		}
-		log.info("CircuitName " + name());
-		//log.info("Levels " + levels());
-		log.info("NodeCount " + nodes);
-		log.info("  PseudoNodeCount " + signals);
-		printGateCounts(pseudo);
-		log.info("  CombinationalCellCount " + gates);
-		printGateCounts(combinational);
-		log.info("  SequentialCellCount " + seq);
-		printGateCounts(sequential);
-		log.info("  PrimaryInputCount " + inputs);
-		printGateCounts(inputst);
-		log.info("  PrimaryOutputCount " + outputs);
-		printGateCounts(outputst);
-	}
-
-	private void printGateCounts(HashMap<String, Integer> map) {
-		ArrayList<String> keys = new ArrayList<>(map.keySet());
-		keys.sort(new Comparator<String>() {
-			public int compare(String o1, String o2) {
-				return o1.compareTo(o2);
-			}
-		});
-		for (String key : keys) {
-			log.info("    " + key + " " + map.get(key));
-		}
-
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -724,11 +659,21 @@ public class MutableCircuit extends Circuit {
 		return receivers[signalID];
 	}
 	
+	public int driverPinOf(int signalID) {
+		return driverPins[signalID];
+	}
+
+	public int readerPinOf(int signalID) {
+		return receiverPins[signalID];
+	}
+	
 	private int newSignalId() {
 		signalCount++;
 		if (signalIdRecycle.isEmpty()) {
 			drivers = (MutableCell[]) ArrayTools.grow(drivers, MutableCell.class, signalCount);
 			receivers = (MutableCell[]) ArrayTools.grow(receivers, MutableCell.class, signalCount);
+			driverPins = ArrayTools.grow(driverPins, signalCount, 32, -1);
+			receiverPins = ArrayTools.grow(receiverPins, signalCount, 32, -1);
 			return signalCount - 1;
 		} else {
 			return signalIdRecycle.remove(signalIdRecycle.size()-1);
@@ -738,6 +683,8 @@ public class MutableCircuit extends Circuit {
 	private void freeSignalId(int sid) {
 		drivers[sid] = null;
 		receivers[sid] = null;
+		driverPins[sid] = -1;
+		receiverPins[sid] = -1;
 		signalCount--;
 		signalIdRecycle.add(sid);
 	}

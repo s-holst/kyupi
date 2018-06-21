@@ -62,6 +62,30 @@ public class ArrayTools {
 		return arr;
 	}
 
+	public static boolean[] grow(boolean[] arr, int min_size, int block_size, boolean init_value) {
+		if (arr == null || arr.length < min_size) {
+			int new_size = ((min_size - 1) / block_size + 1) * block_size;
+			boolean[] arr2 = new boolean[new_size];
+			Arrays.fill(arr2, init_value);
+			if (arr != null)
+				System.arraycopy(arr, 0, arr2, 0, arr.length);
+			arr = arr2;
+		}
+		return arr;
+	}
+
+	public static double[] grow(double[] arr, int min_size, int block_size, double init_value) {
+		if (arr == null || arr.length < min_size) {
+			int new_size = ((min_size - 1) / block_size + 1) * block_size;
+			double[] arr2 = new double[new_size];
+			Arrays.fill(arr2, init_value);
+			if (arr != null)
+				System.arraycopy(arr, 0, arr2, 0, arr.length);
+			arr = arr2;
+		}
+		return arr;
+	}
+
 	public static int countEntries(Object arr[]) {
 		if (arr == null)
 			return 0;
@@ -73,7 +97,7 @@ public class ArrayTools {
 		return n;
 	}
 
-	public static int maxIndex(Object arr[]) {
+	public static int maxNonNullIndex(Object arr[]) {
 		if (arr == null)
 			return -1;
 		for (int i = arr.length; i >= 1; i--) {
@@ -140,6 +164,22 @@ public class ArrayTools {
 		}
 		return retval;
 	}
+	
+	public static int minIndex(double[] arr, int size) {
+		if (size > arr.length)
+			size = arr.length;
+		if (size <= 0)
+			return -1;
+		double smallest = arr[0];
+		int smallestIndex = 0;
+		for (int i = 1; i < size; i++) {
+			if (arr[i] < smallest) {
+				smallest = arr[i];
+				smallestIndex = i;
+			}
+		}
+		return smallestIndex;
+	}
 
 	public static int search(float[] arr, float key) {
 		for (int i = 0; i < arr.length; i++) {
@@ -157,6 +197,26 @@ public class ArrayTools {
 		return buf.toString();
 	}
 
+	public static String toString(double[] arr, int size) {
+		if (size > arr.length)
+			size = arr.length;
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < size; i++) {
+			buf.append(String.format("%.3f ", arr[i]));
+		}
+		return "[ " + buf.toString() + "]";
+	}
+	
+	public static String toString(boolean[] arr, int size) {
+		if (size > arr.length)
+			size = arr.length;
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < size; i++) {
+			buf.append(arr[i] ? "H ":"L ");
+		}
+		return "[ " + buf.toString() + "]";
+	}
+	
 	public static int max(int[] array) {
 		int max = array[0];
 		for (int x: array)

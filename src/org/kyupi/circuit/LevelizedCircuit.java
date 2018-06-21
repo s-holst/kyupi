@@ -112,11 +112,11 @@ public class LevelizedCircuit extends Circuit {
 			return library.isType(this.type, type);
 		}
 
-		public String inName(int input_pin) {
+		public String inputName(int input_pin) {
 			return library.inputPinName(type, input_pin);
 		}
 
-		public String outName(int output_pin) {
+		public String outputName(int output_pin) {
 			return library.outputPinName(type, output_pin);
 		}
 
@@ -169,6 +169,8 @@ public class LevelizedCircuit extends Circuit {
 	private int edge_count;
 	private LevelizedCell drivers[];
 	private LevelizedCell receivers[];
+	private int driverPins[];
+	private int receiverPins[];
 
 
 	public LevelizedCircuit(MutableCircuit circuit) {
@@ -346,6 +348,8 @@ public class LevelizedCircuit extends Circuit {
 
 		drivers = new LevelizedCell[edge_count];
 		receivers = new LevelizedCell[edge_count];
+		driverPins = new int[edge_count];
+		receiverPins = new int[edge_count];
 		for (LevelizedCell n: cells) {
 			if (n == null)
 				continue;
@@ -354,6 +358,7 @@ public class LevelizedCircuit extends Circuit {
 				LevelizedCell succ = n.outputCellAt(i);
 				if (succ != null) {
 					drivers[n.outputSignalAt(i)] = n;
+					driverPins[n.outputSignalAt(i)] = i;
 				}
 			}
 			int in_count = n.inputCount();
@@ -361,6 +366,7 @@ public class LevelizedCircuit extends Circuit {
 				LevelizedCell pred = n.inputCellAt(i);
 				if (pred != null) {
 					receivers[n.inputSignalAt(i)] = n;
+					receiverPins[n.inputSignalAt(i)] = i;
 				}
 			}
 		}
@@ -408,6 +414,14 @@ public class LevelizedCircuit extends Circuit {
 
 	public LevelizedCell readerOf(int signalID) {
 		return receivers[signalID];
+	}
+
+	public int driverPinOf(int signalID) {
+		return driverPins[signalID];
+	}
+
+	public int readerPinOf(int signalID) {
+		return receiverPins[signalID];
 	}
 
 	public int signalCount() {
