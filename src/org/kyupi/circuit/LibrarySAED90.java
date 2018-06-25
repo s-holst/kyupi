@@ -11,7 +11,7 @@ package org.kyupi.circuit;
 
 import java.util.HashMap;
 
-public class LibraryOldSAED extends Library {
+public class LibrarySAED90 extends Library {
 
 	public static final int TYPE_AO21 = 0x10 | INPUTS_3;
 	public static final int TYPE_AO221 = 0x11 | INPUTS_5;
@@ -58,7 +58,6 @@ public class LibraryOldSAED extends Library {
 	private static final int[] SUBTYPES_FADD = { TYPE_XOR | INPUTS_3, TYPE_FADD_CO };
 
 	private String[] pinNamesIN = { "IN" };
-	private String[] pinNamesINP = { "INP" };
 	private String[] pinNamesINx = { "IN1", "IN2", "IN3", "IN4", "IN5", "IN6" };
 	private String[] pinNamesIN2S = { "IN1", "IN2", "S" };
 	private String[] pinNamesIN4S1 = { "IN1", "IN2", "IN3", "IN4", "S0", "S1" };
@@ -99,14 +98,14 @@ public class LibraryOldSAED extends Library {
 			put(TYPE_DELLN, new InterfaceSpec("DELLN1", pinNamesIN, 1, pinNamesQ, 1));
 			put(TYPE_DELLN, new InterfaceSpec("DELLN2", pinNamesIN, 1, pinNamesQ, 1));
 			put(TYPE_DELLN, new InterfaceSpec("DELLN3", pinNamesIN, 1, pinNamesQ, 1));
-			put(TYPE_IBUFF, new InterfaceSpec("IBUFF", pinNamesINP, 1, pinNamesZN, 1));
-			put(TYPE_INV, new InterfaceSpec("INV", pinNamesINP, 1, pinNamesZN, 1));
+			put(TYPE_IBUFF, new InterfaceSpec("IBUFF", pinNamesIN, 1, pinNamesQN, 1));
+			put(TYPE_INV, new InterfaceSpec("INV", pinNamesIN, 1, pinNamesQN, 1));
 			put(TYPE_MUX21, new InterfaceSpec("MUX21", pinNamesIN2S, 3, pinNamesQ, 1));
 			put(TYPE_MUX41, new InterfaceSpec("MUX41", pinNamesIN4S1, 6, pinNamesQ, 1));
 			put(TYPE_NAND | INPUTS_2, new InterfaceSpec("NAND2", pinNamesINx, 2, pinNamesQN, 1));
 			put(TYPE_NAND | INPUTS_3, new InterfaceSpec("NAND3", pinNamesINx, 3, pinNamesQN, 1));
 			put(TYPE_NAND | INPUTS_4, new InterfaceSpec("NAND4", pinNamesINx, 4, pinNamesQN, 1));
-			put(TYPE_NBUFF, new InterfaceSpec("NBUFF", pinNamesINP, 1, pinNamesZ, 1));
+			put(TYPE_NBUFF, new InterfaceSpec("NBUFF", pinNamesIN, 1, pinNamesQ, 1));
 			put(TYPE_NOR | INPUTS_2, new InterfaceSpec("NOR2", pinNamesINx, 2, pinNamesQN, 1));
 			put(TYPE_NOR | INPUTS_3, new InterfaceSpec("NOR3", pinNamesINx, 3, pinNamesQN, 1));
 			put(TYPE_NOR | INPUTS_4, new InterfaceSpec("NOR4", pinNamesINx, 4, pinNamesQN, 1));

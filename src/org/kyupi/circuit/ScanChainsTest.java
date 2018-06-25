@@ -14,7 +14,7 @@ public class ScanChainsTest {
 
 	@Test
 	public void testScanOutMapping() throws Exception {
-		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED90()).levelized();
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(1, chains.size());
 		ScanChain chain = chains.get(0);
@@ -56,7 +56,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testScanInMapping() throws Exception {
-		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED90()).levelized();
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(1, chains.size());
 		ScanChain chain = chains.get(0);
@@ -108,7 +108,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testMultiChain() throws Exception {
-		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED90()).levelized();
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(2, chains.size());
 		
@@ -152,7 +152,7 @@ public class ScanChainsTest {
 	
 	@Test
 	public void testMultiChainMultiClock() throws Exception {
-		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/multichain.v"), new LibrarySAED90()).levelized();
 		ScanChains chains = new ScanChains(graph);
 		assertEquals(2, chains.size());
 		

@@ -107,7 +107,7 @@ public class CircuitTest {
 		assertEquals(2, c.countOutputs());
 		FormatDOT.save(os, c.levelized());
 
-		lib = new LibrarySAED();
+		lib = new LibrarySAED90();
 
 		c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), lib);
 		assertEquals(11, c.countNodes());
@@ -118,7 +118,7 @@ public class CircuitTest {
 
 	@Test
 	public void testLoadS27Saed90() throws Exception {
-		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED());
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/s27.v"), new LibrarySAED90());
 		assertEquals(39, c.countNodes());
 		assertEquals(8, c.countInputs());
 		assertEquals(2, c.countOutputs());
@@ -126,7 +126,7 @@ public class CircuitTest {
 
 	@Test
 	public void testLoadSAED90cells() throws Exception {
-		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED90()).levelized();
 		assertEquals(257, c.size());
 		assertEquals(15, c.countInputs());
 		assertEquals(126, c.countOutputs());
@@ -135,13 +135,13 @@ public class CircuitTest {
 
 	@Test
 	public void testLoadB01Scan() throws Exception {
-		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED90()).levelized();
 		c.depth();
 	}
 	
 	@Test
 	public void testCopy() throws Exception {
-		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED());
+		MutableCircuit c = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b01.v"), new LibrarySAED90());
 		MutableCircuit c2 = new MutableCircuit(c);
 		assertTrue(c.equals(c2));
 	}
@@ -160,7 +160,7 @@ public class CircuitTest {
 				}
 			});
 
-			LibrarySAED lib = new LibrarySAED();
+			LibrarySAED90 lib = new LibrarySAED90();
 			for (Path pth : cont) {
 				//log.debug("load: " + pth.toString());
 				CircuitTools.loadCircuit(pth.toFile(), lib);

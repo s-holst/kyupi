@@ -17,7 +17,7 @@ import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
-import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.LibrarySAED90;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.item.BBlock;
 import org.kyupi.data.item.BVector;
@@ -68,14 +68,14 @@ public class BBPlainSimTest extends TestCase {
 	@Test
 	public void testC17Saed90() throws Exception {
 		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library()).levelized();
-		LevelizedCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), new LibrarySAED()).levelized();
+		LevelizedCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"), new LibrarySAED90()).levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testSAED90cells() throws Exception {
-		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED()).levelized();
-		MutableCircuit mg_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED());
+		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"), new LibrarySAED90()).levelized();
+		MutableCircuit mg_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"), new LibrarySAED90());
 		CircuitTools.splitMultiOutputCells(mg_test);
 		LevelizedCircuit g_test = mg_test.levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);

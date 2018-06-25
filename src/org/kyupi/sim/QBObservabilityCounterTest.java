@@ -17,7 +17,7 @@ import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.LibrarySAED90;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.item.BVector;
@@ -33,7 +33,7 @@ public class QBObservabilityCounterTest extends TestCase {
 
 	@Test
 	public void testS27() throws Exception {
-		Library l = new LibrarySAED();
+		Library l = new LibrarySAED90();
 		MutableCircuit mc = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
 		LevelizedCircuit lc = mc.levelized();
 		//log.info("Graph=\n" + g);

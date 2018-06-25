@@ -19,7 +19,7 @@ import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
-import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.LibrarySAED90;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.circuit.MutableCircuit.MutableCell;
 import org.kyupi.data.FormatStil;
@@ -67,7 +67,7 @@ public class QBPlainSimTest extends TestCase {
 	}
 
 	public void testOAI21() {
-		MutableCircuit g = new MutableCircuit(new LibrarySAED());
+		MutableCircuit g = new MutableCircuit(new LibrarySAED90());
 		MutableCell i0 = g.new MutableCell("i0", Library.TYPE_BUF | Library.FLAG_INPUT);
 		MutableCell i1 = g.new MutableCell("i1", Library.TYPE_BUF | Library.FLAG_INPUT);
 		MutableCell i2 = g.new MutableCell("i2", Library.TYPE_BUF | Library.FLAG_INPUT);
@@ -76,7 +76,7 @@ public class QBPlainSimTest extends TestCase {
 		i1.setIntfPosition(1);
 		i2.setIntfPosition(2);
 		o0.setIntfPosition(3);
-		MutableCell n = g.new MutableCell("n", LibrarySAED.TYPE_OAI21);
+		MutableCell n = g.new MutableCell("n", LibrarySAED90.TYPE_OAI21);
 		g.connect(i0, -1, n, 0);
 		g.connect(i1, -1, n, 1);
 		g.connect(i2, -1, n, 2);
@@ -154,7 +154,7 @@ public class QBPlainSimTest extends TestCase {
 
 	@Test
 	public void testS27() throws Exception {
-		Library l = new LibrarySAED();
+		Library l = new LibrarySAED90();
 		MutableCircuit g = CircuitTools.loadCircuit(RuntimeTools.KYUPI_HOME + "/testdata/SAED90/s27.v", l);
 		FormatStil p = new FormatStil(RuntimeTools.KYUPI_HOME + "/testdata/s27.stil", g);
 		QVSource tests = p.getStimuliSource();
@@ -204,16 +204,16 @@ public class QBPlainSimTest extends TestCase {
 	public void testC17Saed90() throws Exception {
 		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/c17.isc"), new Library()).levelized();
 		LevelizedCircuit g_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/c17.v"),
-				new LibrarySAED()).levelized();
+				new LibrarySAED90()).levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
 	}
 
 	@Test
 	public void testAllSaed90() throws Exception {
 		LevelizedCircuit g_ref = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90norinv.v"),
-				new LibrarySAED()).levelized();
+				new LibrarySAED90()).levelized();
 		MutableCircuit mg_test = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/SAED90cells.v"),
-				new LibrarySAED());
+				new LibrarySAED90());
 		CircuitTools.splitMultiOutputCells(mg_test);
 		LevelizedCircuit g_test = mg_test.levelized();
 		assertEqualsByRandomSimulation(g_ref, g_test);
@@ -222,7 +222,7 @@ public class QBPlainSimTest extends TestCase {
 	@Test
 	public void testB13Transition() throws Exception {
 		MutableCircuit graph = CircuitTools.loadCircuit(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v"),
-				new LibrarySAED());
+				new LibrarySAED90());
 		FormatStil stil = new FormatStil(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13_trans.stil"), graph);
 		ArrayList<QVector> stimuli = stil.getStimuliArray();
 		ArrayList<QVector> responses = stil.getResponsesArray();

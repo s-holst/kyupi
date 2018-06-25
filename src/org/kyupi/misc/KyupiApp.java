@@ -26,7 +26,7 @@ import org.kyupi.circuit.Circuit;
 import org.kyupi.circuit.CircuitTools;
 import org.kyupi.circuit.Library;
 import org.kyupi.circuit.LibraryNangate;
-import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.LibrarySAED90;
 import org.kyupi.circuit.MutableCircuit;
 import org.kyupi.data.FormatStil;
 import org.kyupi.data.PatternList;
@@ -224,7 +224,7 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 			if (val.startsWith("N"))
 				lib = new LibraryNangate();
 			else if (val.startsWith("S"))
-				lib = new LibrarySAED();
+				lib = new LibrarySAED90();
 			else
 				lib = new Library();
 		} else {

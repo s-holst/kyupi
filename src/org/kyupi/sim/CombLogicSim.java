@@ -16,7 +16,7 @@ import org.kyupi.circuit.Cell;
 import org.kyupi.circuit.LevelizedCircuit;
 import org.kyupi.circuit.LevelizedCircuit.LevelizedCell;
 import org.kyupi.circuit.Library;
-import org.kyupi.circuit.LibrarySAED;
+import org.kyupi.circuit.LibrarySAED90;
 import org.kyupi.data.item.QBlock;
 import org.kyupi.misc.ArrayTools;
 
@@ -480,7 +480,7 @@ public class CombLogicSim {
 			c = -1L;
 			v = 0L;
 			break;
-		case LibrarySAED.TYPE_AO21 & 0xff:
+		case LibrarySAED90.TYPE_AO21 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -513,7 +513,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_AO221 & 0xff:
+		case LibrarySAED90.TYPE_AO221 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -562,7 +562,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_AO222 & 0xff:
+		case LibrarySAED90.TYPE_AO222 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -625,7 +625,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_AO22 & 0xff:
+		case LibrarySAED90.TYPE_AO22 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -672,7 +672,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_AOI21 & 0xff:
+		case LibrarySAED90.TYPE_AOI21 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -706,7 +706,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_AOI221 & 0xff:
+		case LibrarySAED90.TYPE_AOI221 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -756,7 +756,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_AOI222 & 0xff:
+		case LibrarySAED90.TYPE_AOI222 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -820,7 +820,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_AOI22 & 0xff:
+		case LibrarySAED90.TYPE_AOI22 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & ~inV[i];
@@ -868,7 +868,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_OA21 & 0xff:
+		case LibrarySAED90.TYPE_OA21 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -901,7 +901,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_OA221 & 0xff:
+		case LibrarySAED90.TYPE_OA221 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -950,7 +950,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_OA222 & 0xff:
+		case LibrarySAED90.TYPE_OA222 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1013,7 +1013,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_OA22 & 0xff:
+		case LibrarySAED90.TYPE_OA22 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1060,7 +1060,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_OAI21 & 0xff:
+		case LibrarySAED90.TYPE_OAI21 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1131,7 +1131,7 @@ public class CombLogicSim {
 			
 			v ^= c; 
 			break;
-		case LibrarySAED.TYPE_OAI221 & 0xff:
+		case LibrarySAED90.TYPE_OAI221 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1181,7 +1181,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_OAI222 & 0xff:
+		case LibrarySAED90.TYPE_OAI222 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1245,7 +1245,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_OAI22 & 0xff:
+		case LibrarySAED90.TYPE_OAI22 & 0xff:
 			for (int i = 0; i < 2; i++) {
 				l |= ~inC[i] & inV[i];
 				k |= inC[i] & inV[i];
@@ -1293,7 +1293,7 @@ public class CombLogicSim {
 			v |= l;
 			v ^= c;
 			break;
-		case LibrarySAED.TYPE_MUX21 & 0xff:
+		case LibrarySAED90.TYPE_MUX21 & 0xff:
 			for (int i = 0; i < inCount; i++)
 				l |= ~inC[i] & inV[i];
 			k |= (inC[2] & ~inV[2] & inC[0] & ~inV[0])
@@ -1319,7 +1319,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_MUX41 & 0xff:
+		case LibrarySAED90.TYPE_MUX41 & 0xff:
 			for (int i = 0; i < inCount; i++)
 				l |= ~inC[i] & inV[i];
 			k |= (inC[4] & ~inV[4] & inC[5] & ~inV[5] & inC[0]
@@ -1367,7 +1367,7 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_FADD_CO & 0xff:
+		case LibrarySAED90.TYPE_FADD_CO & 0xff:
 			for (int i = 0; i < inCount; i++)
 				l |= ~inC[i] & inV[i];
 			k |= (inC[0] & ~inV[0] & inC[1] & ~inV[1])
@@ -1396,8 +1396,8 @@ public class CombLogicSim {
 			c &= ~l;
 			v |= l;
 			break;
-		case LibrarySAED.TYPE_SDFFAR & 0xff:
-		case LibrarySAED.TYPE_SDFFASR & 0xff:
+		case LibrarySAED90.TYPE_SDFFAR & 0xff:
+		case LibrarySAED90.TYPE_SDFFASR & 0xff:
 			c = inC[0];
 			v = inV[0];
 			if (outCount > 0) {
@@ -1413,7 +1413,7 @@ public class CombLogicSim {
 				outV[i] = 0L;
 			}
 			return;
-		case LibrarySAED.TYPE_HADD & 0xff:
+		case LibrarySAED90.TYPE_HADD & 0xff:
 			if (outCount > 0) {
 				sim(Library.TYPE_XOR, inV, inC, 2, tmpInV, tmpInC, 1);
 				outC[0] = tmpInC[0];
@@ -1429,14 +1429,14 @@ public class CombLogicSim {
 				outV[i] = 0L;
 			}
 			return;
-		case LibrarySAED.TYPE_FADD & 0xff:
+		case LibrarySAED90.TYPE_FADD & 0xff:
 			if (outCount > 0) {
 				sim(Library.TYPE_XOR, inV, inC, 3, tmpInV, tmpInC, 1);
 				outC[0] = tmpInC[0];
 				outV[0] = tmpInV[0];
 			}
 			if (outCount > 1) {
-				sim(LibrarySAED.TYPE_FADD_CO, inV, inC, 3, tmpInV, tmpInC, 1);
+				sim(LibrarySAED90.TYPE_FADD_CO, inV, inC, 3, tmpInV, tmpInC, 1);
 				outC[1] = tmpInC[0];
 				outV[1] = tmpInV[0];
 			}
@@ -1445,7 +1445,7 @@ public class CombLogicSim {
 				outV[i] = 0L;
 			}
 			return;
-		case LibrarySAED.TYPE_DEC24 & 0xff:
+		case LibrarySAED90.TYPE_DEC24 & 0xff:
 			if (outCount > 0) {
 				sim(Library.TYPE_NOR, inV, inC, 2, tmpInV, tmpInC, 1);
 				outC[0] = tmpInC[0];

@@ -15,14 +15,14 @@ public class FormatVerilogTest {
 
 	@Test
 	public void test() throws Exception {
-		MutableCircuit c = FormatVerilog.load(new FileInputStream(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v")), new LibrarySAED());
+		MutableCircuit c = FormatVerilog.load(new FileInputStream(new File(RuntimeTools.KYUPI_HOME, "testdata/SAED90/b13.v")), new LibrarySAED90());
 		assertNotNull(c);
 		c.printStats();
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		FormatVerilog.save(os, c);
 		//FormatVerilog.save(new FileOutputStream("foo.v"), c);
 		InputStream is = new ByteArrayInputStream(os.toByteArray());
-		MutableCircuit c2 = FormatVerilog.load(is, new LibrarySAED());
+		MutableCircuit c2 = FormatVerilog.load(is, new LibrarySAED90());
 		c2.printStats();
 		assertTrue(c.equals(c2));
 	}
