@@ -30,10 +30,6 @@ else
 fi
 
 
-#
-# First command line argument determines start class
-#
-
 app_package="org.kyupi"
 app_path="org/kyupi"
 app_class=Main
