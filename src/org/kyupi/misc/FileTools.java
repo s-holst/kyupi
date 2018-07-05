@@ -51,6 +51,10 @@ public class FileTools {
 			if (!allowOverwrite)
 				throw new IOException("file already exists: " + f);
 		}
+		File parent = f.getParentFile();
+		if (parent != null && !parent.exists()) {
+			parent.mkdirs();
+		}
 		FileOutputStream fos = new FileOutputStream(f);
 		if (BZip2Utils.isCompressedFilename(f.getName()))
 			return new BZip2CompressorOutputStream(fos);
