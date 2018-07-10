@@ -309,6 +309,11 @@ public class Library {
 		}
 		return typeNames.get(name);
 	}
+	
+	public boolean hasTypeName(String name) {
+		HashMap<String, Integer> typeNames = getTypeNames();
+		return typeNames.containsKey(name);
+	}
 
 	protected HashMap<String, Integer> getTypeNames() {
 		return typeNames;
