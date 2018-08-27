@@ -171,12 +171,12 @@ public abstract class KyupiApp extends TestCase implements Callable<Void> {
 		return patterns;
 	}
 
-	protected ArrayList<QVector> loadStimuliFromArgs(MutableCircuit circuit) throws IOException {
+	protected ArrayList<QVector> loadStimuliFromArgs(Circuit circuit) throws IOException {
 		ensurePatternsLoaded(circuit);
 		return patterns.getStimuliArray();
 	}
 
-	protected ArrayList<QVector> loadResponsesFromArgs(MutableCircuit circuit) throws IOException {
+	protected ArrayList<QVector> loadResponsesFromArgs(Circuit circuit) throws IOException {
 		ensurePatternsLoaded(circuit);
 		return patterns.getResponsesArray();
 	}
