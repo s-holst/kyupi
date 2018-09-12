@@ -478,7 +478,7 @@ public class CombLogicSim {
 			break;
 		case Library.TYPE_CONST1:
 			c = -1L;
-			v = 0L;
+			v = 1L;
 			break;
 		case LibrarySAED90.TYPE_AO21 & 0xff:
 			for (int i = 0; i < 2; i++) {
