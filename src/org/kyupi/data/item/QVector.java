@@ -218,6 +218,20 @@ public class QVector extends DataItem<QVector> {
 			}
 		}
 	}
+	
+	public void compactTo(int[] compactor, QVector dest) {
+		int l = Math.min(compactor.length, length);
+		dest.value.clear();
+		dest.care.clear();
+		for (int i = 0; i < l; i++) {
+			if (compactor[i] >= 0 && compactor[i] < dest.length) {
+				if (value.get(i))
+					dest.value.flip(compactor[i]);
+				if (care.get(i))
+					dest.care.flip(compactor[i]);
+			}
+		}
+	}
 
 	public QVector and(QVector vector) {
 		value.and(vector.value);

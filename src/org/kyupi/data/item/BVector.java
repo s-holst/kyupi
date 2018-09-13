@@ -108,6 +108,17 @@ public class BVector extends DataItem<BVector> {
 			dest.setC(i, l);
 		}
 	}
+	
+	public void compactTo(int[] compactor, BVector dest) {
+		int l = Math.min(compactor.length, length);
+		dest.value.clear();
+		for (int i = 0; i < l; i++) {
+			if (compactor[i] >= 0 && compactor[i] < dest.length) {
+				if (value.get(i))
+					dest.value.flip(compactor[i]);
+			}
+		}
+	}
 
 	public String toString() {
 		StringBuffer buf = new StringBuffer(length);
