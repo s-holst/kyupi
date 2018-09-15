@@ -127,7 +127,21 @@ public class SharedMemory {
 		}
 		mem.putInt(index + HEADER_SIZE, value);
 	}
-
+	
+	public void putByte(int index, byte value) {
+		if (!possessionLock.isHeldByCurrentThread()) {
+			throw new IllegalMonitorStateException("Before any access, acquire() must be called.");
+		}
+		mem.put(index + HEADER_SIZE, value);
+	}
+	
+	public void putFloat(int index, float value) {
+		if (!possessionLock.isHeldByCurrentThread()) {
+			throw new IllegalMonitorStateException("Before any access, acquire() must be called.");
+		}
+		mem.putFloat(index + HEADER_SIZE, value);
+	}
+	
 	public int getInt(int index) {
 		if (!possessionLock.isHeldByCurrentThread()) {
 			throw new IllegalMonitorStateException("Before any access, acquire() must be called.");
