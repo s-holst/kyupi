@@ -296,7 +296,7 @@ The width of vectors (number of bit positions) is immutable after creation, but
 the bit data itself is mutable to reduce object creation overhead. 
 
 
-Sets or lists of vector data is organized in streams of data items.
+Sets or lists of vector data are organized in streams of data items.
 Each stream is created by specifying one or more source streams and some operation.
 KyuPI encourages lazy evaluation by having a pull-based streaming setup.
 I.e. a simulator is set up by declaring `resp = sim(tests)` and later run by pulling vectors from the resp stream `v = resp.next();`.
@@ -304,16 +304,17 @@ I.e. a simulator is set up by declaring `resp = sim(tests)` and later run by pul
 Data items used in streams are re-usable.
 Whenever a data item (vector) is not needed anymore, `item.free()` is called so that the source stream can re-use the data item again.
 
-There is a stream class for each of the basic vector formats `BVector`, `QVector`, `BBlock`, `QBlock` called `BVStream`, `QVStream`, `BBStream`, and `QBStream`, respectively.
+A stream originates at a source.
+There is a source class for each of the basic vector formats `BVector`, `QVector`, `BBlock`, `QBlock` called `BVSource`, `QVSource`, `BBSource`, and `QBSource`, respectively.
 
 Data streams can be plugged together in arbitrary complex ways for advanced data processing.
-The basic source classes support easy conversion between the four vector data formats by using the static method `.from(stream)`.
+The basic source classes support easy conversion between the four vector data formats by using the static method `.from(source)`.
 
-Streams implement the Iterable and Iterator interfaces.
-Thus they can be used easily in for loops `for(QVector v: stream) {...}`.
-Be aware, that there is only one iterator state per stream.
-Nested loops on a single stream will not work.
-Also, a second for loop will cause the stream (and all of its sources) to reset, which repeats all the processing again.
+Stream sources implement the Iterable and Iterator interfaces.
+Thus they can be used easily in for loops `for(QVector v: source) {...}`.
+Be aware, that there is only one iterator state per stream source.
+Nested loops on a single source will not work.
+Also, a second for-loop will cause the stream (and all of its sources) to reset, which repeats all the processing again.
 If a single stream is used multiple times, its data should be stored first e.g. in an ArrayList by using `toArrayList()`.
 Then, multiple new streams can be created from the array: `s2 = QVStream.from(width,array)`.
 
