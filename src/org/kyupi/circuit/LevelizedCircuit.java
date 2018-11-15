@@ -74,7 +74,7 @@ public class LevelizedCircuit extends Circuit {
 		}
 		
 		public int outputSignalAt(int outputIdx) {
-			return output_map_offset[id()] + outputIdx;
+			return (outputCells[outputIdx] == null) ? -1 : output_map_offset[id()] + outputIdx;
 		}
 
 		public int level() {
@@ -126,20 +126,23 @@ public class LevelizedCircuit extends Circuit {
 				iosuffix = "I" + intfPosition();
 			if (isOutput())
 				iosuffix = "O" + intfPosition();
+			if (isSequential())
+				iosuffix = "S" + intfPosition();
+			
 			StringBuilder b = new StringBuilder(
 					"" + l + "_" + m + ":" + typeName() + "\"" + name() + "\"" + iosuffix);
 			int m_in = inputCount();
 			int m_out = outputCount();
 			for (int i = 0; i < m_in; i++) {
 				if (inputCells[i] == null) {
-					b.append("<null");
+					b.append(" <null");
 				} else {
 					b.append(" <" + inputCells[i].l + "_" + inputCells[i].m);
 				}
 			}
 			for (int o = 0; o < m_out; o++) {
 				if (outputCells[o] == null) {
-					b.append(">null");
+					b.append(" >null");
 				} else {
 					b.append(" >" + outputCells[o].l + "_" + outputCells[o].m);
 				}
@@ -369,6 +372,13 @@ public class LevelizedCircuit extends Circuit {
 					receiverPins[n.inputSignalAt(i)] = i;
 				}
 			}
+		}
+		
+		for (int i = 0; i < edge_count; i++) {
+			if (drivers[i] == null)
+				log.warn("Signal " + i + " has no driver. prev: " + drivers[i-1] + " next: " + drivers[i+1]);
+			if (receivers[i] == null)
+				log.warn("Signal " + i + " has no receiver.");
 		}
 	}
 
