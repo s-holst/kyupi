@@ -385,22 +385,22 @@ public class MutableCircuit extends Circuit {
 		library = lib;
 	}
 	
-	public MutableCircuit(MutableCircuit g) {
-		library = g.library;
-		name = g.name;
-		for (int idx = 0; idx < g.nodes.length; idx++) {
-			MutableCell n = g.nodes[idx];
+	public MutableCircuit(Circuit g) {
+		library = g.library();
+		name = g.name();
+		for (int idx = 0; idx < g.size(); idx++) {
+			Cell n = g.cell(idx);
 			if (n != null)
 				new MutableCell(n);
 		}
 		
-		for (int idx = 0; idx < g.nodes.length; idx++) {
-			MutableCell n = g.nodes[idx];
+		for (int idx = 0; idx < g.size(); idx++) {
+			Cell n = g.cell(idx);
 			if (n == null)
 				continue;
-			int outCount = n.maxOut() + 1;
+			int outCount = n.outputCount();
 			for (int i = 0; i < outCount; i++) {
-				MutableCell succ = n.outputCellAt(i);
+				Cell succ = n.outputCellAt(i);
 				if (succ != null) {
 					int sid = newSignalId();
 					nodes[idx].setOut(i, nodes[succ.id()], sid);
@@ -408,14 +408,15 @@ public class MutableCircuit extends Circuit {
 			}
 		}
 		
-		for (int idx = 0; idx < g.nodes.length; idx++) {
-			MutableCell n = g.nodes[idx];
+		for (int idx = 0; idx < g.size(); idx++) {
+			Cell n = g.cell(idx);
 			if (n == null)
 				continue;
-			int inCount = n.maxIn() + 1;
+			int inCount = n.inputCount();
 			for (int i = 0; i < inCount; i++) {
-				MutableCell pred = n.inputCellAt(i);
-				int predIdx = pred.searchOutIdx(n);
+				Cell pred = n.inputCellAt(i);
+				int sig = n.inputSignalAt(i);
+				int predIdx = g.driverPinOf(sig);
 				if (pred != null)
 					nodes[idx].setIn(i, nodes[pred.id()], nodes[pred.id()].outputSignals[predIdx]);
 			}
