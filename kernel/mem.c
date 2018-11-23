@@ -13,6 +13,7 @@
 #include<sys/stat.h>
 #include<sys/mman.h>
 #include<fcntl.h>
+#include<unistd.h>
 
 #include"mem.h"
 
@@ -83,10 +84,7 @@ void mem_acquire(mem_t *mem) {
 		fprintf(stderr, "mem_acquire failed: invalid handle from parent.");
 		exit(1);
 	}
-	if ((seq = getc(stdin)) == EOF) {
-		fprintf(stderr, "mem_acquire failed: EOF instead of sequence number.");
-		exit(1);
-	}
+	seq = getc(stdin);
 	int polling = 0;
 	while (seq != (char) mem->seq) {
 		usleep(1000);

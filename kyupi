@@ -22,7 +22,9 @@ if [ -f "$KYUPI_HOME/lib/commons-cli-1.0.jar" ]; then
   hamcrest=$KYUPI_HOME/lib/hamcrest-core-1.3.jar
   compress=$KYUPI_HOME/lib/commons-compress-1.4.1.jar
   bin=$KYUPI_HOME/bin
-  export CLASSPATH=$bin:$log4j:$cli:$hamcrest:$junit:$compress
+
+  SEP=":" && [[ `uname` =~ "CYGWIN" ]] && SEP=";"
+  export CLASSPATH="$bin$SEP$log4j$SEP$cli$SEP$hamcrest$SEP$junit$SEP$compress"
 else
   echo "KyuPI distribution not found in directory '$KYUPI_HOME'."
   echo "Set the variable KYUPI_HOME to the directory which contains the distribution."
@@ -51,7 +53,6 @@ if [ ! -f "$KYUPI_HOME/bin/$app_path/$app_class.class" ]; then
     exit 1
   fi
 fi
-
 
 #
 # Start Java process

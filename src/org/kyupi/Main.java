@@ -113,7 +113,7 @@ public class Main extends KyupiApp {
 		log.info("Failures " + res.getFailureCount());
 		for (Failure f : res.getFailures()) {
 			log.error("FailedTest " + f.getTestHeader());
-			log.error("   " + f.getMessage() + f.getTrace());
+			log.error("   " + f.getTrace().replace("%", "%%"));
 		}
 		if (res.getFailureCount() > 0) {
 			log.error("Some tests failed. Please ensure the following:");
