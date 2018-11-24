@@ -96,6 +96,12 @@ public class ProcessManager {
 	public void launch(File command) throws IOException {
 		if (isLaunched())
 			throw new IllegalStateException("Process was already launched.");
+		if (!command.canExecute()) {
+			String absPath = command.getAbsolutePath();
+			command = new File(absPath + ".exe");
+			if (!command.canExecute())			
+				throw new IOException("Not Executable: " + absPath + "[.exe]");
+		}
 		List<String> command_line = new ArrayList<>();
 		command_line.add(command.getCanonicalPath());
 		for (Path m : paths) {
